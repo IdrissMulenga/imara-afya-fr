@@ -13,9 +13,9 @@ export default function LoginScreen() {
     const { c } = useTheme();
     const { t } = useStrings();
 
+    // logged in -> straight to the dashboard
     const onAuthSuccess = (_info: AuthSuccess) => {
-        // no signed-in area yet — point this at the home route when it exists
-        // router.replace('/(tabs)');
+        router.replace('/(home)');
     };
 
     const f = useAuthForm('login', onAuthSuccess);

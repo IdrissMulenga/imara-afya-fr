@@ -10,7 +10,8 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-const LOCAL_GRAPHQL_PORT = 4004;
+// must match PORT in the backend's .env
+const LOCAL_GRAPHQL_PORT = 5500;
 const GRAPHQL_PATH = '/graphql';
 
 const getHostFromUri = (uri?: string | null) => {
@@ -33,3 +34,6 @@ const getDevApiHost = () => {
 export const API_URL =
   process.env.EXPO_PUBLIC_GRAPHQL_URL?.trim() ||
   `http://${getDevApiHost()}:${LOCAL_GRAPHQL_PORT}${GRAPHQL_PATH}`;
+
+// helps debug "network request failed/timed out" — check the Metro terminal
+if (__DEV__) console.log('[imara-afya] GraphQL endpoint:', API_URL);
