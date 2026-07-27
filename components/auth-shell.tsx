@@ -94,6 +94,50 @@ export function Checkbox({
   );
 }
 
+/** Gender selector — values match the backend enum ("Man" | "Woman"). */
+export function GenderPicker({
+  value,
+  onChange,
+}: {
+  value: 'Man' | 'Woman' | null;
+  onChange: (g: 'Man' | 'Woman') => void;
+}) {
+  const { c, radius } = useTheme();
+  const { t } = useStrings();
+  const opts: ['Man' | 'Woman', string][] = [
+    ['Woman', t.genderWoman],
+    ['Man', t.genderMan],
+  ];
+
+  return (
+    <View style={{ gap: 7 }}>
+      <Text style={[styles.fieldLabel, { color: c.textMuted }]}>{t.genderLabel}</Text>
+      <View style={styles.pillRow}>
+        {opts.map(([k, label]) => {
+          const on = value === k;
+          return (
+            <Pressable
+              key={k}
+              onPress={() => onChange(k)}
+              style={[
+                styles.pill,
+                {
+                  backgroundColor: on ? c.surface : c.fieldBg,
+                  borderColor: on ? c.primary : 'transparent',
+                  borderRadius: radius,
+                },
+              ]}
+            >
+              {on && <Ionicons name="checkmark" size={14} color={c.primary} />}
+              <Text style={[styles.pillLabel, { color: on ? c.primary : c.textMuted }]}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 /** Inline red error row (field-level or server-level). */
 export function ErrorRow({ message }: { message: string }) {
   const { c } = useTheme();
@@ -142,4 +186,11 @@ export const styles = StyleSheet.create({
   footerText: { fontSize: 14, fontWeight: '600' },
   errRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8 },
   errText: { fontSize: 12.5, fontWeight: '600' },
+  fieldLabel: { fontSize: 13, fontWeight: '600', letterSpacing: -0.1 },
+  pillRow: { flexDirection: 'row', gap: 10 },
+  pill: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 14, borderWidth: 1.5,
+  },
+  pillLabel: { fontSize: 14.5, fontWeight: '700' },
 });

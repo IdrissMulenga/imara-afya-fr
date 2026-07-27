@@ -6,12 +6,17 @@
 // SETUP (one-time, in your Cloudinary dashboard):
 //   1. Settings → Upload → Upload presets → "Add upload preset"
 //   2. Set Signing Mode = "Unsigned", save, copy the preset name.
-//   3. Fill the two values below (cloud name is shown on your dashboard home).
+//   3. Put these in a .env file at the project root (then restart with -c):
+//        EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name
+//        EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your-unsigned-preset
 //
-// Until both are filled, uploadImageAsync() returns null and the profile
-// simply saves without an image.
-export const CLOUDINARY_CLOUD_NAME = '';   // e.g. 'imara-afya'
-export const CLOUDINARY_UPLOAD_PRESET = ''; // e.g. 'imara_unsigned'
+// These are public values (safe in the app bundle) — an unsigned preset is
+// designed for client uploads. Never put your Cloudinary API *secret* here.
+//
+// Until both are set, uploadImageAsync() returns null and the profile simply
+// saves without an image.
+export const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim() || '';
+export const CLOUDINARY_UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.trim() || '';
 
 export const cloudinaryConfigured = () =>
   !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_UPLOAD_PRESET);

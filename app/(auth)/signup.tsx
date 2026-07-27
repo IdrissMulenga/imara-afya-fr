@@ -7,14 +7,15 @@ import useAuthForm, { type AuthSuccess } from '@/hooks/use-auth-form';
 import TextField from '@/components/text-field';
 import PasswordStrength from '@/components/password-strength';
 import { PrimaryButton } from '@/components/buttons';
-import { AuthShell, AuthFooter, Checkbox, ErrorRow } from '@/components/auth-shell';
+import { AuthShell, AuthFooter, Checkbox, ErrorRow, GenderPicker } from '@/components/auth-shell';
 
 export default function SignupScreen() {
   const { t } = useStrings();
 
+  // account created + token stored -> go set up the profile
+  // `replace` so the back gesture can't return to the signup form
   const onAuthSuccess = (_info: AuthSuccess) => {
-    // no verification / home route yet — wire this up when those screens exist
-    // router.push({ pathname: '/(auth)/verify', params: { email: info.email ?? '' } });
+    router.replace('/(auth)/profile');
   };
 
   const f = useAuthForm('signup', onAuthSuccess);
@@ -54,6 +55,12 @@ export default function SignupScreen() {
           onSubmitEditing={f.submit}
         />
         <PasswordStrength password={f.password} />
+      </View>
+
+      {/* backend requires gender at signup */}
+      <View>
+        <GenderPicker value={f.gender} onChange={f.setGender} />
+        {!!f.errors.gender && <ErrorRow message={f.errors.gender} />}
       </View>
 
       <View>
