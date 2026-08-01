@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "imara-afya-fr",
+    "name": "Imara Afya",
     "slug": "imara-afya-fr",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "bi.imaraco.imaraafya",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +21,27 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "resize",
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      },
+      "package": "bi.imaraco.imaraafya",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "READ_MEDIA_IMAGES",
+        "VIBRATE"
+      ],
+      "blockedPermissions": [
+        "ACCESS_BACKGROUND_LOCATION",
+        "RECORD_AUDIO",
+        "CAMERA"
+      ]
     },
     "web": {
       "output": "static",
@@ -38,11 +60,22 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Imara Afya uses your location only to show hospitals and clinics near you. It is never stored or shared.",
+          "locationWhenInUsePermission": "Imara Afya uses your location only to show hospitals and clinics near you. It is never stored or shared.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "description": "Your health, made simple. Keep your health records, medicine reminders, daily habits and cycle tracking in one private place — built for Burundi, in Kirundi, Kiswahili, French and English.",
+    "primaryColor": "#0a7d5a"
   }
 }

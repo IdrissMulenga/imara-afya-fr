@@ -1,24 +1,38 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { ApolloWrapper } from '@/lib/apollo';
+import { ThemeProvider } from '@/constants/theme';
+import { LangProvider } from '@/constants/strings';
+import { ToastProvider } from '@/components/toast';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <ApolloWrapper>
+      <SafeAreaProvider>
+        <ThemeProvider initialPalette="forest">
+          <LangProvider initialLang="en">
+            {/* ToastProvider sits inside theme + safe-area so it can use both */}
+            <ToastProvider>
+              <StatusBar style="auto" />
+              {/* slide feels more like moving through the app than a cross-fade,
+                  and Reanimated keeps it on the UI thread */}
+              <Stack screenOptions={{
+                headerShown: false,
+                animation: 'slide_from_right',
+                animationDuration: 260,
+                gestureEnabled: true
+              }}>
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(home)" />
+              </Stack>
+            </ToastProvider>
+          </LangProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ApolloWrapper>
   );
 }
