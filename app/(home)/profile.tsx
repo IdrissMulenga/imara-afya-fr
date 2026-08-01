@@ -1,7 +1,7 @@
 // app/(home)/profile.tsx — view + edit your profile.
 // Reachable from the dashboard avatar. Lets the user finish a profile they
 // skipped, rename themselves, or swap their photo at any time.
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator,
 } from 'react-native';
@@ -39,9 +39,20 @@ export default function ProfileScreen() {
   const [weight, setWeight] = useState('');
   const [religion, setReligion] = useState('');
 
-  // prefill once the user loads
+  // PREFILL EXACTLY ONCE.
+  //
+  // `me` is a new object every time any query writes the user back to the cache
+  // — and with cache-and-network that happens on mount, on every dashboard
+  // refetch, and after each save. Without this guard the effect re-ran mid-edit
+  // and overwrote whatever she had typed or the photo she had just picked,
+  // which is why editing appeared to do nothing.
+  const prefilled = useRef(false);
+
   useEffect(() => {
-    if (!me) return;
+    if (!me || prefilled.current) return;
+
+    prefilled.current = true;
+
     setFirstName(me.firstName ?? '');
     setLastName(me.lastName ?? '');
     setImage(me.image ?? null);
@@ -82,13 +93,19 @@ export default function ProfileScreen() {
 
       {/* top bar */}
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          style={[styles.iconBtn, { backgroundColor: c.fieldBg, borderColor: c.border }]}
-        >
-          <Ionicons name="arrow-back" size={20} color={c.text} />
-        </Pressable>
+        {/* profile is a tab now — only offer "back" when we actually got here
+            from another screen, e.g. the dashboard avatar */}
+        {router.canGoBack() ? (
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={8}
+            style={[styles.iconBtn, { backgroundColor: c.fieldBg, borderColor: c.border }]}
+          >
+            <Ionicons name="arrow-back" size={20} color={c.text} />
+          </Pressable>
+        ) : (
+          <View style={styles.iconBtnSpacer} />
+        )}
         <Text style={[styles.topTitle, { color: c.text }]}>{t.myProfile}</Text>
         <Pressable onPress={signOut} hitSlop={8}>
           <Text style={[styles.signOut, { color: c.danger }]}>{t.signOut}</Text>
@@ -201,6 +218,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22, paddingBottom: 6, gap: 12,
   },
   iconBtn: { width: 40, height: 40, borderRadius: 12, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  //keeps the title centred when there's no back button
+  iconBtnSpacer: { width: 40, height: 40 },
   topTitle: { fontSize: 16.5, fontWeight: '800', letterSpacing: -0.3 },
   signOut: { fontSize: 14, fontWeight: '700' },
 
