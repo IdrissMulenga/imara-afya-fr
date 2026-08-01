@@ -1,8 +1,9 @@
 // components/home/quick-action.tsx — white card with a tinted icon tile.
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/constants/theme';
+import { PressableScale } from '@/components/motion';
 
 export default function QuickAction({
   icon,
@@ -21,16 +22,11 @@ export default function QuickAction({
   const { c, radius } = useTheme();
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
-      style={({ pressed }) => [
+      style={[
         styles.card,
-        {
-          backgroundColor: c.surface,
-          borderColor: c.border,
-          borderRadius: radius + 4,
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-        },
+        { backgroundColor: c.surface, borderColor: c.border, borderRadius: radius + 4 },
       ]}
     >
       <View style={[styles.iconTile, { backgroundColor: tint }]}>
@@ -40,7 +36,7 @@ export default function QuickAction({
       {!!subtitle && (
         <Text style={[styles.sub, { color: c.textMuted }]} numberOfLines={1}>{subtitle}</Text>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }
 

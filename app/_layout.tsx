@@ -18,9 +18,13 @@ export default function RootLayout() {
             {/* ToastProvider sits inside theme + safe-area so it can use both */}
             <ToastProvider>
               <StatusBar style="auto" />
+              {/* slide feels more like moving through the app than a cross-fade,
+                  and Reanimated keeps it on the UI thread */}
               <Stack screenOptions={{
                 headerShown: false,
-                animation: 'fade'
+                animation: 'slide_from_right',
+                animationDuration: 260,
+                gestureEnabled: true
               }}>
                 <Stack.Screen name="(auth)" />
                 <Stack.Screen name="(home)" />

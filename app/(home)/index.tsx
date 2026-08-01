@@ -15,20 +15,17 @@ import { router } from 'expo-router';
 
 import { useTheme } from '@/constants/theme';
 import { useStrings } from '@/constants/strings';
+import { FadeIn, PressableScale } from '@/components/motion';
 import useDashboard from '@/hooks/use-dashboard';
+import useGreeting from '@/hooks/use-greeting';
 import { useToast } from '@/components/toast';
 import { errorMessage } from '@/lib/errors';
 import StatCard from '@/components/home/stat-card';
-import QuickAction from '@/components/home/quick-action';
+import FeatureCard from '@/components/home/feature-card';
+import ProgressRing from '@/components/home/progress-ring';
+import Sparkline from '@/components/home/sparkline';
 import SectionHeader from '@/components/home/section-header';
 import MedicationRow from '@/components/home/medication-row';
-
-const greetingKey = () => {
-  const h = new Date().getHours();
-  if (h < 12) return 'goodMorning' as const;
-  if (h < 18) return 'goodAfternoon' as const;
-  return 'goodEvening' as const;
-};
 
 export default function HomeScreen() {
   const { c, dark } = useTheme();
@@ -37,9 +34,12 @@ export default function HomeScreen() {
   const toast = useToast();
 
   const {
-    me, isWoman, recordCount, dueToday, dueCount, cycle,
-    markTaken, loading, refetch,
+    me, isWoman, recordCount, dueToday, dueCount, takenCount, cycle,
+    habits, waterWeek, markTaken, loading, refetch,
   } = useDashboard();
+
+  // updates itself when noon / 6pm passes, and when the app is reopened
+  const greetingKey = useGreeting();
 
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -72,14 +72,14 @@ export default function HomeScreen() {
         <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
           <View style={styles.heroTop}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.greeting}>{t[greetingKey()]},</Text>
+              <Text style={styles.greeting}>{t[greetingKey]},</Text>
               <Text style={styles.name} numberOfLines={1}>
                 {firstName || t.home} 👋
               </Text>
             </View>
 
             {/* tap to view / edit profile — shows the photo once one is set */}
-            <Pressable
+            <PressableScale
               onPress={() => router.push('/(home)/profile')}
               hitSlop={8}
               style={styles.avatarBtn}
@@ -89,11 +89,11 @@ export default function HomeScreen() {
               ) : (
                 <Ionicons name="person-outline" size={20} color="#fff" />
               )}
-            </Pressable>
+            </PressableScale>
           </View>
 
           {/* stats — real counts from the backend */}
-          <View style={styles.statRow}>
+          <FadeIn index={1} style={styles.statRow}>
             <StatCard icon="folder-outline" value={recordCount} label={t.statRecords} />
             <StatCard icon="medkit-outline" value={dueCount} label={t.statMedsDue} />
             {isWoman && (
@@ -104,60 +104,115 @@ export default function HomeScreen() {
                 label={t.statNextPeriod}
               />
             )}
-          </View>
+          </FadeIn>
         </View>
 
         {/* ---------------- body ---------------- */}
         <View style={styles.body}>
           <SectionHeader title={t.quickActions} />
 
-          <View style={styles.grid}>
-            <QuickAction
-              icon="folder-outline"
-              tint="#DCFCE7"
-              title={t.healthRecords}
-              subtitle={recordCount ? `${recordCount} ${t.savedLower}` : t.addFirstRecord}
-              // onPress={() => router.push('/(home)/records')}
-            />
-            <QuickAction
-              icon="location-outline"
-              tint="#FEF3C7"
-              title={t.findCare}
-              subtitle={t.clinicsNearYou}
-              // onPress={() => router.push('/(home)/care')}
-            />
-          </View>
-
-          <View style={styles.grid}>
-            <QuickAction
-              icon="medkit-outline"
+          {/* Water — a ring plus the week's bars. The card is worth reading
+              even without tapping it, which the old static tiles were not. */}
+          <FadeIn index={2}>
+            <FeatureCard
+              wide
+              icon="water"
               tint="#DBEAFE"
-              title={t.medications}
-              subtitle={dueCount ? `${dueCount} ${t.dueToday}` : t.allDone}
-              // onPress={() => router.push('/(home)/medications')}
+              iconColor="#2563EB"
+              title={t.hydration}
+              value={habits?.waterToday ?? 0}
+              unit={`/ ${habits?.waterGoal ?? 8}`}
+              caption={
+                habits?.waterStreak
+                  ? `${habits.waterStreak} ${t.dayShort} ${t.streakShort} · ${t.thisWeek}`
+                  : t.thisWeek
+              }
+              badge={habits?.waterGoalMet ? '✓' : undefined}
+              accessory={
+                <View style={{ width: 96 }}>
+                  <Sparkline
+                    data={waterWeek}
+                    goal={habits?.waterGoal ?? 8}
+                    color="#2563EB"
+                  />
+                </View>
+              }
+              onPress={() => router.push('/(home)/habits')}
             />
+          </FadeIn>
+
+          <FadeIn index={3} style={styles.grid}>
+            <FeatureCard
+              icon="medkit"
+              tint="#DCFCE7"
+              iconColor="#0F7A54"
+              title={t.medications}
+              value={dueCount}
+              unit={dueToday.length ? `/ ${dueToday.length}` : undefined}
+              caption={dueToday.length ? `${takenCount} ${t.takenToday}` : t.nothingDue}
+              accessory={
+                dueToday.length ? (
+                  <ProgressRing
+                    progress={takenCount / dueToday.length}
+                    size={54}
+                    stroke={5}
+                    color="#0F7A54"
+                    label={`${Math.round((takenCount / dueToday.length) * 100)}%`}
+                  />
+                ) : undefined
+              }
+              onPress={() => router.push('/(home)/medications')}
+            />
+
             {isWoman ? (
-              <QuickAction
-                icon="calendar-outline"
+              <FeatureCard
+                icon="calendar"
                 tint="#FCE7F3"
+                iconColor="#DB2777"
                 title={t.periodTracker}
-                subtitle={
-                  cycle?.daysUntilNextPeriod != null
-                    ? `${cycle.daysUntilNextPeriod} ${t.daysToGo}`
-                    : t.trackWellness
-                }
-                // onPress={() => router.push('/(home)/cycle')}
+                value={cycle?.daysUntilNextPeriod != null
+                  ? Math.max(cycle.daysUntilNextPeriod, 0)
+                  : '—'}
+                unit={cycle?.daysUntilNextPeriod != null ? t.daysShort : undefined}
+                caption={cycle?.basedOnCycles ? t.nextPeriodIn : t.tapToStart}
+                // don't imply precision the backend says it doesn't have
+                badge={cycle?.confidence === 'low' && cycle?.basedOnCycles ? '~' : undefined}
+                onPress={() => router.push('/(home)/cycle')}
               />
             ) : (
-              <QuickAction
-                icon="person-outline"
-                tint="#F3E8FF"
-                title={t.myProfile}
-                subtitle={me?.plan === 'premium' ? t.planPremium : t.planFree}
-                onPress={() => router.push('/(home)/profile')}
+              <FeatureCard
+                icon="fitness"
+                tint="#EDE9FE"
+                iconColor="#7C3AED"
+                title={t.weightTitle}
+                value={habits?.latestWeight ?? '—'}
+                unit={habits?.latestWeight != null ? t.kgShort : undefined}
+                caption={habits?.bmi != null ? `${t.bmiLabel} ${habits.bmi}` : t.tapToStart}
+                onPress={() => router.push('/(home)/habits')}
               />
             )}
-          </View>
+          </FadeIn>
+
+          <FadeIn index={4} style={styles.grid}>
+            <FeatureCard
+              icon="folder"
+              tint="#FEF3C7"
+              iconColor="#B45309"
+              title={t.healthRecords}
+              value={recordCount}
+              caption={recordCount ? t.savedLower : t.addFirstRecord}
+              onPress={() => router.push('/(home)/records')}
+            />
+
+            <FeatureCard
+              icon="location"
+              tint="#FEE2E2"
+              iconColor="#DC2626"
+              title={t.findCare}
+              caption={t.clinicsNearYou}
+              onPress={() => router.push('/(home)/care')}
+            />
+          </FadeIn>
 
           {/* ------------- medications today ------------- */}
           <View style={{ height: 26 }} />
@@ -173,16 +228,17 @@ export default function HomeScreen() {
             <ActivityIndicator color={c.primary} style={{ marginTop: 20 }} />
           ) : dueToday.length ? (
             <View style={{ gap: 10 }}>
-              {dueToday.map((m) => (
-                <MedicationRow
-                  key={m.id}
-                  name={m.name}
-                  dosage={m.dosage}
-                  times={m.times}
-                  taken={m.taken}
-                  busy={busyId === m.id}
-                  onMarkTaken={() => onMarkTaken(m.id)}
-                />
+              {dueToday.map((m, i) => (
+                <FadeIn key={m.id} index={i + 5}>
+                  <MedicationRow
+                    name={m.name}
+                    dosage={m.dosage}
+                    times={m.times}
+                    taken={m.taken}
+                    busy={busyId === m.id}
+                    onMarkTaken={() => onMarkTaken(m.id)}
+                  />
+                </FadeIn>
               ))}
             </View>
           ) : (

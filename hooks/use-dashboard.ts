@@ -1,6 +1,9 @@
 // hooks/use-dashboard.ts — everything the home dashboard needs, in one place.
 //
-//   const { me, records, medications, dueToday, cycle, markTaken, ... } = useDashboard();
+//   const { me, records, medications, dueToday, cycle, water, markTaken, ... } = useDashboard();
+//
+// Deliberately one GraphQL round trip. On a 2G connection in Bujumbura, four
+// separate requests is four chances to stall before the screen is usable.
 import { useMemo } from 'react';
 import { useMutation, useQuery } from '@apollo/client/react';
 
@@ -12,14 +15,14 @@ import {
   type DashboardData,
   type MarkMedicationTakenData,
 } from '@/graphql';
-
-const todayIso = () => new Date().toISOString().slice(0, 10);
+import { addDaysIso, todayIso } from '@/lib/dates';
 
 export function useDashboard() {
   const date = todayIso();
+  const weekAgo = addDaysIso(date, -6);
 
   const { data, loading, error, refetch } = useQuery<DashboardData>(DASHBOARD, {
-    variables: { date },
+    variables: { date, weekAgo },
     fetchPolicy: 'cache-and-network',
   });
 
@@ -34,7 +37,7 @@ export function useDashboard() {
 
   const [markMutation, { loading: marking }] = useMutation<MarkMedicationTakenData>(
     MARK_MEDICATION_TAKEN,
-    { refetchQueries: [{ query: DASHBOARD, variables: { date } }] },
+    { refetchQueries: [{ query: DASHBOARD, variables: { date, weekAgo } }] },
   );
 
   const records = data?.myHealthRecords ?? [];
@@ -56,6 +59,24 @@ export function useDashboard() {
   );
 
   const dueCount = dueToday.filter((m) => !m.taken).length;
+  const takenCount = dueToday.length - dueCount;
+
+  const habits = data?.habitSummary ?? null;
+
+  // Seven days of water totals, oldest first, with missing days as zero — a
+  // gap in the sparkline would read as "no data" when it means "drank none".
+  const waterWeek = useMemo(() => {
+    const byDay = new Map<string, number>();
+
+    for (const log of data?.myHabitLogs ?? []) {
+      byDay.set(log.date, (byDay.get(log.date) ?? 0) + log.value);
+    }
+
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = addDaysIso(weekAgo, i);
+      return { date: day, value: byDay.get(day) ?? 0 };
+    });
+  }, [data?.myHabitLogs, weekAgo]);
 
   const markTaken = (medicationId: string) =>
     markMutation({ variables: { medicationId, status: 'taken' } });
@@ -68,6 +89,9 @@ export function useDashboard() {
     medications,
     dueToday,
     dueCount,
+    takenCount,
+    habits,
+    waterWeek,
     cycle: cycleData?.cyclePrediction ?? null,
     markTaken,
     marking,

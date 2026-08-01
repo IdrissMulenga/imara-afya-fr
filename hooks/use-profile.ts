@@ -38,8 +38,21 @@ export function useProfile() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [completeProfileMutation] = useMutation<CompleteProfileData, CompleteProfileVars>(COMPLETE_PROFILE);
-  const [upgradeMutation] = useMutation<UpgradeToPremiumData>(UPGRADE_TO_PREMIUM);
+  // Apollo normalises the returned User by id, so `me` updates on its own —
+  // but the dashboard reads the same user through the Dashboard query, and a
+  // changed avatar has to show there immediately or it looks like the save
+  // failed. Refetching by operation name reuses whatever variables that query
+  // last ran with, so we don't have to know today's date here.
+  const refreshUserEverywhere = { refetchQueries: ['Dashboard', 'Me'] };
+
+  const [completeProfileMutation] = useMutation<CompleteProfileData, CompleteProfileVars>(
+    COMPLETE_PROFILE,
+    refreshUserEverywhere,
+  );
+  const [upgradeMutation] = useMutation<UpgradeToPremiumData>(
+    UPGRADE_TO_PREMIUM,
+    refreshUserEverywhere,
+  );
 
   const completeProfile = async ({
     firstName, lastName, imageUri, height, weight, religion,

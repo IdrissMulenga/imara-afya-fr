@@ -12,4 +12,9 @@ export const USER_FIELDS = `
   gender
   religion
   plan
+  waterGoal
+  cycleRegularity
+  ramadanMode
+  suhoorTime
+  iftarTime
 `;
