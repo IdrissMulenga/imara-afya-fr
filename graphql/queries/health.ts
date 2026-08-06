@@ -91,6 +91,38 @@ export const HOSPITALS = gql`
   }
 `;
 
+// Everything the Find care screen needs, in one response. The backend applies
+// the filter, runs the search, measures the distances, sorts the result and
+// works out where the map should open — the app just renders it.
+export const CARE_MAP = gql`
+  query CareMap($input: CareMapInput) {
+    careMap(input: $input) {
+      facilities {
+        id
+        name
+        address
+        phone
+        latitude
+        longitude
+        city
+        province
+        type
+        distanceKm
+      }
+      region {
+        latitude
+        longitude
+        latitudeDelta
+        longitudeDelta
+      }
+      totalCount
+      count
+      radiusKm
+      sortedByDistance
+    }
+  }
+`;
+
 export const NEARBY_HOSPITALS = gql`
   query NearbyHospitals($latitude: Float!, $longitude: Float!, $radiusKm: Float) {
     nearbyHospitals(latitude: $latitude, longitude: $longitude, radiusKm: $radiusKm) {

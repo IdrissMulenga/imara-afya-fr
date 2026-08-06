@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import { useTheme } from '@/constants/theme';
 import { useStrings } from '@/constants/strings';
 import { FadeIn, PressableScale } from '@/components/motion';
+import SwipeBack from '@/components/swipe-back';
 import useHospitals, { FACILITY_TYPES, type FacilityFilter } from '@/hooks/use-hospitals';
 import useLocation from '@/hooks/use-location';
 import FacilityMap from '@/components/care/facility-map';
@@ -137,8 +138,8 @@ export default function CareScreen() {
   const { coords, request: requestLocation, loading: locating, denied } = useLocation();
 
   const {
-    facilities, count, totalCount, filter, setFilter,
-    search, setSearch, loading, refetch,
+    facilities, region, count, totalCount, filter, setFilter,
+    search, setSearch, searching, loading, refetch,
   } = useHospitals(undefined, coords);
 
   const [showMap, setShowMap] = useState(true);
@@ -147,14 +148,50 @@ export default function CareScreen() {
   const typeLabel = (value: FacilityFilter) =>
     value === 'hospital' ? t.typeHospital : value === 'clinic' ? t.typeClinic : t.typePharmacy;
 
+  // Search runs on the backend now, so there is a moment after the last
+  // keystroke where the on-screen list is stale. Treat that as busy, otherwise
+  // it briefly reads as "no results" for something that does match.
+  const busy = loading || searching;
+
   // nothing in the directory at all vs nothing matching the search are very
   // different problems — say which one it is
-  const isEmptyDirectory = !loading && totalCount === 0;
-  const isEmptySearch = !loading && totalCount > 0 && count === 0;
+  const isEmptyDirectory = !busy && totalCount === 0;
+  const isEmptySearch = !busy && totalCount > 0 && count === 0;
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <SwipeBack style={{ backgroundColor: c.bg }}>
       <StatusBar style="light" />
+
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 12 }]}>
+        <View style={styles.heroTop}>
+          {router.canGoBack() && (
+            <PressableScale onPress={() => router.back()} hitSlop={10} style={styles.backBtn}>
+              <Ionicons name="chevron-back" size={22} color="#fff" />
+            </PressableScale>
+          )}
+          <Text style={styles.heroTitle}>{t.careTitle}</Text>
+        </View>
+        <Text style={styles.heroSub}>{t.careSub}</Text>
+
+        {/* search */}
+        <View style={styles.searchWrap}>
+          <Ionicons name="search" size={17} color="rgba(255,255,255,0.75)" />
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder={t.searchCarePh}
+            placeholderTextColor="rgba(255,255,255,0.6)"
+            style={styles.searchInput}
+            returnKeyType="search"
+          />
+          {!!search && (
+            <PressableScale onPress={() => setSearch('')} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.75)" />
+            </PressableScale>
+          )}
+        </View>
+      </View>
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
@@ -165,35 +202,6 @@ export default function CareScreen() {
           <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
         }
       >
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 12 }]}>
-          <View style={styles.heroTop}>
-            {router.canGoBack() && (
-              <PressableScale onPress={() => router.back()} hitSlop={10} style={styles.backBtn}>
-                <Ionicons name="chevron-back" size={22} color="#fff" />
-              </PressableScale>
-            )}
-            <Text style={styles.heroTitle}>{t.careTitle}</Text>
-          </View>
-          <Text style={styles.heroSub}>{t.careSub}</Text>
-
-          {/* search */}
-          <View style={styles.searchWrap}>
-            <Ionicons name="search" size={17} color="rgba(255,255,255,0.75)" />
-            <TextInput
-              value={search}
-              onChangeText={setSearch}
-              placeholder={t.searchCarePh}
-              placeholderTextColor="rgba(255,255,255,0.6)"
-              style={styles.searchInput}
-              returnKeyType="search"
-            />
-            {!!search && (
-              <PressableScale onPress={() => setSearch('')} hitSlop={8}>
-                <Ionicons name="close-circle" size={18} color="rgba(255,255,255,0.75)" />
-              </PressableScale>
-            )}
-          </View>
-        </View>
 
         {/* filters */}
         <ScrollView
@@ -286,6 +294,7 @@ export default function CareScreen() {
           <View style={{ paddingHorizontal: 22, paddingTop: 14 }}>
             <FacilityMap
               facilities={facilities}
+              region={region}
               userCoords={coords}
               selectedId={selectedId}
               onSelect={setSelectedId}
@@ -294,7 +303,7 @@ export default function CareScreen() {
         )}
 
         <View style={styles.body}>
-          {loading && !count ? (
+          {busy && !count ? (
             <ActivityIndicator color={c.primary} style={{ marginTop: 32 }} />
           ) : isEmptyDirectory ? (
             <View style={[styles.empty, { backgroundColor: c.surface, borderColor: c.border }]}>
@@ -328,13 +337,22 @@ export default function CareScreen() {
             <Ionicons name="alert-circle-outline" size={15} color={c.textFaint} />
             <Text style={[styles.noteText, { color: c.textFaint }]}>{t.emergencyNote}</Text>
           </View>
+
+          {/* REQUIRED. The facility directory is OpenStreetMap data under the
+              ODbL licence, which obliges us to credit the source wherever it is
+              shown. Left untranslated on purpose — this is the wording the
+              licence expects, and it is a credit rather than UI copy. */}
+          <Text style={[styles.attribution, { color: c.textFaint }]}>
+            Facility data © OpenStreetMap contributors
+          </Text>
         </View>
       </ScrollView>
-    </View>
+    </SwipeBack>
   );
 }
 
 const styles = StyleSheet.create({
+  attribution: { fontSize: 11, fontWeight: '500', textAlign: 'center', marginTop: 14 },
   hero: {
     paddingHorizontal: 22, paddingBottom: 22,
     borderBottomLeftRadius: 28, borderBottomRightRadius: 28,

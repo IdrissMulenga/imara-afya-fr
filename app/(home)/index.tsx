@@ -6,8 +6,11 @@
 //   • medications  -> myMedications + markMedicationTaken
 import { useState } from 'react';
 import {
-  View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator, RefreshControl, Image,
+  View, Text, StyleSheet, ActivityIndicator, RefreshControl, Image,
 } from 'react-native';
+import Animated, {
+  Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -43,6 +46,43 @@ export default function HomeScreen() {
 
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  // COLLAPSING HEADER.
+  //
+  // The greeting and avatar stay put — they are how you reach your profile.
+  // The stat row folds away as you scroll, because on an entry-level Android
+  // screen a permanently pinned 200px header eats most of the viewport.
+  const scrollY = useSharedValue(0);
+  // measured rather than hard-coded: the row is taller for women, who get a
+  // third card, and a wrong constant would leave a gap or clip the cards
+  const statHeight = useSharedValue(0);
+
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+
+  const statsStyle = useAnimatedStyle(() => {
+    // Until the row has been measured, impose NO height so it can lay itself
+    // out naturally — that first natural layout is what gives us the height.
+    // Constraining it before then pins it at zero, onLayout reports zero, and
+    // the cards never appear at all.
+    if (!statHeight.value) {
+      return { marginTop: 22, opacity: 1 };
+    }
+
+    // fully open at the top, gone by 90px of scroll
+    const from = [0, 90];
+
+    return {
+      height: interpolate(scrollY.value, from, [statHeight.value, 0], Extrapolation.CLAMP),
+      opacity: interpolate(scrollY.value, from, [1, 0], Extrapolation.CLAMP),
+      marginTop: interpolate(scrollY.value, from, [22, 0], Extrapolation.CLAMP),
+      // a slight lift makes it read as folding under the greeting
+      transform: [
+        { translateY: interpolate(scrollY.value, from, [0, -10], Extrapolation.CLAMP) },
+      ],
+    };
+  });
+
   const firstName = me?.firstName?.trim() || '';
 
   const onMarkTaken = async (id: string) => {
@@ -61,39 +101,41 @@ export default function HomeScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
-        }
-      >
-        {/* ---------------- green hero ---------------- */}
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
-          <View style={styles.heroTop}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.greeting}>{t[greetingKey]},</Text>
-              <Text style={styles.name} numberOfLines={1}>
-                {firstName || t.home} 👋
-              </Text>
-            </View>
-
-            {/* tap to view / edit profile — shows the photo once one is set */}
-            <PressableScale
-              onPress={() => router.push('/(home)/profile')}
-              hitSlop={8}
-              style={styles.avatarBtn}
-            >
-              {me?.image ? (
-                <Image source={{ uri: me.image }} style={styles.avatarImg} />
-              ) : (
-                <Ionicons name="person-outline" size={20} color="#fff" />
-              )}
-            </PressableScale>
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
+        <View style={styles.heroTop}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.greeting}>{t[greetingKey]},</Text>
+            <Text style={styles.name} numberOfLines={1}>
+              {firstName || t.home} 👋
+            </Text>
           </View>
 
-          {/* stats — real counts from the backend */}
-          <FadeIn index={1} style={styles.statRow}>
+          {/* tap to view / edit profile — shows the photo once one is set */}
+          <PressableScale
+            onPress={() => router.push('/(home)/profile')}
+            hitSlop={8}
+            style={styles.avatarBtn}
+          >
+            {me?.image ? (
+              <Image source={{ uri: me.image }} style={styles.avatarImg} />
+            ) : (
+              <Ionicons name="person-outline" size={20} color="#fff" />
+            )}
+          </PressableScale>
+        </View>
+
+        {/* stats — real counts, folded away once you start scrolling */}
+        <Animated.View style={[styles.statCollapse, statsStyle]}>
+          <View
+            style={styles.statRow}
+            onLayout={(e) => {
+              // Capture once, on the first unconstrained layout. Re-measuring
+              // later would read the collapsed height and fight the animation.
+              const h = e.nativeEvent.layout.height;
+              if (!statHeight.value && h > 0) statHeight.value = h;
+            }}
+          >
             <StatCard icon="folder-outline" value={recordCount} label={t.statRecords} />
             <StatCard icon="medkit-outline" value={dueCount} label={t.statMedsDue} />
             {isWoman && (
@@ -104,9 +146,19 @@ export default function HomeScreen() {
                 label={t.statNextPeriod}
               />
             )}
-          </FadeIn>
-        </View>
+          </View>
+        </Animated.View>
+      </View>
 
+      <Animated.ScrollView
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
+        }
+      >
         {/* ---------------- body ---------------- */}
         <View style={styles.body}>
           <SectionHeader title={t.quickActions} />
@@ -248,7 +300,7 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -264,13 +316,16 @@ const styles = StyleSheet.create({
   greeting: { color: 'rgba(255,255,255,0.85)', fontSize: 14.5, fontWeight: '600' },
   name: { color: '#fff', fontSize: 24, fontWeight: '800', letterSpacing: -0.5, marginTop: 2 },
   avatarBtn: {
-    width: 44, height: 44, borderRadius: 14,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: 'rgba(255,255,255,0.16)',
     alignItems: 'center', justifyContent: 'center',
     overflow: 'hidden',
   },
-  avatarImg: { width: '100%', height: '100%' },
-  statRow: { flexDirection: 'row', gap: 10, marginTop: 22 },
+  avatarImg: { width: '100%', height: '100%', borderRadius: 22 },
+  // the collapsing wrapper owns the margin so it can animate to zero;
+  // overflow hidden is what actually clips the cards as it shrinks
+  statCollapse: { overflow: 'hidden' },
+  statRow: { flexDirection: 'row', gap: 10 },
 
   body: { paddingHorizontal: 22, paddingTop: 24, gap: 12 },
   grid: { flexDirection: 'row', gap: 12 },

@@ -10,22 +10,44 @@
 // Records / Ramadan / Profile are still real routes, just reached from More
 // (and from the dashboard) rather than owning a tab — five is as many as fits
 // comfortably on the entry-level Android screens we're targeting.
-import { Tabs } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { useTheme } from '@/constants/theme';
 import { useStrings } from '@/constants/strings';
 import useMe from '@/hooks/use-me';
+import { getToken, isExpired } from '@/lib/tokens';
 
 export default function HomeLayout() {
   const { c } = useTheme();
   const { t } = useStrings();
 
+  // GUARD.
+  //
+  // app/index.tsx is the real gate, but it isn't the only way in — a deep link,
+  // or going back after signing out, can land here directly. This is a local
+  // check only (no request): the server is what actually protects the data, and
+  // anything this misses is caught by the error link on the first query.
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    getToken()
+      .then((token) => setAllowed(!!token && !isExpired(token)))
+      .catch(() => setAllowed(false));
+  }, []);
+
   // the backend rejects every cycle query with WOMEN_ONLY for other users,
   // so the tab is hidden rather than shown and then erroring
-  const { me } = useMe();
+  const { me } = useMe({ skip: allowed !== true });
   const isWoman = me?.gender === 'Woman';
+
+  if (allowed === false) return <Redirect href="/(auth)/login" />;
+
+  // Blank rather than a spinner: this resolves in milliseconds off local
+  // storage, and a flash of loading UI on every tab mount would look broken.
+  if (allowed === null) return <View style={{ flex: 1, backgroundColor: c.bg }} />;
 
   return (
     <Tabs
@@ -33,6 +55,10 @@ export default function HomeLayout() {
         headerShown: false,
         // tabs cross-fade rather than slide — they're siblings, not a hierarchy
         animation: 'shift',
+        // the scene sits behind every screen in this navigator and defaults to
+        // white, which showed through as a flash during the shift animation and
+        // behind the swipe-back gesture — jarring in dark mode especially
+        sceneStyle: { backgroundColor: c.bg },
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.textFaint,
         tabBarStyle: {

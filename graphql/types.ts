@@ -63,8 +63,11 @@ export type CompleteProfileVars = { input: CompleteProfileInput };
 
 export type SignupData = { signup: AuthPayload };
 export type LoginData = { login: AuthPayload };
+export type RefreshSessionData = { refreshSession: AuthPayload };
+export type LogoutData = { logout: boolean };
 export type CompleteProfileData = { completeProfile: User };
 export type UpgradeToPremiumData = { upgradeToPremium: User };
+export type DeleteAccountData = { deleteAccount: boolean };
 export type MeData = { me: User };
 
 /* --------------------------- health features ------------------------- */
@@ -189,6 +192,26 @@ export type Guidance = {
 
 export type FacilityType = 'hospital' | 'clinic' | 'pharmacy';
 
+// where the map should open — computed by the backend, handed straight to
+// MapView so the app holds no coordinates of its own
+export type MapRegion = {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
+
+export type CareMap = {
+  facilities: Hospital[];
+  region: MapRegion;
+  // how many facilities exist before the search narrowed things down — an
+  // empty directory and an empty search need different messages
+  totalCount: number;
+  count: number;
+  radiusKm?: number | null;
+  sortedByDistance: boolean;
+};
+
 export type Hospital = {
   id: string;
   name: string;
@@ -273,6 +296,17 @@ export type MyHealthRecordsData = { myHealthRecords: HealthRecord[] };
 export type MyMedicationsData = { myMedications: Medication[] };
 export type NearbyHospitalsData = { nearbyHospitals: Hospital[] };
 export type HospitalsData = { hospitals: Hospital[] };
+export type CareMapData = { careMap: CareMap };
+export type CareMapInput = {
+  latitude?: number;
+  longitude?: number;
+  radiusKm?: number;
+  type?: string;
+  search?: string;
+  city?: string;
+  province?: string;
+};
+export type CareMapVars = { input?: CareMapInput };
 export type HabitSummaryData = { habitSummary: HabitSummary };
 export type MyHabitLogsData = { myHabitLogs: HabitLog[] };
 export type LogHabitData = { logHabit: HabitLog };

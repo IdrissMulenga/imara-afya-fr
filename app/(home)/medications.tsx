@@ -135,6 +135,14 @@ export default function MedicationsScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
+        <Text style={styles.heroTitle}>{t.medsTitle}</Text>
+        <Text style={styles.heroSub}>
+          {dueCount ? `${dueCount} ${t.dueToday}` : t.allDone}
+        </Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
         showsVerticalScrollIndicator={false}
@@ -142,12 +150,6 @@ export default function MedicationsScreen() {
           <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
         }
       >
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
-          <Text style={styles.heroTitle}>{t.medsTitle}</Text>
-          <Text style={styles.heroSub}>
-            {dueCount ? `${dueCount} ${t.dueToday}` : t.allDone}
-          </Text>
-        </View>
 
         <View style={styles.body}>
           {loading && !dueToday.length ? (
