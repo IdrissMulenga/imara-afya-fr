@@ -1,35 +1,25 @@
 // hooks/use-hospitals.ts — the facility directory behind "Find care".
 //
-// Uses hospitals() rather than nearbyHospitals() on purpose: it needs no
-// location permission, so the list works the first time it's opened. When she
-// grants location we sort by distance on the device instead of re-querying —
-// the directory is small, and a second round trip on 2G is worse than the maths.
-import { useMemo, useState } from 'react';
+// Everything comes from careMap(), a single backend query that filters,
+// searches, measures distances, sorts and returns the region the map should
+// open at. The app used to run the haversine formula and frame the map itself;
+// it no longer knows any geography at all.
+//
+// Location stays optional. Without it the list is alphabetical, which is why
+// the screen works the first time it's opened, before any permission dialog.
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 
-import { HOSPITALS, type Hospital, type HospitalsData } from '@/graphql';
+import { CARE_MAP, type CareMapData, type CareMapVars } from '@/graphql';
 
 // matches the backend enum on hospital.type
 export const FACILITY_TYPES = ['hospital', 'clinic', 'pharmacy'] as const;
 export type FacilityFilter = (typeof FACILITY_TYPES)[number];
 
-// haversine — same formula the backend uses for nearbyHospitals
-export const distanceKm = (
-  from: { latitude: number; longitude: number },
-  to: { latitude: number; longitude: number },
-) => {
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const R = 6371;
-
-  const dLat = toRad(to.latitude - from.latitude);
-  const dLon = toRad(to.longitude - from.longitude);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(from.latitude)) * Math.cos(toRad(to.latitude)) * Math.sin(dLon / 2) ** 2;
-
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
+// Search now costs a round trip, so wait for a pause in typing. On a 2G
+// connection a request per keystroke is both slow and a good way to spend the
+// backend's per-operation budget for nothing.
+const SEARCH_DEBOUNCE_MS = 350;
 
 export function useHospitals(
   city?: string,
@@ -38,43 +28,56 @@ export function useHospitals(
   // null = show every kind of facility
   const [filter, setFilter] = useState<FacilityFilter | null>(null);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const { data, loading, error, refetch } = useQuery<HospitalsData>(HOSPITALS, {
-    variables: { city, type: filter ?? undefined },
-    fetchPolicy: 'cache-and-network',
-  });
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS);
 
-  const all = data?.hospitals ?? [];
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  // name / address search happens on the device — the list is small enough
-  // that a round trip per keystroke would be worse on a slow connection
-  const facilities = useMemo(() => {
-    const q = search.trim().toLowerCase();
+  const input = useMemo(
+    () => ({
+      city,
+      type: filter ?? undefined,
+      search: debouncedSearch || undefined,
+      latitude: userCoords?.latitude,
+      longitude: userCoords?.longitude,
+    }),
+    [city, filter, debouncedSearch, userCoords?.latitude, userCoords?.longitude],
+  );
 
-    const matched = q
-      ? all.filter(
-          (h) =>
-            h.name.toLowerCase().includes(q) ||
-            (h.address ?? '').toLowerCase().includes(q),
-        )
-      : all;
+  const { data, previousData, loading, error, refetch } = useQuery<CareMapData, CareMapVars>(
+    CARE_MAP,
+    { variables: { input }, fetchPolicy: 'cache-and-network' },
+  );
 
-    if (!userCoords) return matched;
+  // While a new filter is in flight `data` is briefly undefined. Falling back
+  // to the last result keeps the list and the map on screen instead of
+  // flashing an empty state on every tap.
+  const result = data?.careMap ?? previousData?.careMap ?? null;
 
-    // closest first — when you need care, "nearest" beats "alphabetical"
-    return matched
-      .map((h): Hospital => ({ ...h, distanceKm: distanceKm(userCoords, h) }))
-      .sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
-  }, [all, search, userCoords]);
+  // Hold the last region we were given so the map has something to open at
+  // during that same gap — handing MapView nothing resets it to the middle of
+  // the Atlantic.
+  const lastRegion = useRef(result?.region ?? null);
+
+  if (result?.region) lastRegion.current = result.region;
 
   return {
-    facilities,
-    count: facilities.length,
-    totalCount: all.length,
+    facilities: result?.facilities ?? [],
+    region: result?.region ?? lastRegion.current,
+    count: result?.count ?? 0,
+    totalCount: result?.totalCount ?? 0,
+    // true once distances are real, so the UI knows whether to show them
+    sortedByDistance: result?.sortedByDistance ?? false,
     filter,
     setFilter,
     search,
     setSearch,
+    // the field is still settling — lets the UI stay busy through the debounce
+    // rather than only while the request itself is in flight
+    searching: search.trim() !== debouncedSearch,
     loading,
     error,
     refetch,

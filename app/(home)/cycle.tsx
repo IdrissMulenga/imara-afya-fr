@@ -2,9 +2,12 @@
 // Backed by myCycles / cyclePrediction / logPeriod / updatePeriod / removePeriod.
 import { useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, ActivityIndicator, RefreshControl, Alert,
+  View, Text, StyleSheet, ActivityIndicator, RefreshControl, Alert,
   useWindowDimensions,
 } from 'react-native';
+import Animated, {
+  Extrapolation, interpolate, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -37,6 +40,35 @@ export default function CycleScreen() {
   } = useCycle();
 
   const [editing, setEditing] = useState<PeriodCycle | null>(null);
+
+  // COLLAPSING HEADER — same behaviour as the dashboard.
+  // The title stays; the big day counter folds away so the calendar and chart
+  // get the screen once she starts reading them.
+  const scrollY = useSharedValue(0);
+  const statHeight = useSharedValue(0);
+
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+
+  const bigStatStyle = useAnimatedStyle(() => {
+    // no height constraint until measured — constraining first pins it at zero
+    // and onLayout then reports zero, so it would never appear at all
+    if (!statHeight.value) {
+      return { marginTop: 24, opacity: 1 };
+    }
+
+    const from = [0, 90];
+
+    return {
+      height: interpolate(scrollY.value, from, [statHeight.value, 0], Extrapolation.CLAMP),
+      opacity: interpolate(scrollY.value, from, [1, 0], Extrapolation.CLAMP),
+      marginTop: interpolate(scrollY.value, from, [24, 0], Extrapolation.CLAMP),
+      transform: [
+        { translateY: interpolate(scrollY.value, from, [0, -10], Extrapolation.CLAMP) },
+      ],
+    };
+  });
 
   // the tab is hidden for men, but guard the screen too in case it's deep-linked
   if (!isWoman && !loading) {
@@ -140,18 +172,19 @@ export default function CycleScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
-        }
-      >
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
-          <Text style={styles.heroTitle}>{t.cycleTitle}</Text>
-          <Text style={styles.heroSub}>{t.cycleSub}</Text>
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
+        <Text style={styles.heroTitle}>{t.cycleTitle}</Text>
+        <Text style={styles.heroSub}>{t.cycleSub}</Text>
 
-          <View style={styles.bigStat}>
+        <Animated.View style={[styles.statCollapse, bigStatStyle]}>
+          <View
+            style={styles.bigStat}
+            onLayout={(e) => {
+              const h = e.nativeEvent.layout.height;
+              if (!statHeight.value && h > 0) statHeight.value = h;
+            }}
+          >
             {openCycle ? (
               <>
                 <Text style={styles.bigNumber}>{currentDay ?? 1}</Text>
@@ -175,7 +208,18 @@ export default function CycleScreen() {
               </>
             )}
           </View>
-        </View>
+        </Animated.View>
+      </View>
+
+      <Animated.ScrollView
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
+        }
+      >
 
         <View style={styles.body}>
           <PressableScale
@@ -320,7 +364,7 @@ export default function CycleScreen() {
             </View>
           )}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       <CycleSheet
         visible={!!editing}
@@ -343,7 +387,10 @@ const styles = StyleSheet.create({
   },
   heroTitle: { color: '#fff', fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
   heroSub: { color: 'rgba(255,255,255,0.85)', fontSize: 13.5, fontWeight: '500', marginTop: 6 },
-  bigStat: { marginTop: 24, alignItems: 'center' },
+  // the collapsing wrapper owns the margin so it can animate to zero;
+  // overflow hidden is what clips the counter as it shrinks
+  statCollapse: { overflow: 'hidden' },
+  bigStat: { alignItems: 'center' },
   bigNumber: { color: '#fff', fontSize: 54, fontWeight: '800', letterSpacing: -2 },
   bigLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '600', marginTop: 2 },
 

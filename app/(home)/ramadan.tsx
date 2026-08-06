@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 
 import { useTheme } from '@/constants/theme';
 import { FadeIn, PressableScale } from '@/components/motion';
+import SwipeBack from '@/components/swipe-back';
 import { useStrings } from '@/constants/strings';
 import useRamadan from '@/hooks/use-ramadan';
 import { useToast } from '@/components/toast';
@@ -90,8 +91,19 @@ export default function RamadanScreen() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <SwipeBack style={{ backgroundColor: c.bg }}>
       <StatusBar style="light" />
+
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 12 }]}>
+        <View style={styles.heroTop}>
+          <Pressable onPress={() => router.back()} hitSlop={10} style={{ marginLeft: -6 }}>
+            <Ionicons name="chevron-back" size={22} color="#fff" />
+          </Pressable>
+          <Text style={styles.heroTitle}>{t.ramadanTitle}</Text>
+        </View>
+        <Text style={styles.heroSub}>{t.ramadanSub}</Text>
+      </View>
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
@@ -101,15 +113,6 @@ export default function RamadanScreen() {
           <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
         }
       >
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 12 }]}>
-          <View style={styles.heroTop}>
-            <Pressable onPress={() => router.back()} hitSlop={10} style={{ marginLeft: -6 }}>
-              <Ionicons name="chevron-back" size={22} color="#fff" />
-            </Pressable>
-            <Text style={styles.heroTitle}>{t.ramadanTitle}</Text>
-          </View>
-          <Text style={styles.heroSub}>{t.ramadanSub}</Text>
-        </View>
 
         {loading && !schedule ? (
           <ActivityIndicator color={c.primary} style={{ marginTop: 40 }} />
@@ -225,7 +228,7 @@ export default function RamadanScreen() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SwipeBack>
   );
 }
 

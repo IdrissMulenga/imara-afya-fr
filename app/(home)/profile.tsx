@@ -21,6 +21,9 @@ import TextField from '@/components/text-field';
 import AvatarPicker from '@/components/profile/avatar-picker';
 import NumberField from '@/components/profile/number-field';
 import ReligionPicker from '@/components/profile/religion-picker';
+import DeleteAccountSheet from '@/components/profile/delete-account-sheet';
+import { PressableScale } from '@/components/motion';
+import SwipeBack from '@/components/swipe-back';
 
 export default function ProfileScreen() {
   const { c, dark, radius } = useTheme();
@@ -29,7 +32,7 @@ export default function ProfileScreen() {
   const toast = useToast();
 
   const { me, loading: loadingMe } = useMe();
-  const { completeProfile, loading: saving } = useProfile();
+  const { completeProfile, deleteAccount, loading: saving } = useProfile();
   const { logout } = useAuth();
 
   const [firstName, setFirstName] = useState('');
@@ -38,6 +41,8 @@ export default function ProfileScreen() {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [religion, setReligion] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // PREFILL EXACTLY ONCE.
   //
@@ -79,6 +84,25 @@ export default function ProfileScreen() {
     router.replace('/(auth)/login');
   };
 
+  const onDelete = async (password: string) => {
+    setDeleting(true);
+    try {
+      await deleteAccount(password);
+
+      // the account no longer exists, so clear the token before navigating —
+      // otherwise the next screen fires authed queries against a dead user
+      await logout();
+
+      setDeleteOpen(false);
+      toast.success(t.accountDeleted);
+      router.replace('/(auth)/signup');
+    } catch (err) {
+      toast.error(errorMessage(err, t.errGeneric));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loadingMe && !me) {
     return (
       <View style={[styles.center, { backgroundColor: c.bg }]}>
@@ -88,7 +112,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <SwipeBack style={{ backgroundColor: c.bg }}>
       <StatusBar style={dark ? 'light' : 'dark'} />
 
       {/* top bar */}
@@ -206,13 +230,34 @@ export default function ProfileScreen() {
             </>
           )}
         </Pressable>
+
+        {/* Required by Google Play for any app with sign-up. Placed last and
+            styled as a plain text link — findable, but never mistaken for a
+            normal action on a screen full of buttons. */}
+        <View style={{ height: 34 }} />
+        <PressableScale onPress={() => setDeleteOpen(true)} style={styles.deleteLink}>
+          <Ionicons name="trash-outline" size={16} color={c.danger} />
+          <Text style={[styles.deleteLinkText, { color: c.danger }]}>{t.deleteAccountAction}</Text>
+        </PressableScale>
       </ScrollView>
-    </View>
+
+      <DeleteAccountSheet
+        visible={deleteOpen}
+        deleting={deleting}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={onDelete}
+      />
+    </SwipeBack>
   );
 }
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  deleteLink: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 7, paddingVertical: 12,
+  },
+  deleteLinkText: { fontSize: 14, fontWeight: '700' },
   topBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 22, paddingBottom: 6, gap: 12,

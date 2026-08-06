@@ -103,6 +103,12 @@ export default function HabitsScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
+        <Text style={styles.heroTitle}>{t.habitsTitle}</Text>
+        <Text style={styles.heroSub}>{t.habitsSub}</Text>
+      </View>
+
       <ScrollView
         ref={scrollRef}
         // just enough to clear the tab bar — insets.bottom is already inside it
@@ -118,10 +124,6 @@ export default function HabitsScreen() {
           <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
         }
       >
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
-          <Text style={styles.heroTitle}>{t.habitsTitle}</Text>
-          <Text style={styles.heroSub}>{t.habitsSub}</Text>
-        </View>
 
         {loading && !summary ? (
           <ActivityIndicator color={c.primary} style={{ marginTop: 40 }} />

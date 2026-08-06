@@ -8,7 +8,9 @@ import { useMutation } from '@apollo/client/react';
 
 import {
   COMPLETE_PROFILE,
+  DELETE_ACCOUNT,
   UPGRADE_TO_PREMIUM,
+  type DeleteAccountData,
   type CompleteProfileData,
   type CompleteProfileVars,
   type UpgradeToPremiumData,
@@ -53,6 +55,8 @@ export function useProfile() {
     UPGRADE_TO_PREMIUM,
     refreshUserEverywhere,
   );
+  // no refetch — the account is gone, and asking for it again would just 401
+  const [deleteMutation] = useMutation<DeleteAccountData>(DELETE_ACCOUNT);
 
   const completeProfile = async ({
     firstName, lastName, imageUri, height, weight, religion,
@@ -103,7 +107,21 @@ export function useProfile() {
     }
   };
 
-  return { completeProfile, upgradeToPremium, loading, error, setError };
+  const deleteAccount = async (password: string) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const { data } = await deleteMutation({ variables: { input: { password } } });
+      return data?.deleteAccount ?? false;
+    } catch (err) {
+      setError(errorMessage(err, 'Could not delete your account. Please try again.'));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { completeProfile, upgradeToPremium, deleteAccount, loading, error, setError };
 }
 
 export default useProfile;

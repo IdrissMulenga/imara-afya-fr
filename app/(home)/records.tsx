@@ -17,6 +17,7 @@ import { errorMessage } from '@/lib/errors';
 import RecordRow from '@/components/records/record-row';
 import RecordSheet from '@/components/records/record-sheet';
 import { FadeIn, PressableScale } from '@/components/motion';
+import SwipeBack from '@/components/swipe-back';
 import type { HealthRecord } from '@/graphql';
 
 export default function RecordsScreen() {
@@ -84,8 +85,21 @@ export default function RecordsScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <SwipeBack style={{ backgroundColor: c.bg }}>
       <StatusBar style="light" />
+
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 12 }]}>
+        <View style={styles.heroTop}>
+          {router.canGoBack() && (
+            <Pressable onPress={() => router.back()} hitSlop={10} style={styles.backBtn}>
+              <Ionicons name="chevron-back" size={22} color="#fff" />
+            </Pressable>
+          )}
+          <Text style={styles.heroTitle}>{t.recordsTitle}</Text>
+        </View>
+        <Text style={styles.heroSub}>{t.recordsSub}</Text>
+      </View>
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
@@ -95,17 +109,6 @@ export default function RecordsScreen() {
         }
       >
         {/* ---------------- green hero ---------------- */}
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 12 }]}>
-          <View style={styles.heroTop}>
-            {router.canGoBack() && (
-              <Pressable onPress={() => router.back()} hitSlop={10} style={styles.backBtn}>
-                <Ionicons name="chevron-back" size={22} color="#fff" />
-              </Pressable>
-            )}
-            <Text style={styles.heroTitle}>{t.recordsTitle}</Text>
-          </View>
-          <Text style={styles.heroSub}>{t.recordsSub}</Text>
-        </View>
 
         {/* ---------------- filters ---------------- */}
         <ScrollView
@@ -199,7 +202,7 @@ export default function RecordsScreen() {
         onSave={onSave}
         onRemove={onRemove}
       />
-    </View>
+    </SwipeBack>
   );
 }
 

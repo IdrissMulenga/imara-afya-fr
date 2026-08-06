@@ -3,18 +3,21 @@ import { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 import { useTheme } from '@/constants/theme';
 import { useStrings } from '@/constants/strings';
-import type { Hospital } from '@/graphql';
+import type { Hospital, MapRegion } from '@/graphql';
 
-// Bujumbura city centre — where the map opens when we have no user location
-// and no facilities to frame.
-const BUJUMBURA: Region = {
-  latitude: -3.3822,
-  longitude: 29.3644,
-  latitudeDelta: 0.09,
-  longitudeDelta: 0.09,
+// Where the map opens is decided by the backend (careMap.region), which frames
+// the pins and the user's position together. This is only the stand-in for the
+// first render, before the first response lands — deliberately wide, so it
+// never looks like a confident wrong answer.
+const FALLBACK: Region = {
+  latitude: 0,
+  longitude: 0,
+  latitudeDelta: 90,
+  longitudeDelta: 90,
 };
 
 const PIN_COLOR: Record<string, string> = {
@@ -23,35 +26,41 @@ const PIN_COLOR: Record<string, string> = {
   pharmacy: '#0F7A54',
 };
 
-// smallest box that contains every point, with breathing room
-const regionFor = (points: { latitude: number; longitude: number }[]): Region => {
-  if (!points.length) return BUJUMBURA;
+// WHICH MAP TO DRAW WITH.
+//
+// Google on both platforms, so the map looks and behaves the same everywhere
+// and there is only one set of behaviour to test and support.
+//
+// Both platforms need their own key for that (see app.config.js). If the iOS
+// key is missing we fall back to Apple Maps rather than render the grey
+// rectangle that asking for Google without a key produces — a different-looking
+// map beats no map at all on a screen whose job is finding a clinic. The
+// warning below is so that fallback is never silent.
+//
+// `undefined` means "platform default", which on iOS is Apple Maps.
+const iosGoogleKey = (Constants.expoConfig?.ios?.config as { googleMapsApiKey?: string } | undefined)
+  ?.googleMapsApiKey;
 
-  const lats = points.map((p) => p.latitude);
-  const lngs = points.map((p) => p.longitude);
+const MAP_PROVIDER = Platform.OS === 'ios' && !iosGoogleKey ? undefined : PROVIDER_GOOGLE;
 
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs);
-  const maxLng = Math.max(...lngs);
-
-  return {
-    latitude: (minLat + maxLat) / 2,
-    longitude: (minLng + maxLng) / 2,
-    // a single pin would give a delta of 0 and zoom to the atom, so floor it
-    latitudeDelta: Math.max((maxLat - minLat) * 1.6, 0.02),
-    longitudeDelta: Math.max((maxLng - minLng) * 1.6, 0.02),
-  };
-};
+if (__DEV__ && Platform.OS === 'ios' && !iosGoogleKey) {
+  console.warn(
+    '[imara-afya] No iOS Google Maps key — falling back to Apple Maps. '
+    + 'Set GOOGLE_MAPS_IOS_API_KEY to use Google on iOS.',
+  );
+}
 
 export default function FacilityMap({
   facilities,
+  region,
   userCoords,
   selectedId,
   onSelect,
   height = 280,
 }: {
   facilities: Hospital[];
+  // null only until the first response arrives
+  region?: MapRegion | null;
   userCoords?: { latitude: number; longitude: number } | null;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
@@ -62,16 +71,22 @@ export default function FacilityMap({
 
   const mapRef = useRef<MapView>(null);
 
-  // re-frame when the filtered list changes, so the map follows the search
+  // Follow the backend's framing as the filter and search change.
+  //
+  // Keyed on the four numbers rather than the object: every response is a new
+  // object, so using it directly would re-animate the map on each poll even
+  // when the region hasn't actually moved.
   useEffect(() => {
-    const points = [...facilities];
+    if (!region) return;
 
-    if (userCoords) points.push({ ...userCoords } as Hospital);
-
-    if (!points.length) return;
-
-    mapRef.current?.animateToRegion(regionFor(points), 500);
-  }, [facilities, userCoords]);
+    mapRef.current?.animateToRegion(region, 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    region?.latitude,
+    region?.longitude,
+    region?.latitudeDelta,
+    region?.longitudeDelta,
+  ]);
 
   // centre on a facility when its card is tapped in the list
   useEffect(() => {
@@ -97,10 +112,9 @@ export default function FacilityMap({
       <MapView
         ref={mapRef}
         style={StyleSheet.absoluteFill}
-        // Google on Android is the reliable choice; iOS uses Apple Maps, which
-        // needs no key and works out of the box
-        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-        initialRegion={regionFor(facilities)}
+        // resolved once at module load — see MAP_PROVIDER above
+        provider={MAP_PROVIDER}
+        initialRegion={region ?? FALLBACK}
         showsUserLocation={!!userCoords}
         showsMyLocationButton={false}
         toolbarEnabled={false}

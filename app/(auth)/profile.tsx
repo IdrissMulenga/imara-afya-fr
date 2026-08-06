@@ -1,7 +1,3 @@
-// app/(auth)/profile.tsx — profile setup screen.
-// Fields match the backend `completeProfile` input: image, height, weight, religion.
-// (Gender is collected at signup, so it isn't here.)
-// The photo is downsized to a small avatar and stored inline on the user.
 import { useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

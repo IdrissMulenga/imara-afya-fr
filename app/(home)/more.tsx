@@ -80,14 +80,16 @@ export default function MoreScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
+      {/* fixed header — stays put while the body scrolls */}
+      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
+        <Text style={styles.heroTitle}>{t.moreTitle}</Text>
+        <Text style={styles.heroSub}>{t.moreSub}</Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
-          <Text style={styles.heroTitle}>{t.moreTitle}</Text>
-          <Text style={styles.heroSub}>{t.moreSub}</Text>
-        </View>
 
         <View style={styles.body}>
           <Row
