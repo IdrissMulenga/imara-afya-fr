@@ -4,36 +4,78 @@ import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/constants/theme';
+import { useStrings } from '@/constants/strings';
+import type { DueDoseStatus } from '@/graphql';
 
 export default function MedicationRow({
   name,
   dosage,
-  times,
+  slot,
   taken,
+  status,
   busy,
   onMarkTaken,
 }: {
   name: string;
   dosage?: string | null;
-  times: string[];
+  // The ONE scheduled time this row represents — "08:00". A twice-daily
+  // medicine renders two of these rows, ticked independently. Null means an
+  // as-needed medicine with no set time.
+  slot?: string | null;
   taken: boolean;
+  /** where this dose stands right now — see DueDoseStatus */
+  status?: DueDoseStatus;
   busy?: boolean;
   onMarkTaken: () => void;
 }) {
   const { c, radius } = useTheme();
+  const { t } = useStrings();
 
-  const detail = [dosage, times.length ? times.join(', ') : null].filter(Boolean).join(' · ');
+  // LATE AND MISSED READ DIFFERENTLY, and the difference matters.
+  //
+  // Late is amber and still tickable — the tablet is worth taking an hour on.
+  // Missed is grey and quiet: today is gone, and shouting about it helps
+  // nobody. A red banner on a missed dose is how an app becomes something
+  // people stop opening.
+  const late = status === 'late';
+  const missed = status === 'missed';
+
+  const detail = [
+    dosage,
+    slot,
+    late ? t.lateDose : missed ? t.missedDose : null,
+  ].filter(Boolean).join(' · ');
 
   return (
-    <View style={[styles.row, { backgroundColor: c.surface, borderColor: c.border, borderRadius: radius }]}>
-      <View style={[styles.pill, { backgroundColor: c.fieldBg }]}>
-        <Ionicons name="medkit-outline" size={20} color={c.primary} />
+    <View
+      style={[
+        styles.row,
+        {
+          backgroundColor: c.surface,
+          borderColor: late ? '#F59E0B' : c.border,
+          borderRadius: radius,
+          // a missed dose recedes rather than shouts
+          opacity: missed ? 0.6 : 1,
+        },
+      ]}
+    >
+      <View style={[styles.pill, { backgroundColor: late ? '#FEF3C7' : c.fieldBg }]}>
+        <Ionicons
+          name={missed ? 'close-circle-outline' : 'medkit-outline'}
+          size={20}
+          color={late ? '#B45309' : missed ? c.textFaint : c.primary}
+        />
       </View>
 
       <View style={{ flex: 1 }}>
         <Text style={[styles.name, { color: c.text }]} numberOfLines={1}>{name}</Text>
         {!!detail && (
-          <Text style={[styles.detail, { color: c.textMuted }]} numberOfLines={1}>{detail}</Text>
+          <Text
+            style={[styles.detail, { color: late ? '#B45309' : c.textMuted }]}
+            numberOfLines={1}
+          >
+            {detail}
+          </Text>
         )}
       </View>
 

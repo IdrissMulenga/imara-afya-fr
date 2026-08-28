@@ -48,7 +48,13 @@ export default function LoginScreen() {
                 <Checkbox checked={f.remember} onToggle={() => f.setRemember((r) => !r)}>
                     {t.remember}
                 </Checkbox>
-                <Text style={[styles.link, { color: c.primary }]}>{t.forgot}</Text>
+                <Text
+                    onPress={() => router.push('/(auth)/forgot-password')}
+                    suppressHighlighting
+                    style={[styles.link, { color: c.primary }]}
+                >
+                    {t.forgot}
+                </Text>
             </View>
 
             {!!f.serverError && <ErrorRow message={f.serverError} />}

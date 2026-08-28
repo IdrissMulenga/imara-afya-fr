@@ -1,21 +1,32 @@
 // hooks/use-dashboard.ts — everything the home dashboard needs, in one place.
 //
-//   const { me, records, medications, dueToday, cycle, water, markTaken, ... } = useDashboard();
+//   const { me, dueToday, routines, checkIn, pregnancy, ... } = useDashboard();
 //
-// Deliberately one GraphQL round trip. On a 2G connection in Bujumbura, four
-// separate requests is four chances to stall before the screen is usable.
+// TWO round trips, not seven. On a 2G connection in Bujumbura every extra
+// request is another chance to stall before the screen is usable, so the
+// dashboard asks for medicines, habits, routines and the check-in together, and
+// women additionally get cycle + pregnancy in one more.
+//
+// The dashboard can also WRITE — tick a dose, tick a routine, save a mood —
+// because making someone open three screens to record thirty seconds of their
+// morning is how a health app stops being used.
 import { useMemo } from 'react';
 import { useMutation, useQuery } from '@apollo/client/react';
 
 import {
-  CYCLE_PREDICTION,
   DASHBOARD,
+  DASHBOARD_WOMEN,
   MARK_MEDICATION_TAKEN,
-  type CyclePredictionData,
+  SAVE_CHECK_IN,
+  SET_ROUTINE_DONE,
   type DashboardData,
+  type DashboardWomenData,
   type MarkMedicationTakenData,
+  type SaveCheckInData,
+  type SetRoutineDoneData,
 } from '@/graphql';
 import { addDaysIso, todayIso } from '@/lib/dates';
+import { buildDueDoses, outstandingCount, takenCountOf } from '@/lib/doses';
 
 export function useDashboard() {
   const date = todayIso();
@@ -29,15 +40,33 @@ export function useDashboard() {
   const me = data?.me ?? null;
   const isWoman = me?.gender === 'Woman';
 
-  // the backend rejects cyclePrediction for non-women (WOMEN_ONLY), so skip it
-  const { data: cycleData } = useQuery<CyclePredictionData>(CYCLE_PREDICTION, {
+  // the backend answers both of these with WOMEN_ONLY for everyone else
+  const { data: womenData } = useQuery<DashboardWomenData>(DASHBOARD_WOMEN, {
     skip: !isWoman,
     fetchPolicy: 'cache-and-network',
   });
 
+  // EVERY MUTATION REFETCHES THE SAME DOCUMENT, with the same variables.
+  //
+  // Apollo caches on the query PLUS its variables, so a refetch that passes a
+  // different `date` writes to a different cache entry and the screen you are
+  // looking at never updates. That has already caught us once: ticking a dose
+  // refreshed a copy of the dashboard nobody was watching.
+  const refresh = [{ query: DASHBOARD, variables: { date, weekAgo } }];
+
   const [markMutation, { loading: marking }] = useMutation<MarkMedicationTakenData>(
     MARK_MEDICATION_TAKEN,
-    { refetchQueries: [{ query: DASHBOARD, variables: { date, weekAgo } }] },
+    { refetchQueries: refresh },
+  );
+
+  const [routineMutation, { loading: tickingRoutine }] = useMutation<SetRoutineDoneData>(
+    SET_ROUTINE_DONE,
+    { refetchQueries: refresh },
+  );
+
+  const [checkInMutation, { loading: savingCheckIn }] = useMutation<SaveCheckInData>(
+    SAVE_CHECK_IN,
+    { refetchQueries: refresh },
   );
 
   const records = data?.myHealthRecords ?? [];
@@ -47,24 +76,21 @@ export function useDashboard() {
   );
   const logs = data?.myMedicationLogs ?? [];
 
-  // ids of medications already logged today
-  const takenIds = useMemo(
-    () => new Set(logs.filter((l) => l.status === 'taken').map((l) => l.medicationId)),
-    [logs],
-  );
+  // ONE ENTRY PER SCHEDULED TIME. Ticking the 08:00 dose of a twice-daily
+  // medicine must leave the 20:00 one outstanding — before this, it didn't.
+  const dueToday = useMemo(() => buildDueDoses(medications, logs), [medications, logs]);
 
-  const dueToday = useMemo(
-    () => medications.map((m) => ({ ...m, taken: takenIds.has(m.id) })),
-    [medications, takenIds],
-  );
-
-  const dueCount = dueToday.filter((m) => !m.taken).length;
-  const takenCount = dueToday.length - dueCount;
+  const dueCount = outstandingCount(dueToday);
+  const takenCount = takenCountOf(dueToday);
 
   const habits = data?.habitSummary ?? null;
+  const checkIn = data?.checkInSummary ?? null;
+
+  const routineDay = data?.todayRoutines ?? null;
+  const routines = routineDay?.routines ?? [];
 
   // Seven days of water totals, oldest first, with missing days as zero — a
-  // gap in the sparkline would read as "no data" when it means "drank none".
+  // gap in the chart would read as "no data" when it means "drank none".
   const waterWeek = useMemo(() => {
     const byDay = new Map<string, number>();
 
@@ -78,8 +104,16 @@ export function useDashboard() {
     });
   }, [data?.myHabitLogs, weekAgo]);
 
-  const markTaken = (medicationId: string) =>
-    markMutation({ variables: { medicationId, status: 'taken' } });
+  const markTaken = (medicationId: string, slot?: string | null) =>
+    markMutation({ variables: { medicationId, slot: slot ?? undefined, status: 'taken' } });
+
+  const setRoutineDone = (id: string, done: boolean) =>
+    routineMutation({ variables: { id, done, date } });
+
+  // mood and energy are always saved together — the backend requires both, and
+  // "how are you" without "how much have you got left" is half a picture
+  const saveCheckIn = (mood: number, energy: number) =>
+    checkInMutation({ variables: { input: { mood, energy, date } } });
 
   return {
     me,
@@ -92,9 +126,18 @@ export function useDashboard() {
     takenCount,
     habits,
     waterWeek,
-    cycle: cycleData?.cyclePrediction ?? null,
+    checkIn,
+    routines,
+    routinesDone: routineDay?.doneCount ?? 0,
+    routinesDue: routineDay?.dueCount ?? 0,
+    cycle: womenData?.cyclePrediction ?? null,
+    pregnancy: womenData?.pregnancyProgress ?? null,
     markTaken,
+    setRoutineDone,
+    saveCheckIn,
     marking,
+    tickingRoutine,
+    savingCheckIn,
     loading,
     error,
     refetch,

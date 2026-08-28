@@ -7,11 +7,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { router } from 'expo-router';
 
 import { useTheme } from '@/constants/theme';
+import usePullRefresh from '@/hooks/use-pull-refresh';
+import { ScreenHeader } from '@/components/hero-backdrop';
+import { useTabBarInset } from '@/components/glass-surface';
 import { useStrings } from '@/constants/strings';
 import useRecords, { RECORD_TYPES, type RecordType } from '@/hooks/use-records';
+import useAttachments from '@/hooks/use-attachments';
 import { useToast } from '@/components/toast';
 import { errorMessage } from '@/lib/errors';
 import RecordRow from '@/components/records/record-row';
@@ -24,6 +27,9 @@ export default function RecordsScreen() {
   const { c } = useTheme();
   const { t } = useStrings();
   const insets = useSafeAreaInsets();
+  // on iOS 26 the tab bar floats over the content as glass, so give that
+  // height back as padding. Zero on Android and older iPhones.
+  const tabBarInset = useTabBarInset();
   const toast = useToast();
 
   const {
@@ -31,8 +37,61 @@ export default function RecordsScreen() {
     add, update, remove, saving, loading, refetch,
   } = useRecords();
 
+  // the spinner shows for a pull, not for every background refetch
+  const { refreshing, onRefresh } = usePullRefresh(refetch);
+
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<HealthRecord | null>(null);
+
+  const { attachImage, removeAttachment, busy: attaching, configured } = useAttachments();
+
+  // ATTACH A PHOTO.
+  //
+  // The mutation returns the whole record, so we replace `editing` with the
+  // fresh copy — otherwise the sheet would keep showing the old attachment
+  // list until it was closed and reopened.
+  const onAttach = async (recordId: string) => {
+    if (!configured) {
+      toast.error(t.errUploadNotSet);
+      return;
+    }
+
+    try {
+      const updated = await attachImage(recordId);
+
+      // null means she backed out of the picker, which is not an error
+      if (!updated) return;
+
+      setEditing(updated);
+      toast.success(t.attachmentAdded);
+    } catch (err) {
+      const message = (err as Error)?.message;
+
+      if (message === 'MEDIA_PERMISSION_DENIED') toast.error(t.errMediaPermission);
+      else if (message === 'UPLOAD_NOT_CONFIGURED') toast.error(t.errUploadNotSet);
+      else toast.error(errorMessage(err, t.errGeneric));
+    }
+  };
+
+  const onDetach = (recordId: string, attachmentId: string) => {
+    Alert.alert(t.removeAttachmentTitle, '', [
+      { text: t.cancel, style: 'cancel' },
+      {
+        text: t.remove,
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const updated = await removeAttachment(recordId, attachmentId);
+
+            if (updated) setEditing(updated);
+            toast.success(t.attachmentRemoved);
+          } catch (err) {
+            toast.error(errorMessage(err, t.errGeneric));
+          }
+        },
+      },
+    ]);
+  };
 
   const typeLabel = (value: RecordType) =>
     value === 'Condition' ? t.typeCondition : value === 'Allergy' ? t.typeAllergy : t.typeMedication;
@@ -88,24 +147,13 @@ export default function RecordsScreen() {
     <SwipeBack style={{ backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
-      {/* fixed header — stays put while the body scrolls */}
-      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 12 }]}>
-        <View style={styles.heroTop}>
-          {router.canGoBack() && (
-            <Pressable onPress={() => router.back()} hitSlop={10} style={styles.backBtn}>
-              <Ionicons name="chevron-back" size={22} color="#fff" />
-            </Pressable>
-          )}
-          <Text style={styles.heroTitle}>{t.recordsTitle}</Text>
-        </View>
-        <Text style={styles.heroSub}>{t.recordsSub}</Text>
-      </View>
+      <ScreenHeader back title={t.recordsTitle} subtitle={t.recordsSub} />
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 96 + tabBarInset }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} />
         }
       >
         {/* ---------------- green hero ---------------- */}
@@ -188,7 +236,16 @@ export default function RecordsScreen() {
       {/* ---------------- add button ---------------- */}
       <PressableScale
         onPress={openNew}
-        style={[styles.fab, { backgroundColor: c.primary, bottom: insets.bottom + 22 }]}
+        style={[
+          styles.fab,
+          {
+            backgroundColor: c.primary,
+            // clear the tab bar as well as the home indicator. tabBarInset is
+            // the bar's height when it floats over the content (iOS 26 glass)
+            // and 0 otherwise, so this is unchanged everywhere else.
+            bottom: insets.bottom + 22 + tabBarInset,
+          },
+        ]}
       >
         <Ionicons name="add" size={22} color="#fff" />
         <Text style={styles.fabText}>{t.addRecord}</Text>
@@ -201,22 +258,15 @@ export default function RecordsScreen() {
         onClose={() => setSheetOpen(false)}
         onSave={onSave}
         onRemove={onRemove}
+        onAttach={onAttach}
+        onDetach={onDetach}
+        attaching={attaching}
       />
     </SwipeBack>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    paddingHorizontal: 22,
-    paddingBottom: 24,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-  },
-  heroTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  backBtn: { marginLeft: -6 },
-  heroTitle: { color: '#fff', fontSize: 23, fontWeight: '800', letterSpacing: -0.5 },
-  heroSub: { color: 'rgba(255,255,255,0.85)', fontSize: 13.5, fontWeight: '500', marginTop: 8 },
 
   filterRow: { paddingHorizontal: 22, paddingTop: 18, gap: 8 },
   chip: { paddingHorizontal: 15, paddingVertical: 9, borderRadius: 12, borderWidth: 1 },

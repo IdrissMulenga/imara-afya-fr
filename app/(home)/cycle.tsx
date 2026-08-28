@@ -11,8 +11,12 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { Redirect } from 'expo-router';
 
 import { useTheme } from '@/constants/theme';
+import usePullRefresh from '@/hooks/use-pull-refresh';
+import HeroBackdrop, { HERO_TOP_GAP, HERO_BOTTOM_GAP } from '@/components/hero-backdrop';
+import { useTabBarInset } from '@/components/glass-surface';
 import { useStrings } from '@/constants/strings';
 import { FadeIn, PressableScale } from '@/components/motion';
 import useCycle, { periodLength } from '@/hooks/use-cycle';
@@ -28,6 +32,9 @@ export default function CycleScreen() {
   const { c } = useTheme();
   const { t } = useStrings();
   const insets = useSafeAreaInsets();
+  // on iOS 26 the tab bar floats over the content as glass, so give that
+  // height back as padding. Zero on Android and older iPhones.
+  const tabBarInset = useTabBarInset();
   const toast = useToast();
 
   const { width } = useWindowDimensions();
@@ -38,6 +45,9 @@ export default function CycleScreen() {
     setRegularity, needsRegularityAnswer,
     saving, loading, refetch,
   } = useCycle();
+
+  // the spinner shows for a pull, not for every background refetch
+  const { refreshing, onRefresh } = usePullRefresh(refetch);
 
   const [editing, setEditing] = useState<PeriodCycle | null>(null);
 
@@ -70,14 +80,18 @@ export default function CycleScreen() {
     };
   });
 
-  // the tab is hidden for men, but guard the screen too in case it's deep-linked
-  if (!isWoman && !loading) {
-    return (
-      <View style={[styles.blocked, { backgroundColor: c.bg }]}>
-        <Ionicons name="lock-closed-outline" size={28} color={c.textFaint} />
-      </View>
-    );
-  }
+  // NOT SHOWN AT ALL for anyone who isn't a woman.
+  //
+  // The tab is already hidden, but hiding a tab does not remove a route — a
+  // deep link, a saved link, or `router.push` from code still lands here, and
+  // the screen used to answer that with a padlock, which is a page telling you
+  // it is not for you. Sending them to the dashboard means the screen simply
+  // does not exist for them.
+  //
+  // `loading` matters: `me` is null on the first render, so `isWoman` is false
+  // before the answer arrives, and redirecting on that would bounce a woman off
+  // her own screen every time she opened it.
+  if (!isWoman && !loading) return <Redirect href="/(home)" />;
 
   // The single button does whichever thing makes sense right now: start a
   // period, or close the one that's running. Showing both at once would let
@@ -173,7 +187,7 @@ export default function CycleScreen() {
       <StatusBar style="light" />
 
       {/* fixed header — stays put while the body scrolls */}
-      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
+      <HeroBackdrop style={[styles.hero, { paddingTop: insets.top + HERO_TOP_GAP }]}>
         <Text style={styles.heroTitle}>{t.cycleTitle}</Text>
         <Text style={styles.heroSub}>{t.cycleSub}</Text>
 
@@ -209,15 +223,15 @@ export default function CycleScreen() {
             )}
           </View>
         </Animated.View>
-      </View>
+      </HeroBackdrop>
 
       <Animated.ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 + tabBarInset }}
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} />
         }
       >
 
@@ -379,12 +393,8 @@ export default function CycleScreen() {
 }
 
 const styles = StyleSheet.create({
-  blocked: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  hero: {
-    paddingHorizontal: 22, paddingBottom: 28,
-    borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
-  },
+  hero: { paddingHorizontal: 22, paddingBottom: HERO_BOTTOM_GAP },
   heroTitle: { color: '#fff', fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
   heroSub: { color: 'rgba(255,255,255,0.85)', fontSize: 13.5, fontWeight: '500', marginTop: 6 },
   // the collapsing wrapper owns the margin so it can animate to zero;

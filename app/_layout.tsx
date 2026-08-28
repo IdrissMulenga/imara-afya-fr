@@ -10,6 +10,7 @@ import { ThemeProvider, useTheme } from '@/constants/theme';
 import { LangProvider } from '@/constants/strings';
 import { ToastProvider } from '@/components/toast';
 import { onSessionEnd } from '@/lib/session';
+import usePreferences from '@/hooks/use-preferences';
 
 
 // Listens for a token dying mid-session — the 7-day expiry passing, a logout on
@@ -23,6 +24,16 @@ function SessionWatcher() {
     void client.clearStore();
     router.replace('/(auth)/login');
   }), []);
+
+  return null;
+}
+
+
+// Pushes the phone's timezone to the backend once per launch, so that
+// "today" is resolved against the user's own calendar rather than UTC.
+// Renders nothing; it just has to be mounted somewhere inside Apollo.
+function PreferenceSync() {
+  usePreferences();
 
   return null;
 }
@@ -62,6 +73,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ApolloWrapper>
         <SessionWatcher />
+        <PreferenceSync />
         <SafeAreaProvider>
           <ThemeProvider initialPalette="forest">
             <LangProvider initialLang="en">
