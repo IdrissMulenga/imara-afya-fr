@@ -154,12 +154,6 @@ export default function HomeScreen() {
     }
   };
 
-  // WHAT THE ROTATING BANNER SHOWS.
-  //
-  // Only things that are true right now, in the order they matter on waking:
-  // medicine that is due, then water, then the cycle. A card with nothing to
-  // say is left out rather than padded — an empty highlight is worse than one
-  // fewer card.
   const highlights = useMemo(() => {
     const list: Highlight[] = [];
 
