@@ -18,8 +18,14 @@ let ending = false;
 export function onSessionEnd(listener: Listener) {
   listeners.add(listener);
 
-  // returned so a useEffect can clean up after itself
-  return () => listeners.delete(listener);
+  // Returned so a useEffect can clean up after itself — and the braces matter:
+  // `() => listeners.delete(listener)` returns Set.delete's boolean, which is
+  // not a valid effect cleanup. React ignores it at runtime, so this only ever
+  // showed up as a type error, but a cleanup that returns a value is the same
+  // shape as an async effect and reads like one.
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 // Called when the backend says the token is no longer good — expired, revoked

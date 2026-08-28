@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/constants/theme';
@@ -21,6 +22,9 @@ export default function RecordSheet({
   onClose,
   onSave,
   onRemove,
+  onAttach,
+  onDetach,
+  attaching,
 }: {
   visible: boolean;
   // null = adding a new one, otherwise editing this record
@@ -29,6 +33,10 @@ export default function RecordSheet({
   onClose: () => void;
   onSave: (values: { type: RecordType; name: string; note?: string }) => void;
   onRemove?: () => void;
+  // attaching needs a saved record, so these are only wired when editing
+  onAttach?: (recordId: string) => void;
+  onDetach?: (recordId: string, attachmentId: string) => void;
+  attaching?: boolean;
 }) {
   const { c } = useTheme();
   const { t } = useStrings();
@@ -150,6 +158,65 @@ export default function RecordSheet({
                 ]}
               />
 
+              {/* ATTACHMENTS — only when editing.
+                  A new record has no id yet, and the backend attaches by
+                  record id, so there is nothing to attach a photo to until it
+                  has been saved once. */}
+              {isEditing && record && (
+                <>
+                  <View style={styles.attachHead}>
+                    <Text style={[styles.label, { color: c.textMuted, marginTop: 0 }]}>
+                      {t.attachments}
+                    </Text>
+
+                    <PressableScale
+                      onPress={() => onAttach?.(record.id)}
+                      disabled={attaching}
+                      hitSlop={8}
+                      style={styles.attachBtn}
+                    >
+                      {attaching ? (
+                        <ActivityIndicator size="small" color={c.primary} />
+                      ) : (
+                        <>
+                          <Ionicons name="add" size={16} color={c.primary} />
+                          <Text style={[styles.attachBtnText, { color: c.primary }]}>
+                            {t.addAttachment}
+                          </Text>
+                        </>
+                      )}
+                    </PressableScale>
+                  </View>
+
+                  {!record.attachments?.length ? (
+                    <Text style={[styles.attachEmpty, { color: c.textFaint }]}>—</Text>
+                  ) : (
+                    <View style={styles.attachRow}>
+                      {record.attachments.map((file) => (
+                        <View key={file.id} style={styles.thumbWrap}>
+                          <Image
+                            source={{ uri: file.url }}
+                            style={[styles.thumb, { borderColor: c.border }]}
+                            contentFit="cover"
+                            // a health photo is worth a moment of patience, but
+                            // not a blank square while it loads
+                            transition={150}
+                          />
+
+                          <PressableScale
+                            onPress={() => onDetach?.(record.id, file.id)}
+                            hitSlop={8}
+                            style={[styles.thumbRemove, { backgroundColor: c.danger }]}
+                          >
+                            <Ionicons name="close" size={12} color="#fff" />
+                          </PressableScale>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+
               <PressableScale
                 onPress={submit}
                 disabled={saving}
@@ -177,6 +244,21 @@ export default function RecordSheet({
 }
 
 const styles = StyleSheet.create({
+  attachHead: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginTop: 18, marginBottom: 8,
+  },
+  attachBtn: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  attachBtnText: { fontSize: 13.5, fontWeight: '700' },
+  attachEmpty: { fontSize: 13, fontWeight: '600' },
+  attachRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  thumbWrap: { width: 72, height: 72 },
+  thumb: { width: 72, height: 72, borderRadius: 12, borderWidth: 1 },
+  thumbRemove: {
+    position: 'absolute', top: -6, right: -6,
+    width: 20, height: 20, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
+  },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
   sheet: {
     borderTopLeftRadius: 26,

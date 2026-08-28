@@ -11,7 +11,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "bi.imaraco.imaraafya",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "entitlements": {
+        "com.apple.developer.usernotifications.time-sensitive": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,14 +29,11 @@
       "package": "bi.imaraco.imaraafya",
       "versionCode": 1,
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
         "POST_NOTIFICATIONS",
         "READ_MEDIA_IMAGES",
         "VIBRATE"
       ],
       "blockedPermissions": [
-        "ACCESS_BACKGROUND_LOCATION",
         "RECORD_AUDIO",
         "CAMERA"
       ]
@@ -54,15 +54,6 @@
           "dark": {
             "backgroundColor": "#000000"
           }
-        }
-      ],
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Imara Afya uses your location only to show hospitals and clinics near you. It is never stored or shared.",
-          "locationWhenInUsePermission": "Imara Afya uses your location only to show hospitals and clinics near you. It is never stored or shared.",
-          "isIosBackgroundLocationEnabled": false,
-          "isAndroidBackgroundLocationEnabled": false
         }
       ]
     ],

@@ -6,7 +6,7 @@
 //
 //   1. `gestureEnabled` on a native stack is iOS-only — react-native-screens
 //      documents it that way, and Android is our first platform.
-//   2. Records / Ramadan / Find care / Profile live inside the Tabs navigator
+//   2. Records / Profile / Password live inside the Tabs navigator
 //      (registered with `href: null`). Tab navigators have no back gesture on
 //      either platform, because there is no stack to pop.
 //

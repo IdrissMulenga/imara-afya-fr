@@ -12,6 +12,8 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 
 import { useTheme } from '@/constants/theme';
+import usePullRefresh from '@/hooks/use-pull-refresh';
+import { ScreenHeader } from '@/components/hero-backdrop';
 import { useStrings } from '@/constants/strings';
 import { FadeIn, PressableScale, ProgressBar } from '@/components/motion';
 import WaterDot from '@/components/habits/water-dot';
@@ -30,6 +32,9 @@ export default function HabitsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
 
   const { summary, addWater, logSleep, logWeight, logging, loading, refetch } = useHabits();
+
+  // the spinner shows for a pull, not for every background refetch
+  const { refreshing, onRefresh } = usePullRefresh(refetch);
 
   const [sleep, setSleep] = useState('');
   const [weight, setWeight] = useState('');
@@ -103,11 +108,7 @@ export default function HabitsScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
-      {/* fixed header — stays put while the body scrolls */}
-      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
-        <Text style={styles.heroTitle}>{t.habitsTitle}</Text>
-        <Text style={styles.heroSub}>{t.habitsSub}</Text>
-      </View>
+      <ScreenHeader title={t.habitsTitle} subtitle={t.habitsSub} />
 
       <ScrollView
         ref={scrollRef}
@@ -121,7 +122,7 @@ export default function HabitsScreen() {
         // Android does the same via softwareKeyboardLayoutMode "resize".
         automaticallyAdjustKeyboardInsets
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} />
         }
       >
 
@@ -285,12 +286,6 @@ export default function HabitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: {
-    paddingHorizontal: 22, paddingBottom: 26,
-    borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
-  },
-  heroTitle: { color: '#fff', fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
-  heroSub: { color: 'rgba(255,255,255,0.85)', fontSize: 13.5, fontWeight: '500', marginTop: 6 },
 
   body: { paddingHorizontal: 22, paddingTop: 22, gap: 14 },
   card: { borderWidth: 1, borderRadius: 20, padding: 18 },

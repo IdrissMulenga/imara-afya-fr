@@ -12,7 +12,6 @@ import { useToast } from '@/components/toast';
 import { errorMessage } from '@/lib/errors';
 import AvatarPicker from '@/components/profile/avatar-picker';
 import NumberField from '@/components/profile/number-field';
-import ReligionPicker from '@/components/profile/religion-picker';
 
 export default function ProfileScreen() {
   const { c, dark, radius } = useTheme();
@@ -23,7 +22,6 @@ export default function ProfileScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
-  const [religion, setReligion] = useState('');
 
   const { completeProfile, loading, error } = useProfile();
   const toast = useToast();
@@ -31,7 +29,7 @@ export default function ProfileScreen() {
   const finish = async () => {
     try {
       // downsizes the photo to a small avatar, then saves the profile
-      await completeProfile({ imageUri: image, height, weight, religion });
+      await completeProfile({ imageUri: image, height, weight });
       toast.success(t.profileSaved);
       router.replace('/(home)');
     } catch (err) {
@@ -76,15 +74,6 @@ export default function ProfileScreen() {
           <NumberField label={t.heightLabel} placeholder={t.heightPh} value={height} onChangeText={setHeight} />
           <NumberField label={t.weightLabel} placeholder={t.weightPh} value={weight} onChangeText={setWeight} />
         </View>
-
-        {/* religion */}
-        <View style={{ height: 22 }} />
-        <View style={styles.fieldHeadRow}>
-          <Text style={[styles.fieldHead, { color: c.textMuted }]}>{t.religionLabel}</Text>
-          <Text style={[styles.optional, { color: c.textFaint, backgroundColor: c.fieldBg }]}>{t.optional}</Text>
-        </View>
-        <View style={{ height: 9 }} />
-        <ReligionPicker value={religion} onChange={setReligion} />
 
         {!!error && (
           <View style={styles.errRow}>

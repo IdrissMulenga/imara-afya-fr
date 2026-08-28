@@ -11,13 +11,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 import { useTheme } from '@/constants/theme';
+import { todayIso } from '@/lib/dates';
+import usePullRefresh from '@/hooks/use-pull-refresh';
+import { ScreenHeader } from '@/components/hero-backdrop';
+import { useTabBarInset } from '@/components/glass-surface';
 import { useStrings } from '@/constants/strings';
 import useMedications from '@/hooks/use-medications';
 import { useToast } from '@/components/toast';
 import { errorMessage } from '@/lib/errors';
 import MedicationRow from '@/components/home/medication-row';
+import AdherenceCard from '@/components/home/adherence-card';
 import { FadeIn, PressableScale } from '@/components/motion';
-import type { Medication } from '@/graphql';
+import type { DueDose, Medication } from '@/graphql';
 
 // "08:00, 20:00" -> ["08:00","20:00"]
 const parseTimes = (raw: string) =>
@@ -29,12 +34,19 @@ export default function MedicationsScreen() {
   const { c } = useTheme();
   const { t } = useStrings();
   const insets = useSafeAreaInsets();
+  // on iOS 26 the tab bar floats over the content as glass, so give that
+  // height back as padding. Zero on Android and older iPhones.
+  const tabBarInset = useTabBarInset();
   const toast = useToast();
 
   const {
-    dueToday, paused, dueCount, add, update, remove, setActive, markTaken,
+    dueToday, active, paused, dueCount, adherence,
+    add, update, remove, setActive, markTaken, unmarkTaken,
     saving, loading, refetch,
   } = useMedications();
+
+  // the spinner shows for a pull, not for every background refetch
+  const { refreshing, onRefresh } = usePullRefresh(refetch);
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<Medication | null>(null);
@@ -43,6 +55,9 @@ export default function MedicationsScreen() {
   const [name, setName] = useState('');
   const [dosage, setDosage] = useState('');
   const [times, setTimes] = useState('');
+  const [frequency, setFrequency] = useState<Frequency>('daily');
+  const [endDate, setEndDate] = useState('');
+  const [stock, setStock] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   // reset the form each time the sheet opens
@@ -51,6 +66,9 @@ export default function MedicationsScreen() {
     setName(editing?.name ?? '');
     setDosage(editing?.dosage ?? '');
     setTimes((editing?.times ?? []).join(', '));
+    setFrequency((editing?.frequency as Frequency) ?? 'daily');
+    setEndDate(editing?.endDate ?? '');
+    setStock(editing?.stock != null ? String(editing.stock) : '');
     setError(null);
   }, [sheetOpen, editing]);
 
@@ -64,11 +82,17 @@ export default function MedicationsScreen() {
     setSheetOpen(true);
   };
 
-  const onMarkTaken = async (id: string) => {
-    setBusyId(id);
+  // A dose is a medicine AND a time, so the busy key has to be the dose key —
+  // otherwise tapping the 08:00 row spins the 20:00 row of the same medicine.
+  const onMarkTaken = async (dose: DueDose) => {
+    setBusyId(dose.key);
     try {
-      await markTaken(id);
-      toast.success(t.doseLogged);
+      if (dose.taken) {
+        await unmarkTaken(dose.medicationId, dose.slot);
+      } else {
+        await markTaken(dose.medicationId, dose.slot);
+        toast.success(t.doseLogged);
+      }
     } catch (err) {
       toast.error(errorMessage(err, t.errGeneric));
     } finally {
@@ -84,6 +108,16 @@ export default function MedicationsScreen() {
 
     const list = parseTimes(times);
 
+    if (endDate && !DATE_RE.test(endDate)) {
+      setError(t.errCourseDate);
+      return;
+    }
+
+    if (stock.trim() && (!Number.isFinite(Number(stock)) || Number(stock) < 0)) {
+      setError(t.errStock);
+      return;
+    }
+
     // the backend stores times as plain strings, so validate the shape here —
     // a bad time would silently never remind her
     if (list.some((time) => !TIME_RE.test(time))) {
@@ -95,6 +129,12 @@ export default function MedicationsScreen() {
       name: name.trim(),
       dosage: dosage.trim() || undefined,
       times: list,
+      frequency,
+      // A COURSE ONLY EXISTS IF THERE IS AN END TO IT. The start is today
+      // for a new medicine, because "alternate days" has to count from
+      // somewhere and a course with no anchor drifts.
+      ...(endDate ? { endDate, startDate: editing?.startDate ?? todayIso() } : {}),
+      ...(stock.trim() ? { stock: Number(stock) } : {}),
     };
 
     try {
@@ -135,23 +175,24 @@ export default function MedicationsScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="light" />
 
-      {/* fixed header — stays put while the body scrolls */}
-      <View style={[styles.hero, { backgroundColor: c.heroMid, paddingTop: insets.top + 16 }]}>
-        <Text style={styles.heroTitle}>{t.medsTitle}</Text>
-        <Text style={styles.heroSub}>
-          {dueCount ? `${dueCount} ${t.dueToday}` : t.allDone}
-        </Text>
-      </View>
+      <ScreenHeader
+        title={t.medsTitle}
+        subtitle={dueCount ? `${dueCount} ${t.dueToday}` : t.allDone}
+      />
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 96 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 96 + tabBarInset }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={() => refetch()} tintColor={c.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} />
         }
       >
 
         <View style={styles.body}>
+          {/* WHAT THE DOSE LOG ADDS UP TO. Hides itself when nothing has been
+              due yet, rather than showing a new user a confident 0%. */}
+          <AdherenceCard summary={adherence} />
+
           {loading && !dueToday.length ? (
             <ActivityIndicator color={c.primary} style={{ marginTop: 32 }} />
           ) : !dueToday.length && !paused.length ? (
@@ -165,19 +206,29 @@ export default function MedicationsScreen() {
                 <>
                   <Text style={[styles.sectionTitle, { color: c.textMuted }]}>{t.activeMeds}</Text>
                   <View style={{ gap: 10 }}>
-                    {dueToday.map((m, i) => (
-                      <FadeIn key={m.id} index={i} style={styles.rowWrap}>
+                    {dueToday.map((dose, i) => (
+                      <FadeIn key={dose.key} index={i} style={styles.rowWrap}>
                         <View style={{ flex: 1 }}>
                           <MedicationRow
-                            name={m.name}
-                            dosage={m.dosage}
-                            times={m.times}
-                            taken={m.taken}
-                            busy={busyId === m.id}
-                            onMarkTaken={() => onMarkTaken(m.id)}
+                            name={dose.name}
+                            dosage={dose.dosage}
+                            slot={dose.slot}
+                            taken={dose.taken}
+                            status={dose.status}
+                            busy={busyId === dose.key}
+                            onMarkTaken={() => onMarkTaken(dose)}
                           />
                         </View>
-                        <PressableScale onPress={() => openEdit(m)} hitSlop={8} style={styles.editBtn}>
+                        {/* a dose row carries only what a dose needs, so the
+                            edit sheet looks the full medicine back up by id */}
+                        <PressableScale
+                          onPress={() => {
+                            const medication = active.find((m) => m.id === dose.medicationId);
+                            if (medication) openEdit(medication);
+                          }}
+                          hitSlop={8}
+                          style={styles.editBtn}
+                        >
                           <Ionicons name="ellipsis-vertical" size={17} color={c.textFaint} />
                         </PressableScale>
                       </FadeIn>
@@ -218,7 +269,16 @@ export default function MedicationsScreen() {
 
       <PressableScale
         onPress={openNew}
-        style={[styles.fab, { backgroundColor: c.primary, bottom: insets.bottom + 22 }]}
+        style={[
+          styles.fab,
+          {
+            backgroundColor: c.primary,
+            // clear the tab bar as well as the home indicator. tabBarInset is
+            // the bar's height when it floats over the content (iOS 26 glass)
+            // and 0 otherwise, so this is unchanged everywhere else.
+            bottom: insets.bottom + 22 + tabBarInset,
+          },
+        ]}
       >
         <Ionicons name="add" size={22} color="#fff" />
         <Text style={styles.fabText}>{t.addMedication}</Text>
@@ -279,6 +339,64 @@ export default function MedicationsScreen() {
                 />
                 <Text style={[styles.hint, { color: c.textFaint }]}>{t.timesHint}</Text>
 
+                {/* HOW OFTEN. This field has been on the model since the
+                    beginning and nothing ever read it, so every medicine was
+                    treated as daily — someone on an every-other-day tablet was
+                    reminded twice as often as they should be, and their
+                    adherence read as half what it actually was. */}
+                <Text style={[styles.label, { color: c.textMuted }]}>{t.frequencyLabel}</Text>
+                <View style={styles.segment}>
+                  {(['daily', 'alternate'] as const).map((option) => {
+                    const active = frequency === option;
+
+                    return (
+                      <PressableScale
+                        key={option}
+                        onPress={() => setFrequency(option)}
+                        style={[
+                          styles.segmentItem,
+                          {
+                            backgroundColor: active ? c.primary : c.fieldBg,
+                            borderColor: active ? c.primary : c.border,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.segmentText, { color: active ? '#fff' : c.textMuted }]}>
+                          {option === 'daily' ? t.freqDaily : t.freqAlternate}
+                        </Text>
+                      </PressableScale>
+                    );
+                  })}
+                </View>
+
+                {/* THE COURSE. A week of antibiotics is not a permanent
+                    prescription — without an end date the reminders never stop
+                    and the only way out is deleting the medicine, which takes
+                    its dose history with it. Optional, because most medicines
+                    genuinely are ongoing. */}
+                <Text style={[styles.label, { color: c.textMuted }]}>{t.courseEndLabel}</Text>
+                <TextInput
+                  value={endDate}
+                  onChangeText={(v) => { setEndDate(v); if (error) setError(null); }}
+                  placeholder={t.courseEndPh}
+                  placeholderTextColor={c.textFaint}
+                  keyboardType="numbers-and-punctuation"
+                  style={[styles.input, { backgroundColor: c.surface, borderColor: c.border, color: c.text }]}
+                />
+
+                {/* STOCK, also optional. Plenty of people won't count, and a
+                    required field they don't want to fill is a field that makes
+                    them abandon the form. */}
+                <Text style={[styles.label, { color: c.textMuted }]}>{t.stockLabel}</Text>
+                <TextInput
+                  value={stock}
+                  onChangeText={(v) => { setStock(v); if (error) setError(null); }}
+                  placeholder={t.stockPh}
+                  placeholderTextColor={c.textFaint}
+                  keyboardType="number-pad"
+                  style={[styles.input, { backgroundColor: c.surface, borderColor: c.border, color: c.text }]}
+                />
+
                 {!!error && (
                   <View style={styles.errRow}>
                     <Ionicons name="alert-circle" size={14} color={c.danger} />
@@ -329,13 +447,18 @@ export default function MedicationsScreen() {
   );
 }
 
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+type Frequency = 'daily' | 'alternate' | 'specificDays';
+
 const styles = StyleSheet.create({
-  hero: {
-    paddingHorizontal: 22, paddingBottom: 26,
-    borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
+  segment: { flexDirection: 'row', gap: 10, marginTop: 2 },
+  segmentItem: {
+    flex: 1, borderWidth: 1, borderRadius: 13,
+    paddingVertical: 11, alignItems: 'center', justifyContent: 'center',
   },
-  heroTitle: { color: '#fff', fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
-  heroSub: { color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: '600', marginTop: 6 },
+  segmentText: { fontSize: 13, fontWeight: '700' },
+
 
   body: { paddingHorizontal: 22, paddingTop: 22 },
   sectionTitle: {

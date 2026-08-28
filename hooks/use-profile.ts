@@ -1,6 +1,6 @@
 // hooks/use-profile.ts — reusable profile hook.
 // Uploads the picked photo to Cloudinary (if configured), then sends the
-// resulting URL plus height / weight / religion to `completeProfile`.
+// resulting URL plus height / weight to `completeProfile`.
 //
 //   const { completeProfile, upgradeToPremium, loading, error } = useProfile();
 import { useState } from 'react';
@@ -26,7 +26,6 @@ export type ProfileInput = {
   imageUri?: string | null;
   height?: string | number | null;
   weight?: string | number | null;
-  religion?: string | null;
 };
 
 // "" / null / undefined -> undefined, so we never send empty values
@@ -59,7 +58,7 @@ export function useProfile() {
   const [deleteMutation] = useMutation<DeleteAccountData>(DELETE_ACCOUNT);
 
   const completeProfile = async ({
-    firstName, lastName, imageUri, height, weight, religion,
+    firstName, lastName, imageUri, height, weight,
   }: ProfileInput) => {
     setError(null);
     setLoading(true);
@@ -81,7 +80,6 @@ export function useProfile() {
       if (image) input.image = image;
       if (num(height) !== undefined) input.height = num(height);
       if (num(weight) !== undefined) input.weight = num(weight);
-      if (religion) input.religion = religion;
 
       const { data } = await completeProfileMutation({ variables: { input } });
       return data?.completeProfile;

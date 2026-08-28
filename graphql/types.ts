@@ -14,13 +14,12 @@ export type User = {
   height?: number | null;
   weight?: number | null;
   gender?: string | null;
-  religion?: string | null;
   plan: Plan;
   waterGoal?: number | null;
   cycleRegularity?: string | null;
-  ramadanMode?: boolean | null;
-  suhoorTime?: string | null;
-  iftarTime?: string | null;
+  // IANA name, e.g. "Africa/Bujumbura". The app pushes this on launch.
+  timezone?: string | null;
+  unitSystem?: string | null;
 };
 
 export type AuthPayload = {
@@ -50,7 +49,6 @@ export type CompleteProfileInput = {
   image?: string;
   height?: number;
   weight?: number;
-  religion?: string;
 };
 
 /* ------------------------ operation variables ----------------------- */
@@ -69,6 +67,13 @@ export type CompleteProfileData = { completeProfile: User };
 export type UpgradeToPremiumData = { upgradeToPremium: User };
 export type DeleteAccountData = { deleteAccount: boolean };
 export type MeData = { me: User };
+export type SetPreferencesData = { setPreferences: User };
+export type ChangePasswordData = { changePassword: AuthPayload };
+export type RequestPasswordResetData = { requestPasswordReset: boolean };
+export type ResetPasswordData = { resetPassword: AuthPayload };
+
+export type ChangePasswordInput = { currentPassword: string; newPassword: string };
+export type ResetPasswordInput = { email: string; token: string; newPassword: string };
 
 /* --------------------------- health features ------------------------- */
 
@@ -89,15 +94,87 @@ export type Medication = {
   name: string;
   dosage?: string | null;
   times: string[];
+  /** "daily" | "alternate" | "specificDays" */
   frequency: string;
+  /** weekday numbers, 0 = Sunday. Only meaningful for "specificDays". */
+  days: number[];
+  startDate?: string | null;
+  endDate?: string | null;
+  stock?: number | null;
+  stockPerDose?: number | null;
+  refillAtDays?: number | null;
+  /** computed by the server from stock and this medicine's own rate */
+  daysOfStockLeft?: number | null;
+  dueToday: boolean;
   active: boolean;
 };
+
+export type MedicationInput = {
+  name: string;
+  dosage?: string;
+  times?: string[];
+  frequency?: string;
+  days?: number[];
+  startDate?: string;
+  endDate?: string;
+  stock?: number;
+  stockPerDose?: number;
+  refillAtDays?: number;
+  active?: boolean;
+};
+
+export type AdherenceDay = { date: string; due: number; taken: number };
+export type AdherenceSlot = { slot: string; due: number; taken: number };
+
+export type AdherenceSummary = {
+  from: string;
+  to: string;
+  due: number;
+  taken: number;
+  /** 0-100, or null when nothing was due in the window */
+  percent?: number | null;
+  streak: number;
+  days: AdherenceDay[];
+  bySlot: AdherenceSlot[];
+};
+
+export type MedicationAdherenceData = { medicationAdherence: AdherenceSummary };
 
 export type MedicationDose = {
   id: string;
   medicationId: string;
   status: string; // "taken" | "skipped"
   takenAt: string;
+  // which scheduled time this dose belongs to, e.g. "08:00".
+  // null for a medicine with no set times, taken as needed.
+  slot?: string | null;
+  // the user's own calendar day, not a UTC one
+  localDate?: string;
+};
+
+// A medicine plus ONE of its scheduled times. This is the unit the dashboard
+// actually renders — a twice-daily medicine produces two of these, each ticked
+// independently.
+/**
+ * WHERE A DOSE STANDS RIGHT NOW.
+ *
+ *   upcoming  its time hasn't come yet
+ *   due       it's time, or within the hour of grace
+ *   late      more than an hour past, still worth taking
+ *   missed    far enough past that today is gone
+ *   taken     recorded
+ */
+export type DueDoseStatus = 'upcoming' | 'due' | 'late' | 'missed' | 'taken';
+
+export type DueDose = {
+  key: string;
+  medicationId: string;
+  name: string;
+  dosage?: string | null;
+  // null for an as-needed medicine with no schedule
+  slot: string | null;
+  taken: boolean;
+  status: DueDoseStatus;
 };
 
 export type PeriodCycle = {
@@ -155,75 +232,17 @@ export type LogHabitInput = {
   date?: string;
 };
 
-/* ------------------------------ ramadan mode ------------------------------ */
-
-export type AdjustedMedication = {
-  id: string;
-  name: string;
-  originalTimes: string[];
-  adjustedTimes: string[];
-};
-
-export type RamadanSchedule = {
-  enabled: boolean;
-  suhoorTime?: string | null;
-  iftarTime?: string | null;
-  medications: AdjustedMedication[];
-};
-
-export type SetRamadanModeInput = {
-  enabled: boolean;
-  suhoorTime?: string;
-  iftarTime?: string;
-};
-
 /* -------------------------------- guidance -------------------------------- */
 
 export type Guidance = {
   id: string;
   category: string;
-  // "religious" entries always carry a source; "medical" ones may not
+  // always "medical" now that religious content has been removed
   kind: string;
   title: string;
   body: string;
   source?: string | null;
   language: string;
-};
-
-export type FacilityType = 'hospital' | 'clinic' | 'pharmacy';
-
-// where the map should open — computed by the backend, handed straight to
-// MapView so the app holds no coordinates of its own
-export type MapRegion = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-};
-
-export type CareMap = {
-  facilities: Hospital[];
-  region: MapRegion;
-  // how many facilities exist before the search narrowed things down — an
-  // empty directory and an empty search need different messages
-  totalCount: number;
-  count: number;
-  radiusKm?: number | null;
-  sortedByDistance: boolean;
-};
-
-export type Hospital = {
-  id: string;
-  name: string;
-  address?: string | null;
-  phone?: string | null;
-  latitude: number;
-  longitude: number;
-  city?: string | null;
-  province?: string | null;
-  type?: string | null;
-  // only returned by nearbyHospitals, which needs the user's coordinates
-  distanceKm?: number | null;
 };
 
 /* ---------------------- health operation results --------------------- */
@@ -235,6 +254,16 @@ export type DashboardData = {
   myMedicationLogs: MedicationDose[];
   habitSummary: HabitSummary;
   myHabitLogs: HabitLog[];
+  checkInSummary: CheckInSummary;
+  todayRoutines: RoutineDay;
+};
+
+// Everything on the dashboard that only applies to women. Fetched as one
+// request, skipped entirely for everyone else — the backend answers both of
+// these with WOMEN_ONLY rather than with null.
+export type DashboardWomenData = {
+  cyclePrediction: CyclePrediction;
+  pregnancyProgress: PregnancyProgress;
 };
 
 export type AddHealthRecordInput = {
@@ -294,25 +323,130 @@ export type MyCyclesData = { myCycles: PeriodCycle[] };
 export type CyclePredictionData = { cyclePrediction: CyclePrediction };
 export type MyHealthRecordsData = { myHealthRecords: HealthRecord[] };
 export type MyMedicationsData = { myMedications: Medication[] };
-export type NearbyHospitalsData = { nearbyHospitals: Hospital[] };
-export type HospitalsData = { hospitals: Hospital[] };
-export type CareMapData = { careMap: CareMap };
-export type CareMapInput = {
-  latitude?: number;
-  longitude?: number;
-  radiusKm?: number;
-  type?: string;
-  search?: string;
-  city?: string;
-  province?: string;
-};
-export type CareMapVars = { input?: CareMapInput };
 export type HabitSummaryData = { habitSummary: HabitSummary };
 export type MyHabitLogsData = { myHabitLogs: HabitLog[] };
 export type LogHabitData = { logHabit: HabitLog };
 export type RemoveHabitLogData = { removeHabitLog: boolean };
 export type SetWaterGoalData = { setWaterGoal: User };
-export type RamadanScheduleData = { ramadanSchedule: RamadanSchedule };
-export type SetRamadanModeData = { setRamadanMode: User };
 export type GuidanceData = { guidance: Guidance[] };
 export type MarkMedicationTakenData = { markMedicationTaken: MedicationDose };
+export type UnmarkMedicationTakenData = { unmarkMedicationTaken: boolean };
+
+/* --------------------------- daily check-in --------------------------- */
+
+export type CheckIn = {
+  id: string;
+  date: string;
+  // 1 = worst, 5 = best
+  mood: number;
+  energy: number;
+  note?: string | null;
+};
+
+export type CheckInSummary = {
+  // null until she has checked in today
+  today?: CheckIn | null;
+  streak: number;
+  averageMood?: number | null;
+  averageEnergy?: number | null;
+  loggedDays: number;
+  windowDays: number;
+};
+
+export type CheckInInput = {
+  mood: number;
+  energy: number;
+  note?: string;
+  date?: string;
+};
+
+export type CheckInSummaryData = { checkInSummary: CheckInSummary };
+export type MyCheckInsData = { myCheckIns: CheckIn[] };
+export type SaveCheckInData = { saveCheckIn: CheckIn };
+export type RemoveCheckInData = { removeCheckIn: boolean };
+
+/* ---------------------------- daily routines --------------------------- */
+
+export type Routine = {
+  id: string;
+  title: string;
+  icon: string;
+  // 0 = Sunday .. 6 = Saturday. Empty means every day.
+  days: number[];
+  time?: string | null;
+  active: boolean;
+  position: number;
+  // only present on todayRoutines / setRoutineDone
+  done?: boolean | null;
+  streak?: number | null;
+};
+
+export type RoutineDay = {
+  date: string;
+  routines: Routine[];
+  doneCount: number;
+  dueCount: number;
+};
+
+export type RoutineInput = {
+  title: string;
+  icon?: string;
+  days?: number[];
+  time?: string;
+};
+
+export type UpdateRoutineInput = {
+  title?: string;
+  icon?: string;
+  days?: number[];
+  time?: string;
+  active?: boolean;
+  position?: number;
+};
+
+export type TodayRoutinesData = { todayRoutines: RoutineDay };
+export type MyRoutinesData = { myRoutines: Routine[] };
+export type AddRoutineData = { addRoutine: Routine };
+export type UpdateRoutineData = { updateRoutine: Routine };
+export type RemoveRoutineData = { removeRoutine: boolean };
+export type SetRoutineDoneData = { setRoutineDone: Routine };
+
+/* ------------------------------ pregnancy ------------------------------ */
+
+export type Pregnancy = {
+  id: string;
+  lastPeriodDate: string;
+  // set once the pregnancy has ended, whatever the outcome
+  endedAt?: string | null;
+  outcome?: string | null;
+  note?: string | null;
+};
+
+export type PregnancyProgress = {
+  active: boolean;
+  pregnancy?: Pregnancy | null;
+  dueDate?: string | null;
+  weeksPregnant?: number | null;
+  daysIntoWeek?: number | null;
+  trimester?: number | null;
+  daysUntilDue?: number | null;
+  overdue?: boolean | null;
+};
+
+export type StartPregnancyInput = { lastPeriodDate: string; note?: string };
+export type UpdatePregnancyInput = { lastPeriodDate?: string; note?: string };
+export type EndPregnancyInput = { endedAt?: string; outcome?: string; note?: string };
+
+export type PregnancyProgressData = { pregnancyProgress: PregnancyProgress };
+export type MyPregnanciesData = { myPregnancies: Pregnancy[] };
+export type StartPregnancyData = { startPregnancy: Pregnancy };
+export type UpdatePregnancyData = { updatePregnancy: Pregnancy };
+export type EndPregnancyData = { endPregnancy: Pregnancy };
+export type RemovePregnancyData = { removePregnancy: boolean };
+
+/* --------------------------- record attachments ------------------------ */
+
+export type AddAttachmentInput = { url: string; name?: string };
+
+export type AddAttachmentData = { addAttachment: HealthRecord };
+export type RemoveAttachmentData = { removeAttachment: HealthRecord };

@@ -1,5 +1,7 @@
-// graphql/queries/wellness.ts — daily habits, Ramadan mode, guidance library.
+// graphql/queries/wellness.ts — daily habits and the guidance library.
 import { gql } from '@apollo/client';
+
+import { CHECK_IN_FIELDS, PREGNANCY_FIELDS, ROUTINE_FIELDS } from '../fragments';
 
 // Today's water / sleep / weight plus the streak and BMI the backend computes.
 export const HABIT_SUMMARY = gql`
@@ -30,23 +32,6 @@ export const MY_HABIT_LOGS = gql`
   }
 `;
 
-// Ramadan settings + what each medication's dose times become while fasting.
-export const RAMADAN_SCHEDULE = gql`
-  query RamadanSchedule {
-    ramadanSchedule {
-      enabled
-      suhoorTime
-      iftarTime
-      medications {
-        id
-        name
-        originalTimes
-        adjustedTimes
-      }
-    }
-  }
-`;
-
 // Published guidance articles, optionally narrowed by category / language.
 export const GUIDANCE = gql`
   query Guidance($category: String, $language: String) {
@@ -59,5 +44,59 @@ export const GUIDANCE = gql`
       source
       language
     }
+  }
+`;
+
+/* ------------------------- daily check-in ------------------------- */
+
+// The dashboard card: today's entry plus the streak and rolling averages the
+// backend already computes, so the app never has to do the maths.
+export const CHECK_IN_SUMMARY = gql`
+  query CheckInSummary($days: Int) {
+    checkInSummary(days: $days) { ${CHECK_IN_FIELDS} }
+  }
+`;
+
+export const MY_CHECK_INS = gql`
+  query MyCheckIns($from: String, $to: String) {
+    myCheckIns(from: $from, to: $to) { id date mood energy note }
+  }
+`;
+
+/* -------------------------- daily routines ------------------------- */
+
+// What's due on a given day, with each routine's tick state and its streak.
+export const TODAY_ROUTINES = gql`
+  query TodayRoutines($date: String) {
+    todayRoutines(date: $date) {
+      date
+      doneCount
+      dueCount
+      routines { ${ROUTINE_FIELDS} }
+    }
+  }
+`;
+
+// The full list, including archived ones, for the manage screen.
+export const MY_ROUTINES = gql`
+  query MyRoutines($includeArchived: Boolean) {
+    myRoutines(includeArchived: $includeArchived) {
+      id title icon days time active position
+    }
+  }
+`;
+
+/* -------------------------- pregnancy ------------------------------ */
+
+// Women only — the backend rejects this with WOMEN_ONLY for other users.
+export const PREGNANCY_PROGRESS = gql`
+  query PregnancyProgress {
+    pregnancyProgress { ${PREGNANCY_FIELDS} }
+  }
+`;
+
+export const MY_PREGNANCIES = gql`
+  query MyPregnancies {
+    myPregnancies { id lastPeriodDate endedAt outcome note }
   }
 `;
