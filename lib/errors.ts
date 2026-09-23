@@ -1,51 +1,135 @@
-// lib/errors.ts — turn an Apollo/network error into a user-facing string.
-// Prefers the GraphQL error message the backend sent (e.g. "Invalid email or
-// password"), falls back to the provided generic message for network failures.
-//
-// Apollo Client v4 changed the error shape: GraphQL errors thrown from a
-// mutation now arrive as a `CombinedGraphQLErrors` whose messages live on
-// `.errors[]` (v3 used `.graphQLErrors[]`). We read both so the real backend
-// message surfaces instead of a generic/combined string.
-type GraphQLErrorLike = {
-  message?: string;
-  extensions?: { code?: string; retryAfter?: number };
+// Reads errors returned by the API. Messages arrive already translated by the
+// backend; only the network-failure messages are defined here.
+import { CombinedGraphQLErrors, ServerError, ServerParseError } from '@apollo/client/errors';
+import type { Lang } from '@/theme/i18n';
+import { GRAPHQL_URL } from './apollo';
+
+export type BackendError = {
+  code: string;
+  /** Already in the caller's language. Show it as-is. */
+  message: string;
+  /** Present on OTP_COOLDOWN and RATE_LIMITED. */
+  retryAfterSeconds?: number;
+  /** Present on OTP_INCORRECT and WRONG_PASSWORD. */
+  attemptsLeft?: number;
 };
 
-type MaybeApolloError = {
-  errors?: GraphQLErrorLike[];        // v4 CombinedGraphQLErrors
-  graphQLErrors?: GraphQLErrorLike[]; // v3 ApolloError (legacy)
-  networkError?: unknown;
-  message?: string;
+// Shown when no response arrived.
+const OFFLINE: Record<Lang, string> = {
+  en: 'No connection. Check your internet and try again.',
+  fr: 'Pas de connexion. Vérifiez votre internet et réessayez.',
+  sw: 'Hakuna muunganisho. Angalia intaneti yako kisha ujaribu tena.',
+  rn: 'Nta murongo uhari. Raba interineti yawe hanyuma ugerageze.',
 };
 
-const firstError = (err: unknown) => {
-  const e = err as MaybeApolloError | null | undefined;
+type Shaped = { message?: string; extensions?: Record<string, unknown> };
 
-  return e?.errors?.[0] ?? e?.graphQLErrors?.[0];
+const fromGraphQLError = (first: Shaped | undefined, lang: Lang): BackendError => {
+  const ext = (first?.extensions ?? {}) as Record<string, unknown>;
+  return {
+    code: typeof ext.code === 'string' ? ext.code : 'INTERNAL',
+    message: first?.message ?? OFFLINE[lang],
+    retryAfterSeconds:
+      typeof ext.retryAfterSeconds === 'number' ? ext.retryAfterSeconds : undefined,
+    attemptsLeft: typeof ext.attemptsLeft === 'number' ? ext.attemptsLeft : undefined,
+  };
 };
 
-// The backend turns people away when an operation is called too often — a
-// tapped-twice button, or a retry loop on a bad connection. That is not a real
-// failure and shouldn't be reported like one: the right response is to wait,
-// not to change anything.
-export function isRateLimited(err: unknown) {
-  return firstError(err)?.extensions?.code === 'RATE_LIMITED';
+// Shown when the server replied with something unusable.
+const UNREACHABLE: Record<Lang, string> = {
+  en: 'We could not reach the server.',
+  fr: 'Impossible de joindre le serveur.',
+  sw: 'Hatukuweza kufikia seva.',
+  rn: 'Ntitwashoboye gushika kuri seriveri.',
+};
+
+const TOO_MANY: Record<Lang, string> = {
+  en: 'Too many attempts. Please wait a moment and try again.',
+  fr: 'Trop de tentatives. Patientez un instant puis réessayez.',
+  sw: 'Majaribio mengi mno. Subiri kidogo kisha ujaribu tena.',
+  rn: 'Wagerageje kenshi cane. Rindira gato hanyuma ugerageze.',
+};
+
+export function readError(error: unknown, lang: Lang): BackendError {
+  // The ordinary case: the server answered 200 with an `errors` array.
+  if (CombinedGraphQLErrors.is(error)) {
+    return fromGraphQLError(error.errors[0] as Shaped | undefined, lang);
+  }
+
+  // Non-200 response: read the error from the body if there is one.
+  if (ServerError.is(error)) {
+    try {
+      const body = JSON.parse(error.bodyText) as { errors?: Shaped[] };
+      if (body.errors?.length) return fromGraphQLError(body.errors[0], lang);
+    } catch {
+      // not JSON — fall through to the status below
+    }
+
+    return {
+      code: error.statusCode === 429 ? 'RATE_LIMITED' : 'SERVER',
+      message:
+        error.statusCode === 429
+          ? TOO_MANY[lang]
+          : `${UNREACHABLE[lang]} (HTTP ${error.statusCode})`,
+    };
+  }
+
+  // A 200 whose body was not JSON (usually a captive portal).
+  if (ServerParseError.is(error)) {
+    return { code: 'SERVER', message: `${UNREACHABLE[lang]} (HTTP ${error.statusCode})` };
+  }
+
+  // No response at all.
+  if (__DEV__) {
+    console.warn(
+      '[api] request never reached the server.\n' +
+        `      url: ${GRAPHQL_URL}\n` +
+        `      reason: ${error instanceof Error ? error.message : String(error)}\n` +
+        '      checks: is the backend running? does that URL work in a browser\n' +
+        '              on the phone? on Android, is cleartext http allowed?',
+    );
+  }
+
+  return { code: 'NETWORK', message: OFFLINE[lang] };
 }
 
-// How long to wait, in seconds, when isRateLimited() is true.
-export function retryAfterSeconds(err: unknown) {
-  const seconds = firstError(err)?.extensions?.retryAfter;
+export const errorMessage = (error: unknown, lang: Lang): string => readError(error, lang).message;
 
-  return typeof seconds === 'number' ? seconds : null;
+// Appends the retry time when the server sends one.
+const IN_SECONDS: Record<Lang, (s: number) => string> = {
+  en: (s) => `Try again in ${s}s.`,
+  fr: (s) => `Réessayez dans ${s} s.`,
+  sw: (s) => `Jaribu tena baada ya sekunde ${s}.`,
+  rn: (s) => `Gerageza bushasha mu masegonda ${s}.`,
+};
+
+export function errorWithWait(error: unknown, lang: Lang): string {
+  const failure = readError(error, lang);
+  if (!failure.retryAfterSeconds) return failure.message;
+  return `${failure.message} ${IN_SECONDS[lang](failure.retryAfterSeconds)}`;
 }
 
-export function errorMessage(
-  err: unknown,
-  fallback = 'Something went wrong. Please try again.',
-): string {
-  const e = err as MaybeApolloError | null | undefined;
-  const first = firstError(err)?.message;
-  if (first) return first;
-  if (e?.networkError) return fallback;
-  return e?.message || fallback;
-}
+export type FieldKey = 'name' | 'email' | 'password' | 'confirm' | 'code' | null;
+
+// The input a backend error code belongs to. null means the whole form.
+const FIELD_OF: Record<string, FieldKey> = {
+  INVALID_EMAIL: 'email',
+  EMAIL_TAKEN: 'email',
+  EMAIL_NOT_VERIFIED: 'email',
+  ACCOUNT_NOT_FOUND: 'email',
+
+  WEAK_PASSWORD: 'password',
+  WRONG_PASSWORD: 'password',
+  PASSWORD_UNCHANGED: 'password',
+  PASSWORD_ATTEMPTS_EXCEEDED: 'password',
+
+  OTP_INCORRECT: 'code',
+  OTP_EXPIRED: 'code',
+  OTP_NOT_FOUND: 'code',
+  OTP_ATTEMPTS_EXCEEDED: 'code',
+
+  // Not tied to a field: the server does not say which one was wrong.
+  INVALID_CREDENTIALS: null,
+};
+
+export const fieldOf = (code: string): FieldKey => FIELD_OF[code] ?? null;

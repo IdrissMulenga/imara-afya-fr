@@ -1,193 +1,182 @@
-// components/motion.tsx — shared animation primitives.
-//
-// Two things, used everywhere:
-//   <FadeIn index={i}>      cards and list rows drift up as the screen settles
-//   <PressableScale>        buttons and cards dip slightly under a finger
-//
-// Kept deliberately small and quick. Entry-level Android is the target device,
-// so every animation here runs on the UI thread via Reanimated and none of them
-// last long enough to sit between the user and their data.
-import { type ReactNode } from 'react';
-import {
-  Pressable,
-  type LayoutChangeEvent,
-  type PressableProps,
-  type ViewStyle,
-  type StyleProp,
-} from 'react-native';
-import Animated, {
-  FadeInDown,
-  LinearTransition,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+// Shared animation hooks and components. Only opacity and transform are animated, so everything runs on the native thread.
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Easing, AccessibilityInfo, type ViewStyle } from 'react-native';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+// Whether the OS "reduce motion" setting is on.
+export function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
 
-/* ------------------------------- timings -------------------------------- */
+  useEffect(() => {
+    let alive = true;
 
-// one place to tune the feel of the whole app
-export const MOTION = {
-  // how long each item takes to fade up
-  duration: 320,
-  // gap between consecutive items in a staggered list
-  stagger: 55,
-  // how far below its resting place an item starts
-  offset: 14,
-  // press feedback
-  pressScale: 0.97,
-  spring: { damping: 18, stiffness: 260, mass: 0.6 },
-} as const;
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((on) => {
+        if (alive) setReduced(on);
+      })
+      .catch(() => {});
 
-/* -------------------------------- FadeIn -------------------------------- */
+    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced);
 
-/**
- * Fades a block up into place. Pass `index` inside a list and each row waits
- * its turn, which reads as one movement instead of everything snapping at once.
- */
+    return () => {
+      alive = false;
+      sub.remove();
+    };
+  }, []);
+
+  return reduced;
+}
+
+// Fades content in with a small upward drift.
 export function FadeIn({
   children,
-  index = 0,
+  delay = 0,
+  from = 10,
+  duration = 320,
   style,
-  // set false for content that changes often — re-running the entry animation
-  // on every data refresh is distracting
-  animate = true,
-  // passed through so callers can measure the block (e.g. to scroll a focused
-  // input clear of the keyboard)
-  onLayout,
 }: {
-  children: ReactNode;
-  index?: number;
-  style?: StyleProp<ViewStyle>;
-  animate?: boolean;
-  onLayout?: (e: LayoutChangeEvent) => void;
+  children: React.ReactNode;
+  delay?: number;
+  /** How far below its resting place it starts, in points. Negative = above. */
+  from?: number;
+  duration?: number;
+  style?: ViewStyle;
 }) {
-  if (!animate) {
-    return (
-      <Animated.View style={style} onLayout={onLayout}>
-        {children}
-      </Animated.View>
-    );
-  }
+  const progress = useRef(new Animated.Value(0)).current;
+  const reduced = useReducedMotion();
 
-  return (
-    <Animated.View
-      style={style}
-      onLayout={onLayout}
-      entering={FadeInDown.delay(index * MOTION.stagger)
-        .duration(MOTION.duration)
-        .withInitialValues({ transform: [{ translateY: MOTION.offset }] })}
-      // rows slide rather than jump when one above them is removed
-      layout={LinearTransition.duration(220)}
-    >
-      {children}
-    </Animated.View>
-  );
-}
+  useEffect(() => {
+    if (reduced) {
+      progress.setValue(1);
+      return;
+    }
 
-/* ---------------------------- PressableScale ---------------------------- */
-
-/**
- * A Pressable that dips under the finger. Use for cards and primary buttons —
- * anywhere the flat `opacity` press state felt dead.
- */
-export function PressableScale({
-  children,
-  style,
-  disabled,
-  scaleTo = MOTION.pressScale,
-  ...rest
-}: {
-  children: ReactNode;
-  style?: StyleProp<ViewStyle>;
-  scaleTo?: number;
-} & Omit<PressableProps, 'style'>) {
-  const scale = useSharedValue(1);
-  const opacity = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-
-  return (
-    <AnimatedPressable
-      {...rest}
-      disabled={disabled}
-      onPressIn={(e) => {
-        scale.value = withSpring(scaleTo, MOTION.spring);
-        opacity.value = withTiming(0.9, { duration: 90 });
-        rest.onPressIn?.(e);
-      }}
-      onPressOut={(e) => {
-        scale.value = withSpring(1, MOTION.spring);
-        opacity.value = withTiming(1, { duration: 140 });
-        rest.onPressOut?.(e);
-      }}
-      style={[style, animatedStyle, disabled && { opacity: 0.55 }]}
-    >
-      {children}
-    </AnimatedPressable>
-  );
-}
-
-/* ------------------------------- CountUp -------------------------------- */
-
-/**
- * Animates a number changing — used for the water count and the days-until
- * figure, where a value that jumps silently is easy to miss.
- */
-export function useAnimatedNumberStyle(value: number) {
-  const scale = useSharedValue(1);
-
-  // a quick pop whenever the value moves
-  const bump = () => {
-    scale.value = withSpring(1.12, { damping: 10, stiffness: 320 }, () => {
-      scale.value = withSpring(1, MOTION.spring);
-    });
-  };
-
-  const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-
-  return { style, bump, value };
-}
-
-/* ------------------------------ ProgressBar ----------------------------- */
-
-/**
- * A width-animated bar. Kept here so the easing matches everything else.
- */
-export function ProgressBar({
-  progress,
-  color,
-  trackColor,
-  height = 8,
-}: {
-  // 0 to 1
-  progress: number;
-  color: string;
-  trackColor: string;
-  height?: number;
-}) {
-  const clamped = Math.max(0, Math.min(1, progress));
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    width: withTiming(`${clamped * 100}%`, {
-      duration: 420,
+    const run = Animated.timing(progress, {
+      toValue: 1,
+      duration,
+      delay,
       easing: Easing.out(Easing.cubic),
-    }),
-  }));
+      useNativeDriver: true,
+    });
+
+    run.start();
+    return () => run.stop();
+  }, [progress, delay, duration, reduced]);
 
   return (
     <Animated.View
-      style={{ height, borderRadius: height / 2, backgroundColor: trackColor, overflow: 'hidden' }}
+      style={[
+        {
+          opacity: progress,
+          transform: [
+            { translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [from, 0] }) },
+          ],
+        },
+        style,
+      ]}
     >
-      <Animated.View style={[{ height, borderRadius: height / 2, backgroundColor: color }, animatedStyle]} />
+      {children}
     </Animated.View>
   );
 }
 
-export default FadeIn;
+// Short horizontal shake for a rejected field. Skipped under reduced motion.
+export function useShake() {
+  const offset = useRef(new Animated.Value(0)).current;
+  const reduced = useReducedMotion();
+
+  const shake = useCallback(() => {
+    if (reduced) return;
+    offset.setValue(0);
+    Animated.sequence([
+      Animated.timing(offset, { toValue: 6, duration: 50, useNativeDriver: true }),
+      Animated.timing(offset, { toValue: -5, duration: 60, useNativeDriver: true }),
+      Animated.timing(offset, { toValue: 3, duration: 60, useNativeDriver: true }),
+      Animated.timing(offset, { toValue: 0, duration: 70, useNativeDriver: true }),
+    ]).start();
+  }, [offset, reduced]);
+
+  return { shake, style: { transform: [{ translateX: offset }] } };
+}
+
+// Spring scale for press feedback.
+export function usePressScale(to = 0.96) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const run = useCallback(
+    (value: number) => {
+      Animated.spring(scale, {
+        toValue: value,
+        speed: 45,
+        bounciness: 5,
+        useNativeDriver: true,
+      }).start();
+    },
+    [scale],
+  );
+
+  return {
+    onPressIn: () => run(to),
+    onPressOut: () => run(1),
+    style: { transform: [{ scale }] },
+  };
+}
+
+// Animates an overlay's opacity between 0 and 1.
+export function useFade(on: boolean, duration = 160) {
+  const value = useRef(new Animated.Value(on ? 1 : 0)).current;
+
+  useEffect(() => {
+    const run = Animated.timing(value, {
+      toValue: on ? 1 : 0,
+      duration,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    });
+    run.start();
+    return () => run.stop();
+  }, [on, value, duration]);
+
+  return value;
+}
+
+// Pop-in scale for a tick or a code digit.
+export function usePop(on: boolean) {
+  const value = useRef(new Animated.Value(on ? 1 : 0)).current;
+
+  useEffect(() => {
+    const run = on
+      ? Animated.spring(value, { toValue: 1, speed: 50, bounciness: 10, useNativeDriver: true })
+      : Animated.timing(value, { toValue: 0, duration: 110, useNativeDriver: true });
+
+    run.start();
+    return () => run.stop();
+  }, [on, value]);
+
+  return { opacity: value, transform: [{ scale: value }] };
+}
+
+// Blinking caret for an empty code box.
+export function useBlink(on: boolean) {
+  const value = useRef(new Animated.Value(1)).current;
+  const reduced = useReducedMotion();
+
+  useEffect(() => {
+    if (!on || reduced) {
+      value.setValue(on ? 1 : 0);
+      return;
+    }
+
+    value.setValue(1);
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(value, { toValue: 0, duration: 420, delay: 80, useNativeDriver: true }),
+        Animated.timing(value, { toValue: 1, duration: 420, delay: 80, useNativeDriver: true }),
+      ]),
+    );
+
+    loop.start();
+    return () => loop.stop();
+  }, [on, value, reduced]);
+
+  return value;
+}

@@ -1,91 +1,143 @@
-import { useEffect } from 'react';
-import { Stack, router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+// Root layout: providers, fonts, and routing between the auth and app groups.
+import React, { useEffect, useState } from 'react';
+import { View, Text, ActivityIndicator } from 'react-native';
+import { Stack, useRouter, useSegments, type ErrorBoundaryProps } from 'expo-router';
+import { ApolloProvider } from '@apollo/client/react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
+import { Sora_600SemiBold, Sora_700Bold } from '@expo-google-fonts/sora';
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+} from '@expo-google-fonts/plus-jakarta-sans';
 
-import client, { ApolloWrapper } from '@/lib/apollo';
-import { ThemeProvider, useTheme } from '@/constants/theme';
-import { LangProvider } from '@/constants/strings';
-import { ToastProvider } from '@/components/toast';
-import { onSessionEnd } from '@/lib/session';
-import usePreferences from '@/hooks/use-preferences';
+import { client } from '@/lib/apollo';
+import { NoticeProvider } from '@/components/notice';
+import { SessionProvider, useSession } from '@/lib/session';
+import { ThemeProvider, useTheme } from '@/theme/theme';
+import { LanguageProvider, useLang } from '@/theme/i18n';
 
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// Listens for a token dying mid-session — the 7-day expiry passing, a logout on
-// another device, a password change — and gets the user back to the login
-// screen. Rendered inside the providers so it stays mounted for the whole app
-// run, and renders nothing itself.
-function SessionWatcher() {
-  useEffect(() => onSessionEnd(() => {
-    // drop cached health data before navigating: it belongs to a session that
-    // no longer exists, and the login screen shouldn't be able to show it
-    void client.clearStore();
-    router.replace('/(auth)/login');
-  }), []);
-
-  return null;
-}
-
-
-// Pushes the phone's timezone to the backend once per launch, so that
-// "today" is resolved against the user's own calendar rather than UTC.
-// Renders nothing; it just has to be mounted somewhere inside Apollo.
-function PreferenceSync() {
-  usePreferences();
-
-  return null;
-}
-
-
-// Its own component because it needs the theme, and RootLayout sits above
-// ThemeProvider — a hook there would read nothing.
-function RootStack() {
-  const { c } = useTheme();
+// Shows render errors instead of a blank screen.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  console.error('[screen crashed]', error?.message, '\n', error?.stack);
 
   return (
-    // slide feels more like moving through the app than a cross-fade, and
-    // Reanimated keeps it on the UI thread
-    <Stack screenOptions={{
-      headerShown: false,
-      animation: 'slide_from_right',
-      animationDuration: 260,
-      // native edge-swipe, iOS only — Android and the tab screens are covered
-      // by components/swipe-back.tsx instead
-      gestureEnabled: true,
-      // the gap behind a sliding screen defaults to white, which flashes on
-      // every push and is glaring in dark mode
-      contentStyle: { backgroundColor: c.bg },
-    }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(home)" />
-    </Stack>
+    <View style={{ flex: 1, backgroundColor: '#13233A', padding: 24, justifyContent: 'center', gap: 14 }}>
+      <Text style={{ color: '#FF8A8A', fontSize: 13, fontWeight: '700', letterSpacing: 1 }}>
+        THIS SCREEN CRASHED
+      </Text>
+      <Text style={{ color: '#F6F7F9', fontSize: 15, lineHeight: 22 }}>
+        {error?.message ?? 'No message'}
+      </Text>
+      <Text style={{ color: 'rgba(246,247,249,0.55)', fontSize: 11, lineHeight: 16 }}>
+        {(error?.stack ?? '').split('\n').slice(0, 8).join('\n')}
+      </Text>
+      <Text onPress={retry} style={{ color: '#7FB0FF', fontSize: 15, marginTop: 8 }}>
+        Try again
+      </Text>
+    </View>
   );
 }
 
+/** Longest wait for fonts and the session before rendering anyway. */
+const PATIENCE_MS = 3500;
+
+// True once ms milliseconds have passed.
+function useTimeout(ms: number): boolean {
+  const [elapsed, setElapsed] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setElapsed(true), ms);
+    return () => clearTimeout(id);
+  }, [ms]);
+  return elapsed;
+}
+
+// Redirects the user to the auth or app group.
+function Gate() {
+  const { user, ready } = useSession();
+  const { ready: langReady } = useLang();
+  const { c, isDark } = useTheme();
+  const segments = useSegments();
+  const router = useRouter();
+  const patienceGone = useTimeout(PATIENCE_MS);
+
+  const booted = (ready && langReady) || patienceGone;
+
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!booted) return;
+
+    const path = segments as readonly string[];
+    const inAuth = path[0] === '(auth)';
+    const inApp = path[0] === '(app)';
+
+    // A signed-in user may stay on verify to confirm their email.
+    const confirmingEmail = inAuth && path[1] === 'verify';
+
+    if (!user && !inAuth) {
+      router.replace('/(auth)/welcome');
+    } else if (user && !inApp && !confirmingEmail) {
+      router.replace('/(app)');
+    }
+  }, [booted, user, segments, router]);
+
+  if (!booted) {
+    return (
+      <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={c.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'fade',
+          contentStyle: { backgroundColor: c.bg },
+        }}
+      />
+    </View>
+  );
+}
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Sora_600SemiBold,
+    Sora_700Bold,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+  });
+  const patienceGone = useTimeout(PATIENCE_MS);
+
+  if (!fontsLoaded && !fontError && !patienceGone) {
+    return <View style={{ flex: 1 }} />;
+  }
+
   return (
-    // Required by react-native-gesture-handler on Android — without it the
-    // swipe-back gesture silently does nothing there, which is the one platform
-    // that has no native back gesture to fall back on.
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ApolloWrapper>
-        <SessionWatcher />
-        <PreferenceSync />
-        <SafeAreaProvider>
-          <ThemeProvider initialPalette="forest">
-            <LangProvider initialLang="en">
-              {/* ToastProvider sits inside theme + safe-area so it can use both */}
-              <ToastProvider>
-                <StatusBar style="auto" />
-                <RootStack />
-              </ToastProvider>
-            </LangProvider>
-          </ThemeProvider>
-        </SafeAreaProvider>
-      </ApolloWrapper>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <ApolloProvider client={client}>
+        <ThemeProvider>
+          <LanguageProvider>
+            <NoticeProvider>
+              <SessionProvider>
+                <Gate />
+              </SessionProvider>
+            </NoticeProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </ApolloProvider>
+    </SafeAreaProvider>
   );
 }

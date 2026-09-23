@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "imaraafyafr",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "bi.imaraco.imaraafya",
@@ -23,12 +22,12 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
       "package": "bi.imaraco.imaraafya",
       "versionCode": 1,
       "permissions": [
+        "ACTIVITY_RECOGNITION",
         "POST_NOTIFICATIONS",
         "READ_MEDIA_IMAGES",
         "VIBRATE"
@@ -45,6 +44,15 @@
     "plugins": [
       "expo-router",
       [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": false,
+            "allowBackup": false
+          }
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
@@ -55,13 +63,24 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Imara Afya counts your steps so it can show your walking and running without you entering anything."
+        }
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
     "description": "Your health, made simple. Keep your health records, medicine reminders, daily habits and cycle tracking in one private place — built for Burundi, in Kirundi, Kiswahili, French and English.",
-    "primaryColor": "#0a7d5a"
+    "primaryColor": "#1B5AAE"
   }
 }

@@ -1,76 +1,135 @@
-// app/(auth)/login.tsx — login screen only.
-import { View, Text } from 'react-native';
-import { router } from 'expo-router';
+// Login with email and password. An untrusted phone gets a code challenge instead of a token.
+import React, { useState } from 'react';
+import { View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useMutation } from '@apollo/client/react';
+import { Screen, Spacer, Gap } from '@/components/screen';
+import { Heading, Field, PrimaryButton, BackButton, ErrorNote, Footnote, LinkText } from '@/components/ui';
+import { Wordmark } from '@/components/wordmark';
+import { Glass } from '@/components/glass';
+import { FadeIn } from '@/components/motion';
+import { useLang } from '@/theme/i18n';
+import { useSession } from '@/lib/session';
+import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
+import { getDeviceId, getDeviceLabel } from '@/lib/device';
+import { LOGIN, type LoginResult } from '@/graphql/auth';
 
-import { useTheme } from '@/constants/theme';
-import { useStrings } from '@/constants/strings';
-import useAuthForm, { type AuthSuccess } from '@/hooks/use-auth-form';
-import TextField from '@/components/text-field';
-import { PrimaryButton } from '@/components/buttons';
-import { AuthShell, AuthFooter, Checkbox, ErrorRow, styles } from '@/components/auth-shell';
+export default function Login() {
+  const router = useRouter();
+  const { t, lang } = useLang();
+  const { signIn } = useSession();
 
-export default function LoginScreen() {
-    const { c } = useTheme();
-    const { t } = useStrings();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-    // logged in -> straight to the dashboard
-    const onAuthSuccess = (_info: AuthSuccess) => {
-        router.replace('/(home)');
-    };
+  // One error at a time. field is null when it is about the whole form.
+  const [error, setError] = useState('');
+  const [field, setField] = useState<FieldKey>(null);
 
-    const f = useAuthForm('login', onAuthSuccess);
+  const [login, { loading }] = useMutation<{ login: LoginResult }>(LOGIN);
 
-    return (
-        <AuthShell title={t.welcomeBack} subtitle={t.loginSub}>
-            <TextField
-                label={t.email}
-                icon="mail-outline"
-                placeholder={t.emailPh}
-                value={f.email}
-                onChangeText={f.setEmail}
-                error={f.errors.email}
-                keyboardType="email-address"
+  const submit = async () => {
+    setError('');
+    setField(null);
+
+    // No client-side validation; the backend returns the errors.
+    try {
+      const [deviceId, deviceLabel] = [await getDeviceId(), getDeviceLabel()];
+      const { data } = await login({
+        variables: { input: { email: email.trim(), password, deviceId, deviceLabel } },
+      });
+
+      const result = data?.login;
+      if (!result) return;
+
+      if (result.__typename === 'AuthPayload') {
+        await signIn(result);
+        router.replace('/(app)');
+        return;
+      }
+
+      // A code was emailed: continue to verify with the address and its masked form.
+      router.push({
+        pathname: '/(auth)/verify',
+        params: { email: email.trim(), masked: result.maskedEmail, purpose: 'LOGIN' },
+      });
+    } catch (e) {
+      const failure = readError(e, lang);
+      setError(errorWithWait(e, lang));
+      setField(fieldOf(failure.code));
+    }
+  };
+
+  return (
+    <Screen>
+      <FadeIn>
+        <BackButton onPress={() => router.replace('/(auth)/welcome')} label={t.back} />
+      </FadeIn>
+
+      <Gap h={24} />
+      <FadeIn delay={60}>
+        <Wordmark />
+      </FadeIn>
+      <Gap h={22} />
+
+      <FadeIn delay={110}>
+        <Heading title={t.loginTitle} sub={t.loginSub} />
+      </FadeIn>
+
+      <Gap h={22} />
+
+      <FadeIn delay={170}>
+        <Glass style={{ padding: 18 }}>
+          <View style={{ gap: 16 }}>
+            <Field
+              label={t.email}
+              value={email}
+              onChangeText={setEmail}
+              errorText={field === 'email' ? error : undefined}
+              placeholder={t.emailHint}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
             />
-
-            <TextField
-                label={t.password}
-                icon="lock-closed-outline"
-                placeholder={t.passwordPh}
-                value={f.password}
-                onChangeText={f.setPassword}
-                error={f.errors.password}
-                secure
-                returnKeyType="go"
-                onSubmitEditing={f.submit}
+            <Field
+              label={t.password}
+              value={password}
+              onChangeText={setPassword}
+              errorText={field === 'password' ? error : undefined}
+              secure
+              autoCapitalize="none"
+              autoComplete="current-password"
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={submit}
             />
+          </View>
+        </Glass>
+      </FadeIn>
 
-            <View style={styles.betweenRow}>
-                <Checkbox checked={f.remember} onToggle={() => f.setRemember((r) => !r)}>
-                    {t.remember}
-                </Checkbox>
-                <Text
-                    onPress={() => router.push('/(auth)/forgot-password')}
-                    suppressHighlighting
-                    style={[styles.link, { color: c.primary }]}
-                >
-                    {t.forgot}
-                </Text>
-            </View>
+      <FadeIn delay={220} style={{ alignItems: 'flex-end', marginTop: 12 }}>
+        <LinkText label={t.forgot} onPress={() => router.push('/(auth)/forgot')} />
+      </FadeIn>
 
-            {!!f.serverError && <ErrorRow message={f.serverError} />}
+      {/* Form-level errors (not tied to one field). */}
+      {error && !field ? (
+        <View style={{ marginTop: 16 }}>
+          <ErrorNote message={error} />
+        </View>
+      ) : null}
 
-            <PrimaryButton
-                label={t.login}
-                onPress={f.submit}
-                loading={f.loading}
-                disabled={!!f.socialLoading}
-            />
+      <Gap h={18} />
+      <FadeIn delay={270}>
+        <PrimaryButton label={t.loginCta} onPress={submit} busy={loading} />
+      </FadeIn>
 
-            <AuthFooter
-                prompt={t.noAccount}
-                action={t.signup}
-                onPress={() => router.push('/(auth)/signup')}
-            />
-        </AuthShell>
-    );
+      <Spacer />
+      <FadeIn delay={320}>
+        <Footnote plain={t.noAccount} link={t.createOne} onPress={() => router.replace('/(auth)/signup')} />
+      </FadeIn>
+    </Screen>
+  );
 }
