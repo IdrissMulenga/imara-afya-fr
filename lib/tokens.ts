@@ -1,114 +1,184 @@
-// lib/tokens.ts — secure storage for the JWT, plus a look at what's inside it.
-//
-// The backend issues a single 7-day token from `signup`, `login` and
-// `refreshSession`. It is stored in SecureStore, which on Android is backed by
-// the Keystore, so another app can't read it.
-//
-// READING THE TOKEN IS NOT VERIFYING IT. Everything below decodes the payload
-// without checking the signature, because the app has no secret to check it
-// with — only the server does. It is there to answer "is this obviously dead?"
-// without a network round trip, which matters a lot on 2G. Anything that
-// actually protects data is enforced server-side by authCheck.
+// Session token and cached profile, stored in SecureStore.
+// Decoding reads the claims only; it does not verify the signature.
 import * as SecureStore from 'expo-secure-store';
+import type { AuthUser } from '@/graphql/auth';
 
-const TOKEN_KEY = 'authToken';
+const TOKEN_KEY = 'imara.authToken';
+const PROFILE_KEY = 'imara.profile';
 
-export async function saveToken(token?: string | null) {
-  if (token) await SecureStore.setItemAsync(TOKEN_KEY, token);
+const SECURE: SecureStore.SecureStoreOptions = {
+  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+};
+
+export async function saveToken(token?: string | null): Promise<void> {
+  if (!token) return;
+  try {
+    await SecureStore.setItemAsync(TOKEN_KEY, token, SECURE);
+  } catch {
+    // ignore
+  }
 }
 
-export const getToken = () => SecureStore.getItemAsync(TOKEN_KEY);
-
-export async function clearToken() {
-  await SecureStore.deleteItemAsync(TOKEN_KEY);
+export async function getToken(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(TOKEN_KEY, SECURE);
+  } catch {
+    return null;
+  }
 }
 
+export async function clearToken(): Promise<void> {
+  try {
+    await SecureStore.deleteItemAsync(TOKEN_KEY, SECURE);
+  } catch {
+    // ignore
+  }
+}
 
-/* ----------------------------- reading claims ---------------------------- */
+// Last known profile, cached with the token so the app can start offline.
 
-// What our backend puts in the payload. `exp` and `iat` are seconds since
-// epoch, per the JWT spec — not milliseconds.
+// Cache version. Must change whenever USER_FIELDS in graphql/auth.ts changes.
+const PROFILE_SHAPE = 2;
+
+type StoredProfile = { v: number; user: AuthUser };
+
+// Fields a cached profile must have to be used.
+const REQUIRED: readonly (keyof AuthUser)[] = [
+  'id',
+  'email',
+  'emailVerified',
+  'name',
+  'gender',
+  'language',
+  'units',
+  'timezone',
+  'cycleTrackingEnabled',
+  'waterGoalGlasses',
+  'stepGoal',
+  'sleepGoalHours',
+  'createdAt',
+];
+
+export async function saveProfile(user: AuthUser): Promise<void> {
+  try {
+    const wrapped: StoredProfile = { v: PROFILE_SHAPE, user };
+    await SecureStore.setItemAsync(PROFILE_KEY, JSON.stringify(wrapped), SECURE);
+  } catch {
+    // ignore
+  }
+}
+
+export async function getProfile(): Promise<AuthUser | null> {
+  try {
+    const raw = await SecureStore.getItemAsync(PROFILE_KEY, SECURE);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<StoredProfile>;
+
+    // Cache from an older version: discard it.
+    if (!parsed || parsed.v !== PROFILE_SHAPE || !parsed.user) {
+      void clearProfile();
+      return null;
+    }
+
+    const user = parsed.user as Partial<AuthUser>;
+    const complete = REQUIRED.every((key) => user[key] !== undefined && user[key] !== null);
+    if (!complete) {
+      void clearProfile();
+      return null;
+    }
+
+    return user as AuthUser;
+  } catch {
+    return null;
+  }
+}
+
+export async function clearProfile(): Promise<void> {
+  try {
+    await SecureStore.deleteItemAsync(PROFILE_KEY, SECURE);
+  } catch {
+    // ignore
+  }
+}
+
+/** Both halves of a session, so no caller can clear one and forget the other. */
+export async function clearSession(): Promise<void> {
+  await Promise.all([clearToken(), clearProfile()]);
+}
+
+const endedListeners = new Set<() => void>();
+
+/** Subscribes to sessions ended outside React (e.g. by the Apollo error link). */
+export function onSessionEnded(listener: () => void): () => void {
+  endedListeners.add(listener);
+  return () => endedListeners.delete(listener);
+}
+
+/** Clears the stored session and tells the session provider to sign out. */
+export async function endSession(): Promise<void> {
+  await clearSession();
+  endedListeners.forEach((listener) => listener());
+}
+
+// JWT payload from the backend. exp and iat are in seconds.
 export type TokenClaims = {
-  id?: string;
-  // tokenVersion at issue — the server's revocation check
+  sub?: string;
+  /** tokenVersion at issue — the server's revocation check */
   v?: number;
-  // session origin: when the password was actually typed
-  o?: number;
+  /** session origin: when the password was actually last typed */
+  o?: string;
   iat?: number;
   exp?: number;
 };
 
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-// Hand-rolled rather than pulling in a base64 package or relying on `atob`,
-// which isn't guaranteed to exist on every Hermes build. It only ever decodes
-// our own payload, which is plain ASCII JSON.
-const decodeBase64Url = (input: string) => {
-  // base64url swaps two characters and drops the padding
+// Base64url decoder (atob is not available on every Hermes build).
+function decodeBase64Url(input: string): string {
   const base64 = input.replace(/-/g, '+').replace(/_/g, '/');
-
   let bits = 0;
   let bitCount = 0;
   let out = '';
 
   for (const char of base64) {
     const value = B64.indexOf(char);
-
-    // '=' padding and anything unexpected contribute nothing
-    if (value === -1) continue;
-
+    if (value === -1) continue; // '=' padding and anything unexpected
     bits = (bits << 6) | value;
     bitCount += 6;
-
     if (bitCount >= 8) {
       bitCount -= 8;
       out += String.fromCharCode((bits >> bitCount) & 0xff);
     }
   }
-
   return out;
-};
+}
 
 export function decodeToken(token?: string | null): TokenClaims | null {
   if (!token) return null;
-
   const parts = token.split('.');
-
-  // header.payload.signature — anything else isn't a JWT
-  if (parts.length !== 3) return null;
-
+  if (parts.length !== 3) return null; // header.payload.signature or it is not a JWT
   try {
     return JSON.parse(decodeBase64Url(parts[1])) as TokenClaims;
   } catch {
-    // truncated, corrupted, or not ours
     return null;
   }
 }
 
-// A minute of slack: phone clocks drift, and a token that expires while the
-// request is in flight should be treated as already gone rather than sent.
+// Allowed clock skew.
 const CLOCK_SKEW_SECONDS = 60;
 
-export function isExpired(token?: string | null) {
+export function isExpired(token?: string | null): boolean {
   const claims = decodeToken(token);
-
-  // no token, or one we can't read, is treated as dead — the safe direction,
-  // since the worst case is showing a login screen
   if (!claims?.exp) return true;
-
   return claims.exp <= Math.floor(Date.now() / 1000) + CLOCK_SKEW_SECONDS;
 }
 
-// Renew a token once it's older than this. Well short of the 7-day expiry, so
-// there is a wide margin to catch someone who opens the app only occasionally.
-const REFRESH_AFTER_HOURS = 24;
+// Renew the token when fewer than this many days remain.
+const RENEW_WHEN_DAYS_LEFT = 7;
 
-export function shouldRefresh(token?: string | null) {
+export function shouldRefresh(token?: string | null): boolean {
   const claims = decodeToken(token);
-
-  if (!claims?.iat) return false;
-
-  const ageSeconds = Math.floor(Date.now() / 1000) - claims.iat;
-
-  return ageSeconds > REFRESH_AFTER_HOURS * 60 * 60;
+  if (!claims?.exp) return false;
+  return claims.exp - Math.floor(Date.now() / 1000) < RENEW_WHEN_DAYS_LEFT * 86_400;
 }
