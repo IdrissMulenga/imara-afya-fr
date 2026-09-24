@@ -95,7 +95,7 @@ export default function Verify() {
         });
         if (data?.verifyLoginOtp) {
           await signIn(data.verifyLoginOtp);
-          router.replace('/(app)');
+          router.replace('/(app)/dashboard');
         }
         return;
       }
@@ -104,7 +104,7 @@ export default function Verify() {
         const { data } = await verifyEmail({ variables: { input: { code: value } } });
         if (data?.verifyEmailOtp) {
           setUser(data.verifyEmailOtp);
-          router.replace('/(app)');
+          router.replace('/(app)/dashboard');
         }
         return;
       }

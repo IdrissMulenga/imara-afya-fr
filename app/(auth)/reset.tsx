@@ -55,7 +55,7 @@ export default function Reset() {
       if (!data?.resetPassword) return;
 
       await signIn(data.resetPassword);
-      router.replace('/(app)');
+      router.replace('/(app)/dashboard');
     } catch (e) {
       setError(errorMessage(e, lang));
     }

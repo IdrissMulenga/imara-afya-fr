@@ -88,7 +88,12 @@ const errorLink = new ErrorLink(({ error, operation }) => {
 
 export const client = new ApolloClient({
   link: from([authLink, errorLink, httpLink]),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      // One entry per day, so a mutation updates every screen showing that day.
+      HabitDay: { keyFields: ['day'] },
+    },
+  }),
   defaultOptions: {
     // Serve cached data first, then refresh.
     watchQuery: { fetchPolicy: 'cache-and-network' },

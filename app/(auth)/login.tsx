@@ -44,7 +44,7 @@ export default function Login() {
 
       if (result.__typename === 'AuthPayload') {
         await signIn(result);
-        router.replace('/(app)');
+        router.replace('/(app)/dashboard');
         return;
       }
 

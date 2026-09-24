@@ -99,7 +99,7 @@ export default function Signup() {
         }
       }
 
-      router.replace('/(app)');
+      router.replace('/(app)/dashboard');
     } catch (e) {
       const failure = readError(e, lang);
       setError(errorWithWait(e, lang));

@@ -383,7 +383,8 @@ export function Stepper({
   );
 }
 
-function StepButton({
+/** Round minus/plus button, as used by Stepper. */
+export function StepButton({
   sign,
   onPress,
   disabled,

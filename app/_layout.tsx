@@ -17,6 +17,10 @@ import {
 import { client } from '@/lib/apollo';
 import { NoticeProvider } from '@/components/notice';
 import { SessionProvider, useSession } from '@/lib/session';
+import { StepsProvider } from '@/lib/steps-provider';
+import { WaterReminders } from '@/lib/water-reminders';
+// Defines the background step-sync task at startup.
+import '@/lib/steps-task';
 import { ThemeProvider, useTheme } from '@/theme/theme';
 import { LanguageProvider, useLang } from '@/theme/i18n';
 
@@ -85,7 +89,7 @@ function Gate() {
     if (!user && !inAuth) {
       router.replace('/(auth)/welcome');
     } else if (user && !inApp && !confirmingEmail) {
-      router.replace('/(app)');
+      router.replace('/(app)/dashboard');
     }
   }, [booted, user, segments, router]);
 
@@ -132,7 +136,10 @@ export default function RootLayout() {
           <LanguageProvider>
             <NoticeProvider>
               <SessionProvider>
-                <Gate />
+                <StepsProvider>
+                  <Gate />
+                  <WaterReminders />
+                </StepsProvider>
               </SessionProvider>
             </NoticeProvider>
           </LanguageProvider>

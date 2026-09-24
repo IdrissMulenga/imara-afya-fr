@@ -12,5 +12,5 @@ export default function Index() {
   // Storage not read yet: show a themed blank view.
   if (!ready) return <View style={{ flex: 1, backgroundColor: c.bg }} />;
 
-  return <Redirect href={user ? '/(app)' : '/(auth)/welcome'} />;
+  return <Redirect href={user ? '/(app)/dashboard' : '/(auth)/welcome'} />;
 }
