@@ -28,6 +28,8 @@ type SessionValue = {
   /** End the session locally without calling the server (used after account deletion). */
   forgetSession: () => Promise<void>;
   setUser: (user: AuthUser) => void;
+  /** Reloads the signed-in user from the server. */
+  refreshUser: () => Promise<void>;
 };
 
 const SessionContext = createContext<SessionValue>({
@@ -37,6 +39,7 @@ const SessionContext = createContext<SessionValue>({
   signOut: async () => {},
   forgetSession: async () => {},
   setUser: () => {},
+  refreshUser: async () => {},
 });
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
@@ -171,9 +174,18 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     return () => sub.remove();
   }, [client, accept]);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const { data } = await client.query<{ me: AuthUser }>({ query: ME, fetchPolicy: 'network-only' });
+      if (data?.me) accept(data.me);
+    } catch {
+      // ignore: offline keeps the current profile; a dead session is handled by the error link
+    }
+  }, [client, accept]);
+
   const value = useMemo<SessionValue>(
-    () => ({ user, ready, signIn, signOut, forgetSession, setUser: accept }),
-    [user, ready, signIn, signOut, forgetSession, accept],
+    () => ({ user, ready, signIn, signOut, forgetSession, setUser: accept, refreshUser }),
+    [user, ready, signIn, signOut, forgetSession, accept, refreshUser],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

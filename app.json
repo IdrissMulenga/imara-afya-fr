@@ -12,7 +12,13 @@
       "bundleIdentifier": "bi.imaraco.imaraafya",
       "buildNumber": "1",
       "entitlements": {
-        "com.apple.developer.usernotifications.time-sensitive": true
+        "com.apple.developer.usernotifications.time-sensitive": true,
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
+      },
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "Imara Afya reads your sleep from Apple Health so your nights are logged without you entering them.",
+        "NSHealthUpdateUsageDescription": "Imara Afya does not write to Apple Health."
       }
     },
     "android": {
@@ -74,7 +80,9 @@
       "expo-image",
       "expo-secure-store",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-background-task",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

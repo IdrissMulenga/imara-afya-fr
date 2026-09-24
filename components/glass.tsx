@@ -1,7 +1,8 @@
 // Frosted panel. Real blur on iOS; a translucent fill on Android (blur is too slow
-// on low-end phones). Separated by a shadow in light mode and by its fill in dark mode.
+// on low-end phones). On iOS a shadow separates it in light mode; on Android a
+// hairline edge does (elevation shadows show through translucent views).
 import React from 'react';
-import { View, Platform, StyleSheet, type ViewStyle } from 'react-native';
+import { View, Platform, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '@/theme/theme';
 import { radius } from '@/theme/tokens';
@@ -24,7 +25,7 @@ export function Glass({
   /** Which surface it sits on. Defaults to the current theme. */
   tone?: Tone;
   intensity?: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   radius?: number;
   /** Use a real blur on Android too. */
   force?: boolean;
@@ -45,8 +46,8 @@ export function Glass({
     overflow: 'hidden',
   };
 
-  // Shadow in light mode only, on a wrapper because the panel clips its children.
-  const lift = !flat && !onDark;
+  // Shadow in light mode on iOS only, on a wrapper because the panel clips its children.
+  const lift = !flat && !onDark && Platform.OS === 'ios';
 
   const useRealBlur = Platform.OS === 'ios' || force;
 
@@ -65,14 +66,22 @@ export function Glass({
     <View
       style={[
         skin,
-        { backgroundColor: onDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.82)' },
+        {
+          backgroundColor: onDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)',
+          ...(bordered || flat
+            ? null
+            : {
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: onDark ? 'rgba(255,255,255,0.12)' : 'rgba(19,35,58,0.08)',
+              }),
+        },
         style,
       ]}
     >
       <View
         style={[
           styles.sheen,
-          { backgroundColor: onDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.9)' },
+          { backgroundColor: onDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.7)' },
         ]}
         pointerEvents="none"
       />
@@ -86,7 +95,7 @@ export function Glass({
     <View
       style={[
         { borderRadius: r },
-        Platform.OS === 'ios' ? styles.shadowIOS : styles.shadowAndroid,
+        styles.shadowIOS,
       ]}
     >
       {inner}
@@ -102,5 +111,4 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 4 },
   },
-  shadowAndroid: { elevation: 2 },
 });

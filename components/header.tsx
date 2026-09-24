@@ -104,16 +104,17 @@ export function AppHeader({
 }: {
   title: string;
   subtitle?: string;
-  backLabel: string;
-  onBack: () => void;
+  /** Omit both for a page with no back button (the menu bar pages). */
+  backLabel?: string;
+  onBack?: () => void;
   /** A step marker, e.g. "2 / 3". */
   eyebrow?: string;
 }) {
   return (
     <HeaderShell>
-      <BackChip label={backLabel} onPress={onBack} />
+      {onBack ? <BackChip label={backLabel ?? ''} onPress={onBack} /> : null}
 
-      <View style={{ marginTop: 18, gap: 7 }}>
+      <View style={{ marginTop: onBack ? 18 : 4, gap: 7 }}>
         {eyebrow ? (
           <Text style={[T.label, { color: W.inkFaint }]}>{eyebrow}</Text>
         ) : null}

@@ -5,7 +5,10 @@ import { useRouter } from 'expo-router';
 import { Screen, Spacer, Gap } from '@/components/screen';
 import { QuietButton } from '@/components/ui';
 import { AppHeader } from '@/components/header';
-import { NavRow, Badge, Divider, IdentityCard } from '@/components/panel';
+import { MenuBar } from '@/components/menu-bar';
+import { NavRow, Badge, Divider, IdentityCard, SwitchRow } from '@/components/panel';
+import { useNotice } from '@/components/notice';
+import { useWaterReminders } from '@/lib/water-reminders';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
 import { useLang, COPY } from '@/theme/i18n';
@@ -33,7 +36,9 @@ export default function Settings() {
   const router = useRouter();
   const { t, lang } = useLang();
   const { c } = useTheme();
-  const { user, signOut } = useSession();
+  const { user, signOut, refreshUser } = useSession();
+  const notice = useNotice();
+  const reminders = useWaterReminders();
 
   const a = APP_COPY[lang];
 
@@ -59,7 +64,9 @@ export default function Settings() {
 
   return (
     <Screen
-      header={<AppHeader title={a.settings} backLabel={t.back} onBack={() => router.back()} />}
+      onRefresh={refreshUser}
+      header={<AppHeader title={a.settings} />}
+      menu={<MenuBar active="settings" />}
     >
 
       <FadeIn delay={100}>
@@ -123,6 +130,22 @@ export default function Settings() {
             value={prefs}
             onPress={() => router.push('/(app)/preferences')}
           />
+          {reminders.supported ? (
+            <SwitchRow
+              label={a.waterReminders}
+              hint={a.waterRemindersNote}
+              value={reminders.enabled}
+              onChange={(on) => {
+                if (!on) {
+                  void reminders.disable();
+                  return;
+                }
+                void reminders.enable().then((result) => {
+                  if (result === 'denied') notice.failure(a.waterReminders, a.notificationsDenied);
+                });
+              }}
+            />
+          ) : null}
         </Group>
       </FadeIn>
 

@@ -127,6 +127,65 @@ export type AppCopy = {
   loading: string;
   retry: string;
   outOfRange: string;
+
+  // habits
+  habitsToday: string;
+  dayToday: string;
+  waterLabel: string;
+  stepsLabel: string;
+  sleepLabel: string;
+  addGlass: string;
+  removeGlass: string;
+  stepsHint: string;
+  streak: string;
+  noStreak: string;
+  goalMet: string;
+  of: string;
+  couldNotLoad: string;
+  stepsTitle: string;
+  stepsSub: string;
+  stepsHistory: string;
+  last14Days: string;
+  enableSteps: string;
+  enableStepsNote: string;
+  stepsDenied: string;
+  liveOnlyNote: string;
+  noStepSensor: string;
+  enterSteps: string;
+  average: string;
+  bestDay: string;
+  distance: string;
+  streakLabel: string;
+  kmUnit: string;
+  ofGoal: string;
+  addHalfHour: string;
+  removeHalfHour: string;
+  seeHistory: string;
+  seeHistorySub: string;
+  menuHome: string;
+  menuProfile: string;
+  trackSleep: string;
+  trackSleepNoteAndroid: string;
+  trackSleepNoteIos: string;
+  sleepAutoAndroid: string;
+  sleepAutoIos: string;
+  sleepNotStarted: string;
+  waterReminders: string;
+  waterRemindersNote: string;
+  waterReminderTitle: string;
+  waterReminderBody: string;
+  addGlassAction: string;
+  remindMe: string;
+  remindersOn: string;
+  notificationsDenied: string;
+  openDetails: string;
+  lastNight: string;
+  waterSub: string;
+  sleepSub: string;
+  longestNight: string;
+  remindersSection: string;
+  autoTracking: string;
+  mostWater: string;
 };
 
 export const APP_COPY: Record<Lang, AppCopy> = {
@@ -134,7 +193,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     greetMorning: 'Good morning',
     greetAfternoon: 'Good afternoon',
     greetEvening: 'Good evening',
-    dashSub: 'Here is what the app knows about you so far. Tracking comes next.',
+    dashSub: 'Your day at a glance.',
     yourProfile: 'YOUR PROFILE',
     openSettings: 'Settings',
     memberSince: 'With us since',
@@ -246,13 +305,70 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Loading',
     retry: 'Try again',
     outOfRange: 'That number is outside the allowed range.',
+    habitsToday: 'TODAY',
+    dayToday: 'Today',
+    waterLabel: 'Water',
+    stepsLabel: 'Steps',
+    sleepLabel: 'Sleep',
+    addGlass: 'Add a glass',
+    removeGlass: 'Remove a glass',
+    stepsHint: 'Type the number from your phone’s step counter.',
+    streak: '{n}-day streak',
+    noStreak: 'No streak yet',
+    goalMet: 'Goal met',
+    of: 'of',
+    couldNotLoad: 'Could not load your day.',
+    stepsTitle: 'Steps',
+    stepsSub: 'Counted automatically by your phone.',
+    stepsHistory: 'LAST 30 DAYS',
+    last14Days: 'LAST 14 DAYS',
+    enableSteps: 'Count my steps automatically',
+    enableStepsNote: 'Imara Afya uses your phone’s step sensor. Only the daily total is saved to your account.',
+    stepsDenied: 'Step counting is off. Allow “Physical activity” for Imara Afya in your phone settings.',
+    liveOnlyNote: 'On this version of the app, steps are only counted while it is open.',
+    noStepSensor: 'This phone has no step sensor. You can enter your steps yourself.',
+    enterSteps: 'ENTER STEPS',
+    average: 'Daily average (7 days)',
+    bestDay: 'Best day',
+    distance: 'Distance',
+    streakLabel: 'Streak',
+    kmUnit: 'km',
+    ofGoal: 'Of goal',
+    addHalfHour: 'Add half an hour',
+    removeHalfHour: 'Remove half an hour',
+    seeHistory: 'Steps history',
+    seeHistorySub: 'Last 30 days',
+    menuHome: 'Home',
+    menuProfile: 'Profile',
+    trackSleep: 'Track my sleep automatically',
+    trackSleepNoteAndroid: 'Your phone estimates sleep from movement and light at night. Correct it with − and + if needed.',
+    trackSleepNoteIos: 'Reads your sleep from Apple Health (Sleep Schedule or an Apple Watch). Correct it with − and + if needed.',
+    sleepAutoAndroid: 'Estimated by your phone · correct with − and +',
+    sleepAutoIos: 'From Apple Health · correct with − and +',
+    sleepNotStarted: 'Sleep tracking could not start. Check the permission in your phone settings.',
+    waterReminders: 'Water reminders',
+    waterRemindersNote: 'At 9:00, 12:00, 15:00 and 18:00, with a “+1 glass” button.',
+    waterReminderTitle: 'Time for a glass of water',
+    waterReminderBody: 'Tap “+1 glass” once you have had one.',
+    addGlassAction: '+1 glass',
+    remindMe: 'Remind me to drink water',
+    remindersOn: 'Water reminders are on',
+    notificationsDenied: 'Notifications are off for Imara Afya. Turn them on in your phone settings.',
+    openDetails: 'Opens the details',
+    lastNight: 'Last night',
+    waterSub: 'Glasses of water, one tap at a time.',
+    sleepSub: 'Hours slept each night.',
+    longestNight: 'Longest night',
+    remindersSection: 'REMINDERS',
+    autoTracking: 'AUTOMATIC TRACKING',
+    mostWater: 'Most water',
   },
 
   fr: {
     greetMorning: 'Bonjour',
     greetAfternoon: 'Bon après-midi',
     greetEvening: 'Bonsoir',
-    dashSub: 'Voici ce que l’application sait de vous pour l’instant. Le suivi arrive ensuite.',
+    dashSub: 'Votre journée en un coup d’œil.',
     yourProfile: 'VOTRE PROFIL',
     openSettings: 'Paramètres',
     memberSince: 'Avec nous depuis',
@@ -367,13 +483,70 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Chargement',
     retry: 'Réessayer',
     outOfRange: 'Ce nombre est en dehors de la plage autorisée.',
+    habitsToday: 'AUJOURD’HUI',
+    dayToday: 'Aujourd’hui',
+    waterLabel: 'Eau',
+    stepsLabel: 'Pas',
+    sleepLabel: 'Sommeil',
+    addGlass: 'Ajouter un verre',
+    removeGlass: 'Retirer un verre',
+    stepsHint: 'Saisissez le nombre indiqué par le podomètre de votre téléphone.',
+    streak: '{n} jours d’affilée',
+    noStreak: 'Pas encore de série',
+    goalMet: 'Objectif atteint',
+    of: 'sur',
+    couldNotLoad: 'Impossible de charger votre journée.',
+    stepsTitle: 'Pas',
+    stepsSub: 'Comptés automatiquement par votre téléphone.',
+    stepsHistory: '30 DERNIERS JOURS',
+    last14Days: '14 DERNIERS JOURS',
+    enableSteps: 'Compter mes pas automatiquement',
+    enableStepsNote: 'Imara Afya utilise le capteur de pas de votre téléphone. Seul le total du jour est enregistré sur votre compte.',
+    stepsDenied: 'Le comptage des pas est désactivé. Autorisez « Activité physique » pour Imara Afya dans les réglages du téléphone.',
+    liveOnlyNote: 'Sur cette version de l’application, les pas ne sont comptés que lorsqu’elle est ouverte.',
+    noStepSensor: 'Ce téléphone n’a pas de capteur de pas. Vous pouvez saisir vos pas vous-même.',
+    enterSteps: 'SAISIR LES PAS',
+    average: 'Moyenne par jour (7 jours)',
+    bestDay: 'Meilleur jour',
+    distance: 'Distance',
+    streakLabel: 'Série',
+    kmUnit: 'km',
+    ofGoal: 'De l’objectif',
+    addHalfHour: 'Ajouter une demi-heure',
+    removeHalfHour: 'Retirer une demi-heure',
+    seeHistory: 'Historique des pas',
+    seeHistorySub: '30 derniers jours',
+    menuHome: 'Accueil',
+    menuProfile: 'Profil',
+    trackSleep: 'Suivre mon sommeil automatiquement',
+    trackSleepNoteAndroid: 'Votre téléphone estime votre sommeil grâce aux mouvements et à la lumière la nuit. Corrigez avec − et + si besoin.',
+    trackSleepNoteIos: 'Lit votre sommeil dans Santé d’Apple (horaire de sommeil ou Apple Watch). Corrigez avec − et + si besoin.',
+    sleepAutoAndroid: 'Estimé par votre téléphone · corrigez avec − et +',
+    sleepAutoIos: 'Depuis Santé d’Apple · corrigez avec − et +',
+    sleepNotStarted: 'Le suivi du sommeil n’a pas pu démarrer. Vérifiez l’autorisation dans les réglages du téléphone.',
+    waterReminders: 'Rappels d’eau',
+    waterRemindersNote: 'À 9 h, 12 h, 15 h et 18 h, avec un bouton « +1 verre ».',
+    waterReminderTitle: 'C’est l’heure d’un verre d’eau',
+    waterReminderBody: 'Touchez « +1 verre » une fois que vous en avez bu un.',
+    addGlassAction: '+1 verre',
+    remindMe: 'Me rappeler de boire de l’eau',
+    remindersOn: 'Les rappels d’eau sont activés',
+    notificationsDenied: 'Les notifications sont désactivées pour Imara Afya. Activez-les dans les réglages du téléphone.',
+    openDetails: 'Ouvre les détails',
+    lastNight: 'La nuit dernière',
+    waterSub: 'Des verres d’eau, un geste à la fois.',
+    sleepSub: 'Heures de sommeil chaque nuit.',
+    longestNight: 'Nuit la plus longue',
+    remindersSection: 'RAPPELS',
+    autoTracking: 'SUIVI AUTOMATIQUE',
+    mostWater: 'Le plus d’eau',
   },
 
   sw: {
     greetMorning: 'Habari za asubuhi',
     greetAfternoon: 'Habari za mchana',
     greetEvening: 'Habari za jioni',
-    dashSub: 'Haya ni yale programu inayajua kukuhusu kwa sasa. Ufuatiliaji unafuata.',
+    dashSub: 'Siku yako kwa muhtasari.',
     yourProfile: 'WASIFU WAKO',
     openSettings: 'Mipangilio',
     memberSince: 'Nasi tangu',
@@ -488,13 +661,70 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Inapakia',
     retry: 'Jaribu tena',
     outOfRange: 'Nambari hiyo iko nje ya kiwango kinachoruhusiwa.',
+    habitsToday: 'LEO',
+    dayToday: 'Leo',
+    waterLabel: 'Maji',
+    stepsLabel: 'Hatua',
+    sleepLabel: 'Usingizi',
+    addGlass: 'Ongeza glasi',
+    removeGlass: 'Ondoa glasi',
+    stepsHint: 'Andika idadi kutoka kihesabu hatua cha simu yako.',
+    streak: 'Siku {n} mfululizo',
+    noStreak: 'Bado hakuna mfululizo',
+    goalMet: 'Lengo limefikiwa',
+    of: 'kati ya',
+    couldNotLoad: 'Imeshindikana kupakia siku yako.',
+    stepsTitle: 'Hatua',
+    stepsSub: 'Zinahesabiwa na simu yako moja kwa moja.',
+    stepsHistory: 'SIKU 30 ZILIZOPITA',
+    last14Days: 'SIKU 14 ZILIZOPITA',
+    enableSteps: 'Hesabu hatua zangu moja kwa moja',
+    enableStepsNote: 'Imara Afya hutumia kihisi hatua cha simu yako. Jumla ya siku pekee ndiyo huhifadhiwa kwenye akaunti yako.',
+    stepsDenied: 'Kuhesabu hatua kumezimwa. Ruhusu “Shughuli za mwili” kwa Imara Afya kwenye mipangilio ya simu.',
+    liveOnlyNote: 'Kwenye toleo hili la programu, hatua huhesabiwa tu programu ikiwa wazi.',
+    noStepSensor: 'Simu hii haina kihisi hatua. Unaweza kuandika hatua zako mwenyewe.',
+    enterSteps: 'ANDIKA HATUA',
+    average: 'Wastani wa siku (siku 7)',
+    bestDay: 'Siku bora',
+    distance: 'Umbali',
+    streakLabel: 'Mfululizo',
+    kmUnit: 'km',
+    ofGoal: 'Ya lengo',
+    addHalfHour: 'Ongeza nusu saa',
+    removeHalfHour: 'Punguza nusu saa',
+    seeHistory: 'Historia ya hatua',
+    seeHistorySub: 'Siku 30 zilizopita',
+    menuHome: 'Nyumbani',
+    menuProfile: 'Wasifu',
+    trackSleep: 'Fuatilia usingizi wangu moja kwa moja',
+    trackSleepNoteAndroid: 'Simu yako hukadiria usingizi kutokana na mwendo na mwanga usiku. Rekebisha kwa − na + ikihitajika.',
+    trackSleepNoteIos: 'Husoma usingizi wako kutoka Apple Health (ratiba ya usingizi au Apple Watch). Rekebisha kwa − na + ikihitajika.',
+    sleepAutoAndroid: 'Umekadiriwa na simu yako · rekebisha kwa − na +',
+    sleepAutoIos: 'Kutoka Apple Health · rekebisha kwa − na +',
+    sleepNotStarted: 'Ufuatiliaji wa usingizi haukuweza kuanza. Angalia ruhusa kwenye mipangilio ya simu.',
+    waterReminders: 'Vikumbusho vya maji',
+    waterRemindersNote: 'Saa 3:00, 6:00, 9:00 na 12:00, na kitufe cha “+1 glasi”.',
+    waterReminderTitle: 'Ni wakati wa glasi ya maji',
+    waterReminderBody: 'Gusa “+1 glasi” ukishakunywa moja.',
+    addGlassAction: '+1 glasi',
+    remindMe: 'Nikumbushe kunywa maji',
+    remindersOn: 'Vikumbusho vya maji vimewashwa',
+    notificationsDenied: 'Arifa zimezimwa kwa Imara Afya. Ziwashe kwenye mipangilio ya simu.',
+    openDetails: 'Hufungua maelezo',
+    lastNight: 'Usiku uliopita',
+    waterSub: 'Glasi za maji, mguso mmoja kwa wakati.',
+    sleepSub: 'Masaa ya usingizi kila usiku.',
+    longestNight: 'Usiku mrefu zaidi',
+    remindersSection: 'VIKUMBUSHO',
+    autoTracking: 'UFUATILIAJI WA MOJA KWA MOJA',
+    mostWater: 'Maji mengi zaidi',
   },
 
   rn: {
     greetMorning: 'Bwakeye',
     greetAfternoon: 'Mwiriwe',
     greetEvening: 'Mwiriwe',
-    dashSub: 'Ibi ni ivyo porogaramu izi kuri wewe ubu. Gukurikirana biraza.',
+    dashSub: 'Umusi wawe mu ncamake.',
     yourProfile: 'UMWIDONDORO WAWE',
     openSettings: 'Ibigenamiterere',
     memberSince: 'Turi kumwe kuva',
@@ -609,6 +839,63 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Birapakirwa',
     retry: 'Gerageza',
     outOfRange: 'Iyo nomero iri hanze y’urugero rwemewe.',
+    habitsToday: 'UYU MUNSI',
+    dayToday: 'Uyu munsi',
+    waterLabel: 'Amazi',
+    stepsLabel: 'Intambwe',
+    sleepLabel: 'Ibitotsi',
+    addGlass: 'Ongeramwo ikirobo',
+    removeGlass: 'Kuramwo ikirobo',
+    stepsHint: 'Andika igitigiri kiri ku gaharuro k’intambwe ka terefone yawe.',
+    streak: 'Imisi {n} ikurikirana',
+    noStreak: 'Nta ruhererekane rurabaho',
+    goalMet: 'Intumbero yashitse',
+    of: 'kuri',
+    couldNotLoad: 'Ntivyakunze gupakira umusi wawe.',
+    stepsTitle: 'Intambwe',
+    stepsSub: 'Ziharurwa na terefone yawe ubwayo.',
+    stepsHistory: 'IMISI 30 IHEZE',
+    last14Days: 'IMISI 14 IHEZE',
+    enableSteps: 'Harura intambwe zanje ubwayo',
+    enableStepsNote: 'Imara Afya ikoresha agakoresho k’intambwe ka terefone yawe. Igiteranyo c’umusi gusa ni co kibikwa kuri konte yawe.',
+    stepsDenied: 'Guharura intambwe kwahagaritswe. Rekurira “Ibikorwa vy’umubiri” Imara Afya mu mategeko ya terefone.',
+    liveOnlyNote: 'Kuri iyi verisiyo ya porogaramu, intambwe ziharurwa gusa iyo yuguruye.',
+    noStepSensor: 'Iyi terefone ntigira agakoresho k’intambwe. Ushobora kwiyandikira intambwe zawe.',
+    enterSteps: 'ANDIKA INTAMBWE',
+    average: 'Ikigereranyo c’umusi (imisi 7)',
+    bestDay: 'Umusi mwiza',
+    distance: 'Urugendo',
+    streakLabel: 'Uruhererekane',
+    kmUnit: 'km',
+    ofGoal: 'Vy’intumbero',
+    addHalfHour: 'Ongeramwo isaha igice',
+    removeHalfHour: 'Kuramwo isaha igice',
+    seeHistory: 'Kahise k’intambwe',
+    seeHistorySub: 'Imisi 30 iheze',
+    menuHome: 'Ahabanza',
+    menuProfile: 'Umwirondoro',
+    trackSleep: 'Kurikirana ibitotsi vyanje ubwavyo',
+    trackSleepNoteAndroid: 'Terefone yawe igereranya ibitotsi ikoresheje ivyiyumviro n’umuco mw’ijoro. Kosora na − na + nibiba ngombwa.',
+    trackSleepNoteIos: 'Isoma ibitotsi vyawe muri Apple Health (gahunda y’ibitotsi canke Apple Watch). Kosora na − na + nibiba ngombwa.',
+    sleepAutoAndroid: 'Vyagereranijwe na terefone yawe · kosora na − na +',
+    sleepAutoIos: 'Biva muri Apple Health · kosora na − na +',
+    sleepNotStarted: 'Gukurikirana ibitotsi ntivyashoboye gutangura. Raba uruhusha mu mategeko ya terefone.',
+    waterReminders: 'Ivyibutsa vy’amazi',
+    waterRemindersNote: 'Isaha 9:00, 12:00, 15:00 na 18:00, hamwe n’agafyondo “+1 ikirobo”.',
+    waterReminderTitle: 'N’igihe c’ikirobo c’amazi',
+    waterReminderBody: 'Fyonda “+1 ikirobo” umaze kunywa kimwe.',
+    addGlassAction: '+1 ikirobo',
+    remindMe: 'Nyibutsa kunywa amazi',
+    remindersOn: 'Ivyibutsa vy’amazi vyatanguye',
+    notificationsDenied: 'Imenyesha ryahagaritswe kuri Imara Afya. Ritangure mu mategeko ya terefone.',
+    openDetails: 'Bifungura ibisobanuro',
+    lastNight: 'Ijoro riheze',
+    waterSub: 'Ibirobo vy’amazi, gufyonda rimwe.',
+    sleepSub: 'Amasaha waryamye buri joro.',
+    longestNight: 'Ijoro rirerire kuruta',
+    remindersSection: 'IVYIBUTSA',
+    autoTracking: 'GUKURIKIRANA UBWAVYO',
+    mostWater: 'Amazi menshi kuruta',
   },
 };
 
