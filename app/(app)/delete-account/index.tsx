@@ -1,6 +1,6 @@
 // Delete account: its own screen, typing DELETE (translated), and the account password.
 // The backend deletes the account, its trusted devices and codes.
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
