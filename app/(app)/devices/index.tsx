@@ -1,6 +1,6 @@
 // Trusted devices: phones that can sign in without an emailed code.
 // The current phone is marked and cannot be removed here. Trust expires after 90 days.
-import { useState } from 'react';
+import React,{ useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation, useQuery } from '@apollo/client/react';
