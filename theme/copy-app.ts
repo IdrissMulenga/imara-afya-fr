@@ -186,6 +186,35 @@ export type AppCopy = {
   remindersSection: string;
   autoTracking: string;
   mostWater: string;
+
+  // check-in
+  checkInLabel: string;
+  checkInSub: string;
+  checkInPrompt: string;
+  checkInPromptSub: string;
+  checkInCta: string;
+  moodLabel: string;
+  energyLabel: string;
+  checkInNote: string;
+  checkInNotePlaceholder: string;
+  checkInSave: string;
+  checkInUpdate: string;
+  checkInSaved: string;
+  checkInRemove: string;
+  checkInRemoveConfirm: string;
+  checkInRemoved: string;
+  remove: string;
+  moodAverage: string;
+  energyAverage: string;
+  checkInDays: string;
+  checkInHistory: string;
+  noCheckIns: string;
+  pickBoth: string;
+  moodName: string;
+  energyName: string;
+  last30Days: string;
+  moodWords: [string, string, string, string, string];
+  energyWords: [string, string, string, string, string];
 };
 
 export const APP_COPY: Record<Lang, AppCopy> = {
@@ -362,6 +391,34 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     remindersSection: 'REMINDERS',
     autoTracking: 'AUTOMATIC TRACKING',
     mostWater: 'Most water',
+
+    checkInLabel: 'Check-in',
+    checkInSub: 'How you feel, one moment a day.',
+    checkInPrompt: 'How are you feeling today?',
+    checkInPromptSub: 'Two taps: your mood and your energy.',
+    checkInCta: 'Check in',
+    moodLabel: 'MOOD',
+    energyLabel: 'ENERGY',
+    checkInNote: 'NOTE (OPTIONAL)',
+    checkInNotePlaceholder: 'Anything on your mind?',
+    checkInSave: 'Save check-in',
+    checkInUpdate: 'Update check-in',
+    checkInSaved: 'Check-in saved',
+    checkInRemove: 'Remove today’s check-in',
+    checkInRemoveConfirm: 'Remove today’s check-in?',
+    checkInRemoved: 'Check-in removed',
+    remove: 'Remove',
+    moodAverage: 'Mood (7 days)',
+    energyAverage: 'Energy (7 days)',
+    checkInDays: 'Days checked in (30 days)',
+    checkInHistory: 'RECENT CHECK-INS',
+    noCheckIns: 'No check-ins yet. Your first one starts your streak.',
+    pickBoth: 'Choose your mood and your energy.',
+    moodName: 'Mood',
+    energyName: 'Energy',
+    last30Days: 'LAST 30 DAYS',
+    moodWords: ['Very low', 'Low', 'Okay', 'Good', 'Very good'],
+    energyWords: ['Exhausted', 'Tired', 'Okay', 'Energetic', 'Full of energy'],
   },
 
   fr: {
@@ -540,6 +597,34 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     remindersSection: 'RAPPELS',
     autoTracking: 'SUIVI AUTOMATIQUE',
     mostWater: 'Le plus d’eau',
+
+    checkInLabel: 'Bilan du jour',
+    checkInSub: 'Comment vous vous sentez, un moment par jour.',
+    checkInPrompt: 'Comment vous sentez-vous aujourd’hui ?',
+    checkInPromptSub: 'Deux touches : votre humeur et votre énergie.',
+    checkInCta: 'Faire le bilan',
+    moodLabel: 'HUMEUR',
+    energyLabel: 'ÉNERGIE',
+    checkInNote: 'NOTE (FACULTATIF)',
+    checkInNotePlaceholder: 'Quelque chose en tête ?',
+    checkInSave: 'Enregistrer le bilan',
+    checkInUpdate: 'Mettre à jour le bilan',
+    checkInSaved: 'Bilan enregistré',
+    checkInRemove: 'Supprimer le bilan du jour',
+    checkInRemoveConfirm: 'Supprimer le bilan du jour ?',
+    checkInRemoved: 'Bilan supprimé',
+    remove: 'Supprimer',
+    moodAverage: 'Humeur (7 jours)',
+    energyAverage: 'Énergie (7 jours)',
+    checkInDays: 'Jours avec bilan (30 jours)',
+    checkInHistory: 'BILANS RÉCENTS',
+    noCheckIns: 'Aucun bilan pour l’instant. Le premier lance votre série.',
+    pickBoth: 'Choisissez votre humeur et votre énergie.',
+    moodName: 'Humeur',
+    energyName: 'Énergie',
+    last30Days: '30 DERNIERS JOURS',
+    moodWords: ['Très bas', 'Bas', 'Correct', 'Bien', 'Très bien'],
+    energyWords: ['Épuisé', 'Fatigué', 'Correct', 'En forme', 'Plein d’énergie'],
   },
 
   sw: {
@@ -718,6 +803,34 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     remindersSection: 'VIKUMBUSHO',
     autoTracking: 'UFUATILIAJI WA MOJA KWA MOJA',
     mostWater: 'Maji mengi zaidi',
+
+    checkInLabel: 'Hali ya leo',
+    checkInSub: 'Unavyojisikia, dakika moja kila siku.',
+    checkInPrompt: 'Unajisikiaje leo?',
+    checkInPromptSub: 'Miguso miwili: hali ya moyo na nguvu zako.',
+    checkInCta: 'Andika hali',
+    moodLabel: 'HALI YA MOYO',
+    energyLabel: 'NGUVU',
+    checkInNote: 'MAELEZO (SI LAZIMA)',
+    checkInNotePlaceholder: 'Kuna jambo lolote akilini?',
+    checkInSave: 'Hifadhi hali',
+    checkInUpdate: 'Sasisha hali',
+    checkInSaved: 'Hali imehifadhiwa',
+    checkInRemove: 'Futa hali ya leo',
+    checkInRemoveConfirm: 'Futa hali ya leo?',
+    checkInRemoved: 'Hali imefutwa',
+    remove: 'Futa',
+    moodAverage: 'Hali ya moyo (siku 7)',
+    energyAverage: 'Nguvu (siku 7)',
+    checkInDays: 'Siku zilizoandikwa (siku 30)',
+    checkInHistory: 'HALI ZA KARIBUNI',
+    noCheckIns: 'Bado hakuna hali iliyoandikwa. Ya kwanza inaanzisha mfululizo wako.',
+    pickBoth: 'Chagua hali ya moyo na nguvu zako.',
+    moodName: 'Hali ya moyo',
+    energyName: 'Nguvu',
+    last30Days: 'SIKU 30 ZILIZOPITA',
+    moodWords: ['Mbaya sana', 'Mbaya', 'Sawa', 'Nzuri', 'Nzuri sana'],
+    energyWords: ['Nimechoka sana', 'Nimechoka', 'Sawa', 'Nina nguvu', 'Nguvu tele'],
   },
 
   rn: {
@@ -896,6 +1009,34 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     remindersSection: 'IVYIBUTSA',
     autoTracking: 'GUKURIKIRANA UBWAVYO',
     mostWater: 'Amazi menshi kuruta',
+
+    checkInLabel: 'Uko gute uyu munsi',
+    checkInSub: 'Ingene wiyumva, akanya gato buri munsi.',
+    checkInPrompt: 'Wiyumva gute uyu munsi?',
+    checkInPromptSub: 'Gukanda kabiri: umutima wawe n’inguvu zawe.',
+    checkInCta: 'Andika',
+    moodLabel: 'INGENE WIYUMVA',
+    energyLabel: 'INGUVU',
+    checkInNote: 'ICANDIKO (SI NGOMBWA)',
+    checkInNotePlaceholder: 'Hari ico uriko uriyumvira?',
+    checkInSave: 'Bika',
+    checkInUpdate: 'Hindura',
+    checkInSaved: 'Vyabitswe',
+    checkInRemove: 'Kuraho ivy’uyu munsi',
+    checkInRemoveConfirm: 'Kuraho ivy’uyu munsi?',
+    checkInRemoved: 'Vyakuweho',
+    remove: 'Kuraho',
+    moodAverage: 'Ingene wiyumva (iminsi 7)',
+    energyAverage: 'Inguvu (iminsi 7)',
+    checkInDays: 'Iminsi wanditse (iminsi 30)',
+    checkInHistory: 'IVYANDITSWE VUBA',
+    noCheckIns: 'Nta co urandika. Ica mbere gitangura urukurikirane rwawe.',
+    pickBoth: 'Hitamwo ingene wiyumva n’inguvu zawe.',
+    moodName: 'Ingene wiyumva',
+    energyName: 'Inguvu',
+    last30Days: 'IMINSI 30 IHERUKA',
+    moodWords: ['Nabi cane', 'Nabi', 'Ni sawa', 'Neza', 'Neza cane'],
+    energyWords: ['Naruhijwe cane', 'Naruhijwe', 'Ni sawa', 'Mfise inguvu', 'Inguvu nyinshi'],
   },
 };
 

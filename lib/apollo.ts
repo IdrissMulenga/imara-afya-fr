@@ -92,6 +92,7 @@ export const client = new ApolloClient({
     typePolicies: {
       // One entry per day, so a mutation updates every screen showing that day.
       HabitDay: { keyFields: ['day'] },
+      CheckIn: { keyFields: ['day'] },
     },
   }),
   defaultOptions: {
