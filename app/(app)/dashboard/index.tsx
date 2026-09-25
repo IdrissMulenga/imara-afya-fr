@@ -1,4 +1,4 @@
-// Dashboard: today's steps, water and sleep against the user's goals.
+// Dashboard: today's check-in, then steps, water and sleep against the user's goals.
 import React, { useCallback, useRef } from 'react';
 import { View, Text } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -6,6 +6,7 @@ import { Screen, Gap } from '@/components/screen';
 import { QuietButton } from '@/components/ui';
 import { NavRow, Badge } from '@/components/panel';
 import { TodayCard, useHabitSummary } from '@/components/habits';
+import { CheckInTile, useCheckInSummary } from '@/components/checkin';
 import { ProfileHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
@@ -26,15 +27,19 @@ export default function Dashboard() {
   const a = APP_COPY[lang];
 
   const { data: habits, refetch: refetchHabits } = useHabitSummary();
+  const { data: checkIn, refetch: refetchCheckIn } = useCheckInSummary();
 
   // Refresh on return to this screen (skipping the first focus, which already fetched),
   // so the day rolls over after midnight.
   const focusedOnce = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      if (focusedOnce.current) void refetchHabits();
+      if (focusedOnce.current) {
+        void refetchHabits();
+        void refetchCheckIn();
+      }
       focusedOnce.current = true;
-    }, [refetchHabits]),
+    }, [refetchHabits, refetchCheckIn]),
   );
 
   // The user can be null briefly while signing out.
@@ -44,7 +49,7 @@ export default function Dashboard() {
 
   return (
     <Screen
-      onRefresh={() => Promise.all([refetchHabits(), syncHealth(), refreshUser()])}
+      onRefresh={() => Promise.all([refetchHabits(), refetchCheckIn(), syncHealth(), refreshUser()])}
       header={
         <ProfileHeader
           greeting={`${greetingFor(a)}${firstName ? ',' : ''}`}
@@ -90,6 +95,7 @@ export default function Dashboard() {
       <FadeIn delay={160}>
         <View style={{ gap: 10 }}>
           <Text style={[T.label, { color: c.faint, marginLeft: 2 }]}>{a.habitsToday}</Text>
+          <CheckInTile summary={checkIn?.checkInSummary} />
           <TodayCard user={user} summary={habits?.habitSummary} />
           <Glass style={{ paddingHorizontal: 16, paddingVertical: 10 }}>
             <NavRow
