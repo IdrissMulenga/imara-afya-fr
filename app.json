@@ -8,7 +8,7 @@
     "scheme": "imaraafyafr",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "bi.imaraco.imaraafya",
       "buildNumber": "1",
       "entitlements": {
@@ -18,7 +18,8 @@
       },
       "infoPlist": {
         "NSHealthShareUsageDescription": "Imara Afya reads your sleep from Apple Health so your nights are logged without you entering them.",
-        "NSHealthUpdateUsageDescription": "Imara Afya does not write to Apple Health."
+        "NSHealthUpdateUsageDescription": "Imara Afya does not write to Apple Health.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
