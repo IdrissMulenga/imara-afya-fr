@@ -59,6 +59,7 @@ const NoticeContext = createContext<NoticeApi>({
 
 // Read by <Screen>, which positions the toast above its footer.
 const ToastContext = createContext<ToastState>(null);
+/** The toast currently showing (read by Screen). */
 export const useToastState = () => useContext(ToastContext);
 
 // How long each tone stays on screen.
@@ -67,6 +68,7 @@ const HOLD_MS: Record<Tone, number> = { success: 3200, error: 5200, info: 4000 }
 // How long a toast stays in state: its animation in, hold and fade out.
 const TOAST_MS = 4400;
 
+/** Provides notices and toasts to the app. */
 export function NoticeProvider({ children }: { children: React.ReactNode }) {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [toastState, setToastState] = useState<ToastState>(null);
@@ -133,6 +135,7 @@ export function NoticeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Shows success and failure notices, and toasts. */
 export const useNotice = () => useContext(NoticeContext);
 
 function Banner({ notice, onDone }: { notice: Notice; onDone: () => void }) {

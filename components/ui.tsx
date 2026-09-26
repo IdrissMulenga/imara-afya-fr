@@ -148,6 +148,7 @@ type FieldProps = TextInputProps & {
   errorText?: string;
 };
 
+/** Labelled text input with focus and error rings; secure adds a show/hide toggle. */
 export function Field({
   label,
   secure,
@@ -259,6 +260,7 @@ export function Field({
   );
 }
 
+/** Main action button; shows a spinner while busy. */
 export function PrimaryButton({
   label,
   onPress,
@@ -327,6 +329,7 @@ export function PrimaryButton({
   );
 }
 
+/** Secondary button. */
 export function QuietButton({ label, onPress }: { label: string; onPress: () => void }) {
   const { c } = useTheme();
   const press = usePressScale(0.97);
@@ -366,6 +369,7 @@ export function QuietButton({ label, onPress }: { label: string; onPress: () => 
   );
 }
 
+/** Text-only button. */
 export function LinkText({ label, onPress }: { label: string; onPress: () => void }) {
   const { c } = useTheme();
   const press = usePressScale(0.94);
@@ -384,6 +388,7 @@ export function LinkText({ label, onPress }: { label: string; onPress: () => voi
   );
 }
 
+/** An error message box. */
 export function ErrorNote({ message }: { message: string }) {
   const { c } = useTheme();
   if (!message) return null;
@@ -400,6 +405,7 @@ export function ErrorNote({ message }: { message: string }) {
   );
 }
 
+/** A neutral message box. */
 export function InfoNote({ children }: { children: React.ReactNode }) {
   const { c } = useTheme();
   return (

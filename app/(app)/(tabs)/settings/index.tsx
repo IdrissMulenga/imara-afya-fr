@@ -5,10 +5,12 @@ import { useRouter } from 'expo-router';
 import { Screen, Spacer, Gap } from '@/components/screen';
 import { QuietButton } from '@/components/ui';
 import { AppHeader } from '@/components/header';
-import { MenuBar } from '@/components/menu-bar';
 import { NavRow, Badge, Divider, IdentityCard, SwitchRow } from '@/components/panel';
 import { useNotice } from '@/components/notice';
 import { useWaterReminders } from '@/lib/water-reminders';
+import { useCheckInNotifications } from '@/lib/checkin-reminders';
+import { BedtimeRemindersSwitch } from '@/components/sleep-schedule';
+import { useCycleReminders } from '@/lib/cycle-reminders';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
 import { useLang, COPY } from '@/theme/i18n';
@@ -39,6 +41,8 @@ export default function Settings() {
   const { user, signOut, refreshUser } = useSession();
   const notice = useNotice();
   const reminders = useWaterReminders();
+  const checkInNotes = useCheckInNotifications();
+  const cycleReminders = useCycleReminders();
 
   const a = APP_COPY[lang];
 
@@ -66,7 +70,7 @@ export default function Settings() {
     <Screen
       onRefresh={refreshUser}
       header={<AppHeader title={a.settings} />}
-      menu={<MenuBar active="settings" />}
+      tabbed
     >
 
       <FadeIn delay={100}>
@@ -142,6 +146,43 @@ export default function Settings() {
                 }
                 void reminders.enable().then((result) => {
                   if (result === 'denied') notice.failure(a.waterReminders, a.notificationsDenied);
+                });
+              }}
+            />
+          ) : null}
+          {checkInNotes.supported ? (
+            <SwitchRow
+              label={a.moodReminders}
+              hint={a.moodRemindersNote}
+              value={checkInNotes.mood}
+              onChange={(on) => {
+                void checkInNotes.setMood(on).then((result) => {
+                  if (result === 'denied') notice.failure(a.moodReminders, a.notificationsDenied);
+                });
+              }}
+            />
+          ) : null}
+          {checkInNotes.supported ? (
+            <SwitchRow
+              label={a.warmMessages}
+              hint={a.warmMessagesNote}
+              value={checkInNotes.warm}
+              onChange={(on) => {
+                void checkInNotes.setWarm(on).then((result) => {
+                  if (result === 'denied') notice.failure(a.warmMessages, a.notificationsDenied);
+                });
+              }}
+            />
+          ) : null}
+          {checkInNotes.supported ? <BedtimeRemindersSwitch /> : null}
+          {cycleReminders.supported && user.gender === 'female' ? (
+            <SwitchRow
+              label={a.cycleReminders}
+              hint={a.cycleRemindersNote}
+              value={cycleReminders.enabled}
+              onChange={(on) => {
+                void cycleReminders.set(on).then((result) => {
+                  if (result === 'denied') notice.failure(a.cycleReminders, a.notificationsDenied);
                 });
               }}
             />

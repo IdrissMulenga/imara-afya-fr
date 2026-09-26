@@ -11,6 +11,7 @@ export const API_ORIGIN = GRAPHQL_URL.replace(/\/graphql\/?$/i, '');
 
 const AVATAR_URL = `${API_ORIGIN}/upload/avatar`;
 
+/** A full URL for a photo: backend paths get the API origin, full URLs are kept. */
 export function resolveMedia(url?: string | null): string | null {
   const value = url?.trim();
   if (!value) return null;

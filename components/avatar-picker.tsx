@@ -15,6 +15,7 @@ import { useSession } from '@/lib/session';
 import { uploadAvatar, removeAvatar } from '@/lib/media';
 import { errorMessage } from '@/lib/errors';
 
+/** The profile photo with buttons to change or remove it. */
 export function AvatarPicker() {
   const { lang } = useLang();
   const { c } = useTheme();

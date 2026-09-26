@@ -68,6 +68,14 @@ class SleepModule : Module() {
       }
     }
 
+    // Stored classify readings: [{ time, confidence }], time in ms, confidence 0-100.
+    Function("getClassifications") {
+      val ctx = context ?: return@Function emptyList<Map<String, Double>>()
+      SleepReceiver.readClassify(ctx).map { (time, confidence) ->
+        mapOf("time" to time.toDouble(), "confidence" to confidence.toDouble())
+      }
+    }
+
     Function("clearSegments") {
       context?.let { SleepReceiver.clear(it) }
     }

@@ -324,10 +324,7 @@ const styles = StyleSheet.create({
   },
 });
 
-/**
- * A number with minus and plus buttons.
- * Stops at min and max, which match the backend limits.
- */
+/** A number with minus and plus buttons, stopping at min and max. */
 export function Stepper({
   label,
   hint,

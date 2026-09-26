@@ -1,6 +1,5 @@
-// Frosted panel. Real blur on iOS; a translucent fill on Android (blur is too slow
-// on low-end phones). On iOS a shadow separates it in light mode; on Android a
-// hairline edge does (elevation shadows show through translucent views).
+// Frosted panel: real blur on iOS, a translucent fill with a hairline edge on Android
+// (blur is too slow on low-end phones).
 import React from 'react';
 import { View, Platform, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';

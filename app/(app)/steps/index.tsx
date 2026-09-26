@@ -1,6 +1,5 @@
 // Steps: today's ring, streak and averages, a 14-day chart and the last 30 days.
-// Steps are counted automatically; typing them is offered only when the phone
-// cannot count (no sensor, or permission refused).
+// Manual entry is offered only when the phone cannot count steps.
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';

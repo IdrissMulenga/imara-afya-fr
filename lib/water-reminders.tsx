@@ -1,24 +1,18 @@
-// Water reminders: local notifications at set times with a "+1 glass" button.
-// On Android the button logs the glass in the background; on iOS it opens the app,
-// which logs it. Imported from app/_layout.tsx so the background task is defined at
-// startup.
-//
-// Off in Expo Go: expo-task-manager and parts of expo-notifications throw on import
-// when their native modules are missing, so they are only loaded when supported.
+// Water reminders with a "+1 glass" button (logged in the background on Android). Imported
+// from app/_layout.tsx so the task exists at startup; off in Expo Go.
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { Platform } from 'react-native';
-import { isRunningInExpoGo } from 'expo';
 import * as SecureStore from 'expo-secure-store';
 import type { NotificationResponse, NotificationTaskPayload } from 'expo-notifications';
 import { client } from './apollo';
 import { getToken } from './tokens';
 import { localDay } from './steps';
 import { useSession } from './session';
+import { Notifications, createToggle, ensurePermission, hasPermission, supported } from './notifications';
 import { ADD_WATER } from '@/graphql/habits';
 import { APP_COPY } from '@/theme/copy-app';
 import { useLang, type Lang } from '@/theme/i18n';
 
-const ENABLED_KEY = 'imara.waterReminders';
 const HANDLED_KEY = 'imara.waterHandled';
 const CATEGORY = 'water-reminder';
 const ACTION = 'add-water';
@@ -28,22 +22,13 @@ const WATER_TASK = 'imara-water-action';
 /** Local hours at which a reminder is shown. */
 export const REMINDER_HOURS = [9, 12, 15, 18] as const;
 
-const supported = (Platform.OS === 'android' || Platform.OS === 'ios') && !isRunningInExpoGo();
-
 // Loaded only when supported; every use below is behind a `supported` check.
-const Notifications = (supported ? require('expo-notifications') : null) as typeof import('expo-notifications');
 const TaskManager = (supported ? require('expo-task-manager') : null) as typeof import('expo-task-manager');
 
-if (supported) {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-    }),
-  });
+// Shared on/off state, so every screen showing it updates together.
+const enabledStore = createToggle('imara.waterReminders');
 
+if (supported) {
   // Android runs this when "+1 glass" is tapped while the app is in the background or closed.
   TaskManager.defineTask<NotificationTaskPayload>(WATER_TASK, async ({ data }) => {
     if (data && 'actionIdentifier' in data) await handleWaterResponse(data);
@@ -126,54 +111,25 @@ async function cancel(): Promise<void> {
   }
 }
 
-async function isEnabled(): Promise<boolean> {
-  try {
-    return (await SecureStore.getItemAsync(ENABLED_KEY)) === '1';
-  } catch {
-    return false;
-  }
-}
-
-// Shared on/off state, so every screen showing it updates together.
-let enabledNow = false;
-const subscribers = new Set<() => void>();
-const setEnabledNow = (value: boolean) => {
-  enabledNow = value;
-  subscribers.forEach((notify) => notify());
-};
-const subscribe = (notify: () => void) => {
-  subscribers.add(notify);
-  return () => {
-    subscribers.delete(notify);
-  };
-};
-if (supported) void isEnabled().then(setEnabledNow);
-
 /** Asks for notification permission and schedules the reminders. */
 export async function enableWaterReminders(lang: Lang): Promise<'enabled' | 'denied'> {
-  if (!supported) return 'denied';
-  const current = await Notifications.getPermissionsAsync();
-  let granted = current.granted;
-  if (!granted && current.canAskAgain) granted = (await Notifications.requestPermissionsAsync()).granted;
-  if (!granted) return 'denied';
-
+  if (!(await ensurePermission())) return 'denied';
   await schedule(lang);
-  await SecureStore.setItemAsync(ENABLED_KEY, '1').catch(() => {});
-  setEnabledNow(true);
+  await enabledStore.set(true);
   return 'enabled';
 }
 
+/** Cancels the water reminders and turns them off. */
 export async function disableWaterReminders(): Promise<void> {
   if (!supported) return;
   await cancel();
-  await SecureStore.deleteItemAsync(ENABLED_KEY).catch(() => {});
-  setEnabledNow(false);
+  await enabledStore.set(false);
 }
 
 /** Re-schedules enabled reminders (e.g. in a new language). */
 async function refresh(lang: Lang): Promise<void> {
-  if (!supported || !(await isEnabled())) return;
-  if (!(await Notifications.getPermissionsAsync()).granted) return;
+  if (!supported || !(await enabledStore.load())) return;
+  if (!(await hasPermission())) return;
   await schedule(lang).catch(() => {});
 }
 
@@ -206,7 +162,7 @@ export function WaterReminders() {
 /** Reminder state for settings and the dashboard. */
 export function useWaterReminders() {
   const { lang } = useLang();
-  const enabled = useSyncExternalStore(subscribe, () => enabledNow);
+  const enabled = useSyncExternalStore(enabledStore.subscribe, enabledStore.get);
   const enable = useCallback(() => enableWaterReminders(lang), [lang]);
   const disable = useCallback(() => disableWaterReminders(), []);
 

@@ -5,6 +5,7 @@ import { light, dark, type Theme } from './tokens';
 
 const ThemeContext = createContext<{ c: Theme; isDark: boolean }>({ c: light, isDark: false });
 
+/** Provides the light or dark colours, following the phone setting. */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';

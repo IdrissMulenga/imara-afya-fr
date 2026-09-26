@@ -1,9 +1,5 @@
-// Background sync of steps and sleep, roughly every 15 minutes while the app is
-// closed (the OS decides the exact timing). Imported from app/_layout.tsx so the task
-// is defined at startup, including when the OS launches the app only to run it.
-//
-// The task packages are loaded only outside Expo Go: they throw on import when their
-// native module is missing, and Expo Go on Android does not include TaskManager.
+// Background sync of steps and sleep about every 15 minutes (off in Expo Go). Imported from
+// app/_layout.tsx so the task exists at startup.
 import { Platform } from 'react-native';
 import { isRunningInExpoGo } from 'expo';
 import { syncHealth } from './sync';
@@ -29,6 +25,7 @@ if (TaskManager && BackgroundTask) {
   });
 }
 
+/** Registers the background sync task when the OS allows it. */
 export async function registerStepsTask(): Promise<void> {
   if (!TaskManager || !BackgroundTask) return;
   try {
@@ -41,6 +38,7 @@ export async function registerStepsTask(): Promise<void> {
   }
 }
 
+/** Removes the background sync task. */
 export async function unregisterStepsTask(): Promise<void> {
   if (!TaskManager || !BackgroundTask) return;
   try {

@@ -1,6 +1,5 @@
-// Session state for the whole app: signIn, signOut and the current user.
-// A session ends only on sign-out or when the server rejects the token;
-// network failures keep the user signed in.
+// Session state: signIn, signOut and the current user. Only sign-out or a rejected token
+// ends a session; network failures keep the user signed in.
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 import type { ApolloClient } from '@apollo/client';
@@ -42,6 +41,7 @@ const SessionContext = createContext<SessionValue>({
   refreshUser: async () => {},
 });
 
+/** Provides the session to the app. */
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const client = useApolloClient();
   const { setLang } = useLang();

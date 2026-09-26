@@ -1,5 +1,5 @@
 // Screen frame: safe area, keyboard handling, pinned header and footer, backdrop.
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -16,6 +16,13 @@ import { Toast, useToastState } from '@/components/notice';
 import { useTheme } from '@/theme/theme';
 import { radius, size } from '@/theme/tokens';
 import { AuthBackdrop } from './backdrop';
+import { useMenuSpace } from './menu-bar';
+
+// Lets a control that is dragged (like the sleep schedule dial) stop the page scrolling.
+const ScrollLockContext = createContext<(locked: boolean) => void>(() => {});
+
+/** Call with true while a drag is in progress, false when it ends. */
+export const useScrollLock = () => useContext(ScrollLockContext);
 
 /** Whether the keyboard is on screen. */
 function useKeyboardVisible(): boolean {
@@ -37,12 +44,13 @@ function useKeyboardVisible(): boolean {
   return visible;
 }
 
+/** Page frame: safe area, pinned header and footer, scrolling content, pull-to-refresh, toast. */
 export function Screen({
   children,
   backdrop = true,
   header,
   footer,
-  menu,
+  tabbed,
   onRefresh,
 }: {
   children?: React.ReactNode;
@@ -50,14 +58,14 @@ export function Screen({
   backdrop?: boolean;
   /** Pinned to the bottom, outside the scroll view. */
   footer?: React.ReactNode;
-  /** A floating, fully rounded bar above the bottom edge (the menu bar). */
-  menu?: React.ReactNode;
+  /** One of the main tabs: leaves room for the floating menu at the bottom. */
+  tabbed?: boolean;
   /** Enables pull-to-refresh; the spinner shows until the promise settles. */
   onRefresh?: () => Promise<unknown>;
   /** Pinned to the top, outside the scroll view. Owns the top safe-area inset. */
   header?: React.ReactNode;
 }) {
-  const { c, isDark } = useTheme();
+  const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToastState();
   const keyboardUp = useKeyboardVisible();
@@ -65,8 +73,8 @@ export function Screen({
   const bottomInset = keyboardUp ? 0 : insets.bottom;
 
   const [footerHeight, setFooterHeight] = useState(0);
-  const [menuHeight, setMenuHeight] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [scrollLocked, setScrollLocked] = useState(false);
 
   const refresh = async () => {
     if (!onRefresh) return;
@@ -79,12 +87,8 @@ export function Screen({
       setRefreshing(false);
     }
   };
-  // Sits just above the home indicator / gesture bar, overlapping part of its
-  // empty inset, with a small margin on phones that have none.
-  const menuBottom = Math.max(insets.bottom - 10, 10);
-  const showMenu = Boolean(menu) && !keyboardUp;
-  // The glass rim: a light edge in dark mode, a faint dark one in light mode.
-  const rim = isDark ? 'rgba(255,255,255,0.16)' : 'rgba(19,35,58,0.08)';
+  const menuSpace = useMenuSpace();
+  const showMenu = Boolean(tabbed) && !keyboardUp;
 
   return (
     <KeyboardAvoidingView
@@ -102,10 +106,11 @@ export function Screen({
             {
               paddingTop: header ? 20 : insets.top + 12,
               paddingBottom: showMenu
-                ? menuBottom + menuHeight + 24
+                ? menuSpace.bottom + menuSpace.height + 24
                 : bottomInset + (footer ? 110 : 28),
             },
           ]}
+          scrollEnabled={!scrollLocked}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -120,7 +125,7 @@ export function Screen({
             ) : undefined
           }
         >
-          {children}
+          <ScrollLockContext.Provider value={setScrollLocked}>{children}</ScrollLockContext.Provider>
         </ScrollView>
       </TouchableWithoutFeedback>
 
@@ -128,7 +133,7 @@ export function Screen({
         <Toast
           key={toast.id}
           message={toast.message}
-          bottom={showMenu ? menuBottom + menuHeight + 12 : footerHeight + 14}
+          bottom={showMenu ? menuSpace.bottom + menuSpace.height + 12 : footerHeight + 14}
         />
       ) : null}
 
@@ -155,41 +160,6 @@ export function Screen({
         </View>
       ) : null}
 
-      {showMenu ? (
-        // Floating glass pill with a light rim. iOS: real blur, shadow on the wrapper
-        // (Glass clips). Android: a translucent fill (blur is too slow on low-end phones)
-        // carrying its own elevation, since Android draws no shadow without a background.
-        <View
-          style={[styles.menuDock, { bottom: menuBottom }, Platform.OS === 'ios' ? styles.menuLiftIOS : null]}
-          onLayout={(e) => setMenuHeight(e.nativeEvent.layout.height)}
-        >
-          {Platform.OS === 'ios' ? (
-            <Glass
-              intensity={80}
-              radius={PILL}
-              flat
-              style={[styles.menuInner, { borderWidth: 1, borderColor: rim }]}
-            >
-              {menu}
-            </Glass>
-          ) : (
-            <View
-              style={[
-                styles.menuInner,
-                styles.menuLiftAndroid,
-                {
-                  borderRadius: PILL,
-                  backgroundColor: isDark ? 'rgba(38,39,42,0.94)' : 'rgba(255,255,255,0.94)',
-                  borderWidth: 1,
-                  borderColor: rim,
-                },
-              ]}
-            >
-              {menu}
-            </View>
-          )}
-        </View>
-      ) : null}
     </KeyboardAvoidingView>
   );
 }
@@ -200,9 +170,6 @@ export const Spacer = () => <View style={{ flexGrow: 1, minHeight: 24 }} />;
 /** Vertical space. */
 export const Gap = ({ h = 16 }: { h?: number }) => <View style={{ height: h }} />;
 
-// Radius large enough to make the menu a pill whatever its height.
-const PILL = 999;
-
 const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
@@ -212,15 +179,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.card,
     borderTopRightRadius: radius.card,
   },
-  menuDock: { position: 'absolute', left: 36, right: 36 },
-  menuInner: { padding: 5 },
-  menuLiftIOS: {
-    shadowColor: '#0C1A2E',
-    shadowOpacity: 0.2,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 10 },
-  },
-  menuLiftAndroid: { elevation: 14 },
   footerLift: {
     shadowColor: '#0C1A2E',
     shadowOpacity: 0.14,

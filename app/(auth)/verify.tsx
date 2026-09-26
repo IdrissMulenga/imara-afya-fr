@@ -1,8 +1,4 @@
-// Six-digit code screen for all three purposes:
-//   LOGIN   verifyLoginOtp
-//   SIGNUP  verifyEmailOtp
-//   RESET   verifyPasswordResetOtp
-// Expiry comes from the server; resend is allowed after 60 seconds.
+// Six-digit code screen for LOGIN, SIGNUP and RESET codes; resend after 60 seconds.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -95,7 +91,7 @@ export default function Verify() {
         });
         if (data?.verifyLoginOtp) {
           await signIn(data.verifyLoginOtp);
-          router.replace('/(app)/dashboard');
+          router.replace('/dashboard');
         }
         return;
       }
@@ -104,7 +100,7 @@ export default function Verify() {
         const { data } = await verifyEmail({ variables: { input: { code: value } } });
         if (data?.verifyEmailOtp) {
           setUser(data.verifyEmailOtp);
-          router.replace('/(app)/dashboard');
+          router.replace('/dashboard');
         }
         return;
       }

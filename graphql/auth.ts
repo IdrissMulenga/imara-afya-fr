@@ -25,6 +25,10 @@ export const USER_FIELDS = gql`
     waterGoalGlasses
     stepGoal
     sleepGoalHours
+    sleepBedtime
+    sleepWakeTime
+    sleepWeekendBedtime
+    sleepWeekendWakeTime
 
     createdAt
   }
@@ -181,6 +185,12 @@ export type AuthUser = {
   waterGoalGlasses: number;
   stepGoal: number;
   sleepGoalHours: number;
+  /** Sleep schedule as HH:MM; null when not set. */
+  sleepBedtime: string | null;
+  sleepWakeTime: string | null;
+  /** Nights ending on Saturday and Sunday; null means the same as weekdays. */
+  sleepWeekendBedtime: string | null;
+  sleepWeekendWakeTime: string | null;
 
   createdAt: string;
 };

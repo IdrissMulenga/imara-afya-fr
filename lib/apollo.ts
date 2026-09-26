@@ -1,7 +1,5 @@
-// Apollo Client (v4). Links, in order:
-//   auth   bearer token, device id, language
-//   error  clears a dead session
-//   http   the request
+// Apollo Client: auth link (token, device id, language), then error link (ends a dead
+// session), then http.
 import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
 import { SetContextLink } from '@apollo/client/link/context';
 import { ErrorLink } from '@apollo/client/link/error';
@@ -31,6 +29,7 @@ function resolveUrl(): string {
   return `http://localhost:${API_PORT}/graphql`;
 }
 
+/** The backend's GraphQL URL for this build. */
 export const GRAPHQL_URL = resolveUrl();
 
 if (__DEV__) {
@@ -86,6 +85,7 @@ const errorLink = new ErrorLink(({ error, operation }) => {
   })();
 });
 
+/** The Apollo client used by the whole app. */
 export const client = new ApolloClient({
   link: from([authLink, errorLink, httpLink]),
   cache: new InMemoryCache({

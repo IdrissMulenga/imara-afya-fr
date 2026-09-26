@@ -9,7 +9,6 @@ import { Glass } from '@/components/glass';
 import { StepButton } from '@/components/panel';
 import { QuietButton, LinkText } from '@/components/ui';
 import { useNotice } from '@/components/notice';
-import { StepsHero } from '@/components/steps-ring';
 import { WaterGlass, SleepRing, WATER_COLOR, SLEEP_COLOR } from '@/components/habit-art';
 import { usePressScale } from '@/components/motion';
 import { useLang, type Lang } from '@/theme/i18n';
@@ -17,7 +16,8 @@ import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
 import { errorMessage } from '@/lib/errors';
-import { useSteps, useTodaySteps } from '@/lib/steps-provider';
+import { useSteps } from '@/lib/steps-provider';
+import { schedulesFrom, upcomingNight } from '@/lib/sleep-schedule';
 import type { AuthUser } from '@/graphql/auth';
 import {
   ADD_WATER,
@@ -46,6 +46,7 @@ export const dayLabel = (day: string, lang: Lang): string => {
 
 const fmt = (value: number): string => value.toLocaleString();
 
+/** The streak line under a habit, e.g. "3-day streak". */
 export const streakText = (days: number, a: AppCopy): string =>
   days > 0 ? a.streak.replace('{n}', String(days)) : a.noStreak;
 
@@ -305,13 +306,15 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
   const a = APP_COPY[lang];
   const goal = user.sleepGoalHours;
   const met = goal > 0 && today.sleepHours >= goal;
+  const schedules = schedulesFrom(user);
+  const night = schedules ? upcomingNight(schedules) : null;
 
   return (
     <HabitTile
       title={a.sleepLabel}
       icon="power-sleep"
       tint={SLEEP_COLOR}
-      onPress={() => router.push('/(app)/sleep')}
+      onPress={() => router.push('/sleep')}
       art={<SleepRing hours={today.sleepHours} goal={goal} size={108} stroke={9} moonOnly />}
       caption={
         <View style={{ gap: 2 }}>
@@ -320,6 +323,14 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
             {fmt(today.sleepHours)} h
             <Text style={[T.fine, { color: c.muted }]}> / {fmt(goal)} {a.hours}</Text>
           </Text>
+          {night ? (
+            <View style={styles.tonight}>
+              <MaterialCommunityIcons name="bed-clock" size={14} color={SLEEP_COLOR} />
+              <Text style={[T.fine, { color: c.muted, flexShrink: 1 }]} numberOfLines={1}>
+                {a.tonightSchedule.replace('{bed}', night.bedtime).replace('{wake}', night.wakeTime)}
+              </Text>
+            </View>
+          ) : null}
         </View>
       }
       streak={streak != null ? streakText(streak, a) : undefined}
@@ -328,29 +339,8 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
   );
 }
 
-/** The dashboard's Today section: the steps card, then the water and sleep tiles. */
-export function TodayCard({ user, summary }: { user: AuthUser; summary?: HabitSummary }) {
-  const router = useRouter();
-  const { today: localDay } = useSteps();
-  const today = summary?.today ?? { day: localDay, waterGlasses: 0, steps: 0, sleepHours: 0 };
-  const steps = useTodaySteps(summary?.today);
-
-  return (
-    <View style={{ gap: 12 }}>
-      <StepsHero
-        steps={steps}
-        goal={user.stepGoal}
-        streakDays={summary?.streaks.steps ?? 0}
-        onPress={() => router.push('/(app)/steps')}
-        footer={<StepsPrompt />}
-      />
-      <WaterTile user={user} today={today} streak={summary?.streaks.water} />
-      <SleepTile user={user} today={today} streak={summary?.streaks.sleep} />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
+  tonight: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   tileHead: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'stretch' },
   tileIcon: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   tileBody: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 12 },

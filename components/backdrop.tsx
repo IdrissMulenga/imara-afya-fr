@@ -9,6 +9,7 @@ const GREEN = '#2EA34C';
 const BLUE = '#1B5AAE';
 const BLUE_DARK = '#5B9BE8';
 
+/** Decorative background for the sign-in screens. */
 export function AuthBackdrop() {
   const { isDark } = useTheme();
   const { width, height } = useWindowDimensions();

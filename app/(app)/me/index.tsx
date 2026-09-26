@@ -6,7 +6,6 @@ import { Screen } from '@/components/screen';
 import { AppHeader } from '@/components/header';
 import { Section, FactRow, NavRow, Badge, Divider, IdentityCard } from '@/components/panel';
 import { FadeIn } from '@/components/motion';
-import { MenuBar } from '@/components/menu-bar';
 import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
@@ -30,8 +29,7 @@ export default function ProfileOverview() {
 
   return (
     <Screen
-      header={<AppHeader title={a.menuProfile} />}
-      menu={<MenuBar active="profile" />}
+      header={<AppHeader title={a.menuProfile} backLabel={t.back} onBack={() => router.back()} />}
       onRefresh={refreshUser}
     >
       <FadeIn delay={60}>

@@ -40,6 +40,7 @@ function Glow({
   );
 }
 
+/** The coloured band every screen header sits in. */
 export function HeaderShell({
   children,
   /** Extra space under the content. */

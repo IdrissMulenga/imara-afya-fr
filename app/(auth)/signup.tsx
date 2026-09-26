@@ -1,8 +1,7 @@
-// Sign-up: name, email, password, gender and terms.
-// Name and gender are saved with updateProfile right after signup; if that fails
-// the account still works. Terms acceptance is not stored on the server.
+// Sign-up: name, email, password, gender and terms. Name and gender are saved right after
+// with updateProfile; terms acceptance is not stored on the server.
 import React, { useMemo, useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import { Screen, Spacer, Gap } from '@/components/screen';
@@ -99,7 +98,7 @@ export default function Signup() {
         }
       }
 
-      router.replace('/(app)/dashboard');
+      router.replace('/dashboard');
     } catch (e) {
       const failure = readError(e, lang);
       setError(errorWithWait(e, lang));

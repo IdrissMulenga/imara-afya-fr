@@ -7,6 +7,7 @@ import { useBlink, useFade, usePop } from '@/components/motion';
 
 export const CODE_LENGTH = 6;
 
+/** Input for a six-digit code; onFilled runs once every digit is in. */
 export function OtpInput({
   value,
   onChange,

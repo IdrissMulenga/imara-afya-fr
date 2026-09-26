@@ -1,8 +1,7 @@
-// Sleep: last night's ring with −/+, automatic tracking, the 7-day average, a 14-day
+// Sleep: last night's ring with −/+, the sleep schedule, automatic tracking, the 7-day average, a 14-day
 // chart and the last 30 nights.
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useQuery } from '@apollo/client/react';
 import { Screen, Gap } from '@/components/screen';
 import { ErrorNote, QuietButton } from '@/components/ui';
@@ -14,6 +13,7 @@ import { MiniStat } from '@/components/steps-ring';
 import { SleepRing, SLEEP_COLOR } from '@/components/habit-art';
 import { HabitChart, HabitHistoryList, HabitStats } from '@/components/habit-history';
 import { SleepButtons, SleepPrompt, useHabitSummary } from '@/components/habits';
+import { SleepScheduleCard } from '@/components/sleep-schedule';
 import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
@@ -27,8 +27,7 @@ const hours = (day: HabitDay) => day.sleepHours;
 const formatHours = (n: number) => `${(Math.round(n * 4) / 4).toLocaleString()} h`;
 
 export default function SleepScreen() {
-  const router = useRouter();
-  const { t, lang } = useLang();
+  const { lang } = useLang();
   const { c } = useTheme();
   const { user } = useSession();
   const { today: localDay, sleepSupported } = useSteps();
@@ -49,7 +48,8 @@ export default function SleepScreen() {
   return (
     <Screen
       onRefresh={() => Promise.all([syncSleep(), summaryQuery.refetch(), historyQuery.refetch()])}
-      header={<AppHeader title={a.sleepLabel} subtitle={a.sleepSub} backLabel={t.back} onBack={() => router.back()} />}
+      header={<AppHeader title={a.sleepLabel} subtitle={a.sleepSub} />}
+      tabbed
     >
       <FadeIn>
         <Glass style={{ padding: 20 }}>
@@ -74,6 +74,11 @@ export default function SleepScreen() {
             </View>
           </View>
         </Glass>
+      </FadeIn>
+
+      <Gap h={18} />
+      <FadeIn delay={40}>
+        <SleepScheduleCard />
       </FadeIn>
 
       {sleepSupported ? (

@@ -1,6 +1,4 @@
-// Animated artwork for water and sleep: a glass that fills with a moving wave, and a
-// floating moon with twinkling stars inside a progress ring. Transforms and opacity
-// only (native thread); still when the OS "reduce motion" setting is on.
+// Animated water glass and sleep moon; still when "reduce motion" is on.
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {

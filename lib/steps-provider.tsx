@@ -1,7 +1,7 @@
 // Automatic tracking for the whole app: step permission and live steps, sleep
 // tracking state, periodic syncs while the app is open, and cleanup on sign-out.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { Pedometer } from 'expo-sensors';
 import { useSession } from './session';
 import {
@@ -18,7 +18,8 @@ import {
   type StepPermission,
 } from './steps';
 import { registerStepsTask, unregisterStepsTask } from './steps-task';
-import { clearSleep, enableSleep, isSleepEnabled, sleepSupported } from './sleep';
+import { clearSleep, enableSleep, isSleepEnabled, setSleepSchedule, sleepSupported } from './sleep';
+import { schedulesFrom } from './sleep-schedule';
 import { syncHealth } from './sync';
 
 // How often to sync while the app is open.
@@ -54,6 +55,7 @@ const StepsContext = createContext<StepsValue>({
   enableSleep: async () => false,
 });
 
+/** Provides step counting and sleep tracking state to the app. */
 export function StepsProvider({ children }: { children: React.ReactNode }) {
   const { user, ready } = useSession();
   const userId = user?.id;
@@ -80,8 +82,17 @@ export function StepsProvider({ children }: { children: React.ReactNode }) {
     void isSleepEnabled().then(setSleepEnabled);
   }, [ready, userId]);
 
+  // The sleep schedule from the profile, kept where background syncs can read it.
+  const schedules = user ? schedulesFrom(user) : null;
+  const scheduleKey = JSON.stringify(schedules);
+  const hasSchedule = Boolean(schedules);
+  useEffect(() => {
+    if (!ready || !userId) return;
+    void setSleepSchedule(JSON.parse(scheduleKey));
+  }, [ready, userId, scheduleKey]);
+
   const active = Boolean(userId) && permission === 'granted' && mode !== 'none';
-  const syncing = active || (Boolean(userId) && sleepEnabled);
+  const syncing = active || (Boolean(userId) && (sleepEnabled || hasSchedule));
 
   // A sync resets the live count: its reading already includes those steps.
   useEffect(
@@ -138,6 +149,13 @@ export function StepsProvider({ children }: { children: React.ReactNode }) {
     setSleepEnabled(started);
     return started;
   }, []);
+
+  // On Android, sleep uses the same physical-activity permission as steps, so it starts
+  // as soon as that is granted.
+  useEffect(() => {
+    if (Platform.OS !== 'android' || !userId || !canTrackSleep || permission !== 'granted' || sleepEnabled) return;
+    void startSleep();
+  }, [userId, canTrackSleep, permission, sleepEnabled, startSleep]);
 
   const today = localDay();
   const value: StepsValue = {

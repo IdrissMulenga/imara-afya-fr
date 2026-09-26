@@ -53,6 +53,8 @@ export default function Preferences() {
   const [units, setUnits] = useState<Units>(user?.units ?? 'metric');
   const [zone, setZone] = useState(user?.timezone ?? '');
   const [cycle, setCycle] = useState(Boolean(user?.cycleTrackingEnabled));
+  // Cycle (period) tracking is only offered to women.
+  const showCycle = user?.gender === 'female';
   const [typing, setTyping] = useState(false);
 
   const [error, setError] = useState('');
@@ -146,7 +148,7 @@ export default function Preferences() {
             language,
             units,
             ...(zone.trim() ? { timezone: zone.trim() } : {}),
-            cycleTrackingEnabled: cycle,
+            cycleTrackingEnabled: showCycle ? cycle : false,
           },
         },
       });
@@ -227,13 +229,16 @@ export default function Preferences() {
         </Section>
       </FadeIn>
 
-      <Gap h={18} />
-
-      <FadeIn delay={250}>
-        <Section title={a.cycleTracking}>
-          <SwitchRow label={a.cycleTracking} hint={a.cycleNote} value={cycle} onChange={setCycle} />
-        </Section>
-      </FadeIn>
+      {showCycle ? (
+        <>
+          <Gap h={18} />
+          <FadeIn delay={250}>
+            <Section title={a.cycleTracking}>
+              <SwitchRow label={a.cycleTracking} hint={a.cycleNote} value={cycle} onChange={setCycle} />
+            </Section>
+          </FadeIn>
+        </>
+      ) : null}
 
       {error ? (
         <View style={{ marginTop: 18 }}>

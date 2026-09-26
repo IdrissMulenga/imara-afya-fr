@@ -2,6 +2,9 @@
 // Kiswahili and Ikirundi are drafts pending review by a native speaker.
 import type { Lang } from './i18n';
 
+/** low = score 1–2, mid = 3, high = 4–5. */
+export type MoodBand = 'low' | 'mid' | 'high';
+
 export type AppCopy = {
   // dashboard
   greetMorning: string;
@@ -129,7 +132,6 @@ export type AppCopy = {
   outOfRange: string;
 
   // habits
-  habitsToday: string;
   dayToday: string;
   waterLabel: string;
   stepsLabel: string;
@@ -161,7 +163,6 @@ export type AppCopy = {
   addHalfHour: string;
   removeHalfHour: string;
   seeHistory: string;
-  seeHistorySub: string;
   menuHome: string;
   menuProfile: string;
   trackSleep: string;
@@ -175,6 +176,13 @@ export type AppCopy = {
   waterReminderTitle: string;
   waterReminderBody: string;
   addGlassAction: string;
+  moodReminders: string;
+  moodRemindersNote: string;
+  moodReminderTitle: string;
+  moodReminderBody: string;
+  warmMessages: string;
+  warmMessagesNote: string;
+  warmMessageTitle: string;
   remindMe: string;
   remindersOn: string;
   notificationsDenied: string;
@@ -191,17 +199,199 @@ export type AppCopy = {
   checkInLabel: string;
   checkInSub: string;
   checkInPrompt: string;
-  checkInPromptSub: string;
-  checkInCta: string;
+  checkInQuickHint: string;
+  checkInDetails: string;
+  menuCheckIn: string;
+  /** Warm message by mood (outer) and energy (inner): low = 1–2, mid = 3, high = 4–5. */
+  moodMessages: Record<MoodBand, Record<MoodBand, string>>;
+  moodSupport: string;
+  /** {h} is a duration such as "7 h 30 min". */
+  sleepScheduleTitle: string;
+  sleepScheduleEmpty: string;
+  sleepScheduleSet: string;
+  bedtimeLabel: string;
+  wakeUpLabel: string;
+  sleepGoalShort: string;
+  inBedHours: string;
+  meetsGoal: string;
+  shortOfGoal: string;
+  saveSchedule: string;
+  removeSchedule: string;
+  scheduleSaved: string;
+  scheduleRemoved: string;
+  bedtimeReminders: string;
+  bedtimeRemindersNote: string;
+  windDownTitle: string;
+  windDownBody: string;
+  goodMorningTitle: string;
+  goodMorningBody: string;
+  sleepFromSchedule: string;
+  dragToAdjust: string;
+  weekdaysLabel: string;
+  weekendLabel: string;
+  weekendDifferent: string;
+  weekendNote: string;
+  bedtimeRemindersNeedsSchedule: string;
+  tonightSchedule: string;
+  menuSleep: string;
+  flowMoodTitle: string;
+  flowEnergyTitle: string;
+  flowNoteTitle: string;
+  newCheckIn: string;
+  /** {n} is a number of goals. */
+  sectionFeel: string;
+  sectionActivity: string;
+  sectionWaterSleep: string;
+  goalsMet: string;
+  goalsAllMet: string;
+  goalsNone: string;
+  /** {n} is a number of days; {date} is a date. */
+  menuCycle: string;
+  cycleTitle: string;
+  cycleSub: string;
+  cycleDayN: string;
+  phaseMenstrual: string;
+  phaseFollicular: string;
+  phaseFertile: string;
+  phaseLuteal: string;
+  phaseUnknown: string;
+  nextPeriodIn: string;
+  nextPeriodTomorrow: string;
+  periodToday: string;
+  periodLate: string;
+  periodDayN: string;
+  fertileFrom: string;
+  fertileNow: string;
+  periodStartedToday: string;
+  periodEndedToday: string;
+  periodStartedOn: string;
+  periodEndedOn: string;
+  anotherDay: string;
+  cycleEmpty: string;
+  legendPeriod: string;
+  legendPredicted: string;
+  legendFertile: string;
+  legendOvulation: string;
+  avgCycle: string;
+  avgPeriod: string;
+  usingTypical: string;
+  periodsHistory: string;
+  ongoing: string;
+  daysN: string;
+  removePeriodConfirm: string;
+  periodSaved: string;
+  periodRemoved: string;
+  cycleDisclaimer: string;
+  flowNone: string;
+  flowSpotting: string;
+  flowLight: string;
+  flowMedium: string;
+  flowHeavy: string;
+  symCramps: string;
+  symHeadache: string;
+  symBackPain: string;
+  symBloating: string;
+  symTenderBreasts: string;
+  symAcne: string;
+  symFatigue: string;
+  symNausea: string;
+  symCravings: string;
+  symInsomnia: string;
+  symMoodSwings: string;
+  symAnxiety: string;
+  disDry: string;
+  disSticky: string;
+  disCreamy: string;
+  disWatery: string;
+  disEggWhite: string;
+  disUnusual: string;
+  tipMenstrual: string;
+  tipFollicular: string;
+  tipFertile: string;
+  tipLuteal: string;
+  tipUnknown: string;
+  inMenstrual: string;
+  inFollicular: string;
+  inFertile: string;
+  inLuteal: string;
+  noteIrregular: string;
+  noteShort: string;
+  noteLong: string;
+  noteLongPeriods: string;
+  noteVeryLate: string;
+  legendLogged: string;
+  todayLogTitle: string;
+  nothingLogged: string;
+  logToday: string;
+  editToday: string;
+  insightsTitle: string;
+  patternText: string;
+  patternCount: string;
+  upcomingTitle: string;
+  upcomingFertile: string;
+  openCalendar: string;
+  calendarPageTitle: string;
+  calendarPageSub: string;
+  calendarAhead: string;
+  calendarJourney: string;
+  variationLabel: string;
+  cycleOfN: string;
+  autoEndedNote: string;
+  setEndDay: string;
+  cycleReminders: string;
+  cycleRemindersNote: string;
+  periodSoonTitle: string;
+  periodSoonBody: string;
+  fertileTitle: string;
+  fertileBody: string;
+  dayLogTitle: string;
+  flowLabel: string;
+  symptomsLabel: string;
+  dischargeLabel: string;
+  dayNoteLabel: string;
+  futureDay: string;
+  dayTooOld: string;
+  dayInPeriod: string;
+  dayExpectedPeriod: string;
+  dayFertile: string;
+  dayOvulation: string;
+  periodStartedHere: string;
+  periodEndedHere: string;
+  reportTitle: string;
+  reportSub: string;
+  shareReport: string;
+  reportSummary: string;
+  reportGenerated: string;
+  reportTypicalCycle: string;
+  reportTypicalPeriod: string;
+  reportCyclesLogged: string;
+  reportNextPeriod: string;
+  reportNotes: string;
+  reportSymptoms: string;
+  reportCycles: string;
+  reportNoPeriods: string;
+  /** {n} is the number of check-ins. */
+  checkInAgain: string;
+  checkInsToday: string;
+  checkInsTodayOne: string;
+  checkInTodayList: string;
+  checkInRemoveOne: string;
+  trendTitle: string;
+  trend7: string;
+  trend30: string;
+  trendUp: string;
+  trendDown: string;
+  trendSteady: string;
+  trendNotEnough: string;
+  bestMorning: string;
+  bestAfternoon: string;
+  bestEvening: string;
   moodLabel: string;
   energyLabel: string;
   checkInNote: string;
   checkInNotePlaceholder: string;
   checkInSave: string;
-  checkInUpdate: string;
   checkInSaved: string;
-  checkInRemove: string;
-  checkInRemoveConfirm: string;
   checkInRemoved: string;
   remove: string;
   moodAverage: string;
@@ -209,7 +399,6 @@ export type AppCopy = {
   checkInDays: string;
   checkInHistory: string;
   noCheckIns: string;
-  pickBoth: string;
   moodName: string;
   energyName: string;
   last30Days: string;
@@ -334,7 +523,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Loading',
     retry: 'Try again',
     outOfRange: 'That number is outside the allowed range.',
-    habitsToday: 'TODAY',
     dayToday: 'Today',
     waterLabel: 'Water',
     stepsLabel: 'Steps',
@@ -366,7 +554,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     addHalfHour: 'Add half an hour',
     removeHalfHour: 'Remove half an hour',
     seeHistory: 'Steps history',
-    seeHistorySub: 'Last 30 days',
     menuHome: 'Home',
     menuProfile: 'Profile',
     trackSleep: 'Track my sleep automatically',
@@ -380,6 +567,13 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterReminderTitle: 'Time for a glass of water',
     waterReminderBody: 'Tap “+1 glass” once you have had one.',
     addGlassAction: '+1 glass',
+    moodReminders: 'Mood check reminders',
+    moodRemindersNote: 'At 9:00, 14:00 and 19:00. Skipped if you checked in shortly before.',
+    moodReminderTitle: 'How are you feeling?',
+    moodReminderBody: 'Take a moment to check in: pick a face and a battery.',
+    warmMessages: 'Warm messages',
+    warmMessagesNote: 'A kind note a few hours after you check in, based on how you feel.',
+    warmMessageTitle: 'A note for you',
     remindMe: 'Remind me to drink water',
     remindersOn: 'Water reminders are on',
     notificationsDenied: 'Notifications are off for Imara Afya. Turn them on in your phone settings.',
@@ -395,17 +589,210 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInLabel: 'Check-in',
     checkInSub: 'How you feel, one moment a day.',
     checkInPrompt: 'How are you feeling today?',
-    checkInPromptSub: 'Two taps: your mood and your energy.',
-    checkInCta: 'Check in',
+    checkInQuickHint: 'Tap a face and a battery. It saves by itself.',
+    checkInDetails: 'Details',
+    menuCheckIn: 'Mood',
+    moodMessages: {
+      low: {
+        low: 'Today feels heavy, and that is okay. Be gentle with yourself: rest, drink some water and take it one small step at a time.',
+        mid: 'Not every day is easy. Try one small thing that usually lifts you: a short walk, a song you love or a call to a friend.',
+        high: 'You have energy even if your heart feels low. A walk outside or a talk with someone you trust might make it feel lighter.',
+      },
+      mid: {
+        low: 'An okay day with low energy. Rest when you can, and try going to bed a little earlier tonight.',
+        mid: 'A steady day. Keep going: small habits like water and moving your body add up.',
+        high: 'You have good energy today. Use some of it for something that makes you smile.',
+      },
+      high: {
+        low: 'Your mood is bright even though you are tired. Enjoy the good feeling and give your body the rest it asks for.',
+        mid: 'So good to see you feeling well! Hold on to what made today good.',
+        high: 'You are shining today! Share that energy, it might brighten someone else’s day too.',
+      },
+    },
+    moodSupport: 'Your mood has been low for several days. You do not have to carry it alone: talking to someone you trust or a health worker can help.',
+    sleepScheduleTitle: 'SLEEP SCHEDULE',
+    sleepScheduleEmpty: 'Set a bedtime and a wake-up time. Imara uses them to track your sleep each night, like Apple Health, and to remind you when it is time for bed.',
+    sleepScheduleSet: 'Set sleep schedule',
+    bedtimeLabel: 'Bedtime',
+    wakeUpLabel: 'Wake up',
+    sleepGoalShort: 'Sleep goal',
+    inBedHours: '{h} in bed',
+    meetsGoal: 'Meets your {h} goal',
+    shortOfGoal: '{h} less than your goal',
+    saveSchedule: 'Save schedule',
+    removeSchedule: 'Remove schedule',
+    scheduleSaved: 'Sleep schedule saved',
+    scheduleRemoved: 'Sleep schedule removed',
+    bedtimeReminders: 'Bedtime reminders',
+    bedtimeRemindersNote: 'A reminder 30 minutes before bedtime and a good-morning note at wake-up.',
+    windDownTitle: 'Bedtime in 30 minutes',
+    windDownBody: 'Time to wind down: dim the lights and put your phone away.',
+    goodMorningTitle: 'Good morning!',
+    goodMorningBody: 'Open Imara to see how you slept.',
+    sleepFromSchedule: 'Nights your phone misses are estimated from your schedule and your movement · correct with − and +',
+    dragToAdjust: 'Drag the bed or the alarm around the ring, or drag the arc to move both.',
+    weekdaysLabel: 'Weekdays',
+    weekendLabel: 'Weekend',
+    weekendDifferent: 'Different times on weekends',
+    weekendNote: 'For Friday and Saturday nights.',
+    bedtimeRemindersNeedsSchedule: 'Set a sleep schedule on the Sleep page to get these.',
+    tonightSchedule: 'Tonight: bed {bed} · wake {wake}',
+    menuSleep: 'Sleep',
+    flowMoodTitle: 'How are you feeling right now?',
+    flowEnergyTitle: 'How is your energy right now?',
+    flowNoteTitle: 'Anything you want to add?',
+    newCheckIn: 'New check-in',
+    sectionFeel: 'HOW YOU FEEL',
+    sectionActivity: 'ACTIVITY',
+    sectionWaterSleep: 'WATER & SLEEP',
+    goalsMet: '{n} of 3 goals met today',
+    goalsAllMet: 'All 3 goals met today. Well done!',
+    goalsNone: 'Your goals for today are waiting',
+    menuCycle: 'Cycle',
+    cycleTitle: 'Cycle',
+    cycleSub: 'Your periods and what comes next.',
+    cycleDayN: 'Day {n}',
+    phaseMenstrual: 'Period',
+    phaseFollicular: 'Follicular phase',
+    phaseFertile: 'Fertile window',
+    phaseLuteal: 'Luteal phase',
+    phaseUnknown: 'No data yet',
+    nextPeriodIn: 'Next period in {n} days',
+    nextPeriodTomorrow: 'Next period expected tomorrow',
+    periodToday: 'Period expected today',
+    periodLate: 'Period is {n} days late',
+    periodDayN: 'Period · day {n}',
+    fertileFrom: 'Fertile window from {date} (estimate)',
+    fertileNow: 'You are in your fertile window (estimate)',
+    periodStartedToday: 'My period started today',
+    periodEndedToday: 'My period ended today',
+    periodStartedOn: 'It started on this day',
+    periodEndedOn: 'It ended on this day',
+    anotherDay: 'Pick another day',
+    cycleEmpty: 'Log the first day of your period to start. Imara learns your cycle as you go.',
+    legendPeriod: 'Period',
+    legendPredicted: 'Expected period',
+    legendFertile: 'Fertile window',
+    legendOvulation: 'Ovulation (estimate)',
+    avgCycle: 'Cycle length',
+    avgPeriod: 'Period length',
+    usingTypical: 'Using typical lengths (28 and 5 days) until you log two periods.',
+    periodsHistory: 'PAST PERIODS',
+    ongoing: 'Ongoing',
+    daysN: '{n} days',
+    removePeriodConfirm: 'Remove this period?',
+    periodSaved: 'Saved',
+    periodRemoved: 'Period removed',
+    cycleDisclaimer: 'Dates are estimates from the periods you log. They can be wrong and are not a method of contraception. See a health worker if your periods are very irregular, very painful, very heavy, or stop.',
+    flowNone: 'None',
+    flowSpotting: 'Spotting',
+    flowLight: 'Light',
+    flowMedium: 'Medium',
+    flowHeavy: 'Heavy',
+    symCramps: 'Cramps',
+    symHeadache: 'Headache',
+    symBackPain: 'Back pain',
+    symBloating: 'Bloating',
+    symTenderBreasts: 'Tender breasts',
+    symAcne: 'Acne',
+    symFatigue: 'Tiredness',
+    symNausea: 'Nausea',
+    symCravings: 'Cravings',
+    symInsomnia: 'Poor sleep',
+    symMoodSwings: 'Mood swings',
+    symAnxiety: 'Anxiety',
+    disDry: 'Dry',
+    disSticky: 'Sticky',
+    disCreamy: 'Creamy',
+    disWatery: 'Watery',
+    disEggWhite: 'Egg white',
+    disUnusual: 'Unusual',
+    tipMenstrual: 'Rest when you need to. Warmth on your belly and gentle movement can ease cramps. Drink plenty of water.',
+    tipFollicular: 'Energy often rises after your period. A good time for more activity.',
+    tipFertile: 'The chance of pregnancy is highest around now. This is an estimate, not a method of contraception.',
+    tipLuteal: 'Some people feel bloated, tired or low before their period. Sleep, water and gentle exercise can help.',
+    tipUnknown: 'Log your period to get estimates and tips for each phase.',
+    inMenstrual: 'during your period',
+    inFollicular: 'after your period',
+    inFertile: 'around your fertile window',
+    inLuteal: 'in the days before your period',
+    noteIrregular: 'Your cycles vary by more than 9 days. Stress or illness can do this; if it continues, talk to a health worker.',
+    noteShort: 'Your cycles are often shorter than 24 days. If this continues, talk to a health worker.',
+    noteLong: 'Your cycles are often longer than 38 days. If this continues, talk to a health worker.',
+    noteLongPeriods: 'A recent period lasted more than 8 days. If periods are often this long or very heavy, talk to a health worker.',
+    noteVeryLate: 'Your period is more than a week late. If you could be pregnant, a pregnancy test can tell you. A health worker can help.',
+    legendLogged: 'Symptoms logged',
+    todayLogTitle: 'TODAY',
+    nothingLogged: 'Nothing logged yet. How is your body today?',
+    logToday: 'Log today',
+    editToday: 'Edit today',
+    insightsTitle: 'INSIGHTS',
+    patternText: '{symptom} usually comes {phase}',
+    patternCount: 'Logged {n} times',
+    upcomingTitle: 'NEXT PERIODS',
+    upcomingFertile: 'Fertile window {range}',
+    openCalendar: 'Open full calendar',
+    calendarPageTitle: 'Calendar',
+    calendarPageSub: 'Your period journey',
+    calendarAhead: 'THIS MONTH AND AHEAD',
+    calendarJourney: 'YOUR JOURNEY',
+    variationLabel: 'Variation',
+    cycleOfN: 'cycle of {n} days',
+    autoEndedNote: 'Marked as over after your usual {n} days. Still bleeding? Log flow on those days or set the end day.',
+    setEndDay: 'Set the end day',
+    cycleReminders: 'Cycle reminders',
+    cycleRemindersNote: 'Two days before your period, and when your fertile window starts.',
+    periodSoonTitle: 'Period expected in 2 days',
+    periodSoonBody: 'Your period may start around {date}. It helps to have pads ready.',
+    fertileTitle: 'Fertile window starts today',
+    fertileBody: 'Estimated from your cycle. Not a method of contraception.',
+    dayLogTitle: 'Day log',
+    flowLabel: 'FLOW',
+    symptomsLabel: 'SYMPTOMS',
+    dischargeLabel: 'DISCHARGE',
+    dayNoteLabel: 'NOTE (OPTIONAL)',
+    futureDay: 'This day has not come yet. Here is what is expected.',
+    dayTooOld: 'Days more than 90 days ago cannot be changed.',
+    dayInPeriod: 'Part of your period',
+    dayExpectedPeriod: 'Period expected (estimate)',
+    dayFertile: 'Fertile window (estimate)',
+    dayOvulation: 'Estimated ovulation',
+    periodStartedHere: 'My period started this day',
+    periodEndedHere: 'My period ended this day',
+    reportTitle: 'Health report',
+    reportSub: 'A cycle summary to show a health worker',
+    shareReport: 'Share report',
+    reportSummary: 'SUMMARY',
+    reportGenerated: 'Made with Imara Afya on {date}',
+    reportTypicalCycle: 'Typical cycle',
+    reportTypicalPeriod: 'Typical period',
+    reportCyclesLogged: 'Periods logged',
+    reportNextPeriod: 'Next expected period',
+    reportNotes: 'Notes',
+    reportSymptoms: 'Common symptoms',
+    reportCycles: 'Cycles',
+    reportNoPeriods: 'No periods logged yet.',
+    checkInAgain: 'Check in again',
+    checkInsToday: '{n} check-ins today',
+    checkInsTodayOne: '1 check-in today',
+    checkInTodayList: 'TODAY’S CHECK-INS',
+    checkInRemoveOne: 'Remove this check-in?',
+    trendTitle: 'TREND',
+    trend7: '7 days',
+    trend30: '30 days',
+    trendUp: 'Your mood is up compared with last week.',
+    trendDown: 'Your mood is a little lower than last week. Be kind to yourself.',
+    trendSteady: 'Your mood has been steady compared with last week.',
+    trendNotEnough: 'Check in on a few more days to see your trend.',
+    bestMorning: 'You tend to feel best in the morning.',
+    bestAfternoon: 'You tend to feel best in the afternoon.',
+    bestEvening: 'You tend to feel best in the evening.',
     moodLabel: 'MOOD',
     energyLabel: 'ENERGY',
     checkInNote: 'NOTE (OPTIONAL)',
     checkInNotePlaceholder: 'Anything on your mind?',
     checkInSave: 'Save check-in',
-    checkInUpdate: 'Update check-in',
     checkInSaved: 'Check-in saved',
-    checkInRemove: 'Remove today’s check-in',
-    checkInRemoveConfirm: 'Remove today’s check-in?',
     checkInRemoved: 'Check-in removed',
     remove: 'Remove',
     moodAverage: 'Mood (7 days)',
@@ -413,7 +800,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInDays: 'Days checked in (30 days)',
     checkInHistory: 'RECENT CHECK-INS',
     noCheckIns: 'No check-ins yet. Your first one starts your streak.',
-    pickBoth: 'Choose your mood and your energy.',
     moodName: 'Mood',
     energyName: 'Energy',
     last30Days: 'LAST 30 DAYS',
@@ -540,7 +926,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Chargement',
     retry: 'Réessayer',
     outOfRange: 'Ce nombre est en dehors de la plage autorisée.',
-    habitsToday: 'AUJOURD’HUI',
     dayToday: 'Aujourd’hui',
     waterLabel: 'Eau',
     stepsLabel: 'Pas',
@@ -572,7 +957,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     addHalfHour: 'Ajouter une demi-heure',
     removeHalfHour: 'Retirer une demi-heure',
     seeHistory: 'Historique des pas',
-    seeHistorySub: '30 derniers jours',
     menuHome: 'Accueil',
     menuProfile: 'Profil',
     trackSleep: 'Suivre mon sommeil automatiquement',
@@ -586,6 +970,13 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterReminderTitle: 'C’est l’heure d’un verre d’eau',
     waterReminderBody: 'Touchez « +1 verre » une fois que vous en avez bu un.',
     addGlassAction: '+1 verre',
+    moodReminders: 'Rappels de bilan d’humeur',
+    moodRemindersNote: 'À 9 h, 14 h et 19 h. Sautés si vous venez de faire votre bilan.',
+    moodReminderTitle: 'Comment vous sentez-vous ?',
+    moodReminderBody: 'Prenez un moment pour faire votre bilan : un visage et une batterie.',
+    warmMessages: 'Messages bienveillants',
+    warmMessagesNote: 'Un petit mot quelques heures après votre bilan, selon ce que vous ressentez.',
+    warmMessageTitle: 'Un mot pour vous',
     remindMe: 'Me rappeler de boire de l’eau',
     remindersOn: 'Les rappels d’eau sont activés',
     notificationsDenied: 'Les notifications sont désactivées pour Imara Afya. Activez-les dans les réglages du téléphone.',
@@ -601,17 +992,210 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInLabel: 'Bilan du jour',
     checkInSub: 'Comment vous vous sentez, un moment par jour.',
     checkInPrompt: 'Comment vous sentez-vous aujourd’hui ?',
-    checkInPromptSub: 'Deux touches : votre humeur et votre énergie.',
-    checkInCta: 'Faire le bilan',
+    checkInQuickHint: 'Touchez un visage et une batterie. C’est enregistré tout seul.',
+    checkInDetails: 'Détails',
+    menuCheckIn: 'Humeur',
+    moodMessages: {
+      low: {
+        low: 'La journée semble lourde, et c’est normal. Soyez doux avec vous-même : reposez-vous, buvez de l’eau et avancez un petit pas à la fois.',
+        mid: 'Tous les jours ne sont pas faciles. Essayez une petite chose qui vous fait du bien : une courte marche, une chanson que vous aimez ou un appel à un ami.',
+        high: 'Vous avez de l’énergie même si le cœur est bas. Une marche dehors ou une discussion avec une personne de confiance peut alléger ce poids.',
+      },
+      mid: {
+        low: 'Une journée correcte avec peu d’énergie. Reposez-vous quand vous pouvez et couchez-vous un peu plus tôt ce soir.',
+        mid: 'Une journée stable. Continuez : les petites habitudes comme boire de l’eau et bouger comptent.',
+        high: 'Vous avez une belle énergie aujourd’hui. Utilisez-en un peu pour quelque chose qui vous fait sourire.',
+      },
+      high: {
+        low: 'Votre humeur est belle même si vous êtes fatigué. Profitez-en et donnez à votre corps le repos qu’il demande.',
+        mid: 'Ça fait plaisir de vous voir bien ! Gardez en tête ce qui a rendu cette journée agréable.',
+        high: 'Vous rayonnez aujourd’hui ! Partagez cette énergie, elle peut illuminer la journée de quelqu’un d’autre.',
+      },
+    },
+    moodSupport: 'Votre humeur est basse depuis plusieurs jours. Vous n’avez pas à porter cela seul : parler à une personne de confiance ou à un agent de santé peut aider.',
+    sleepScheduleTitle: 'HORAIRES DE SOMMEIL',
+    sleepScheduleEmpty: 'Choisissez une heure de coucher et de réveil. Imara s’en sert pour suivre votre sommeil chaque nuit, comme Santé d’Apple, et pour vous rappeler l’heure du coucher.',
+    sleepScheduleSet: 'Définir mes horaires',
+    bedtimeLabel: 'Coucher',
+    wakeUpLabel: 'Réveil',
+    sleepGoalShort: 'Objectif de sommeil',
+    inBedHours: '{h} au lit',
+    meetsGoal: 'Atteint votre objectif de {h}',
+    shortOfGoal: '{h} de moins que votre objectif',
+    saveSchedule: 'Enregistrer les horaires',
+    removeSchedule: 'Supprimer les horaires',
+    scheduleSaved: 'Horaires de sommeil enregistrés',
+    scheduleRemoved: 'Horaires de sommeil supprimés',
+    bedtimeReminders: 'Rappels du coucher',
+    bedtimeRemindersNote: 'Un rappel 30 minutes avant le coucher et un petit mot au réveil.',
+    windDownTitle: 'Coucher dans 30 minutes',
+    windDownBody: 'C’est le moment de ralentir : baissez la lumière et posez votre téléphone.',
+    goodMorningTitle: 'Bonjour !',
+    goodMorningBody: 'Ouvrez Imara pour voir comment vous avez dormi.',
+    sleepFromSchedule: 'Les nuits manquées par le téléphone sont estimées d’après vos horaires et vos mouvements · corrigez avec − et +',
+    dragToAdjust: 'Faites glisser le lit ou le réveil autour du cercle, ou l’arc pour déplacer les deux.',
+    weekdaysLabel: 'Semaine',
+    weekendLabel: 'Week-end',
+    weekendDifferent: 'Horaires différents le week-end',
+    weekendNote: 'Pour les nuits du vendredi et du samedi.',
+    bedtimeRemindersNeedsSchedule: 'Définissez vos horaires sur la page Sommeil pour les recevoir.',
+    tonightSchedule: 'Ce soir : coucher {bed} · réveil {wake}',
+    menuSleep: 'Sommeil',
+    flowMoodTitle: 'Comment vous sentez-vous en ce moment ?',
+    flowEnergyTitle: 'Comment est votre énergie en ce moment ?',
+    flowNoteTitle: 'Quelque chose à ajouter ?',
+    newCheckIn: 'Nouveau bilan',
+    sectionFeel: 'VOTRE HUMEUR',
+    sectionActivity: 'ACTIVITÉ',
+    sectionWaterSleep: 'EAU ET SOMMEIL',
+    goalsMet: '{n} objectifs sur 3 atteints aujourd’hui',
+    goalsAllMet: 'Les 3 objectifs atteints aujourd’hui. Bravo !',
+    goalsNone: 'Vos objectifs du jour vous attendent',
+    menuCycle: 'Cycle',
+    cycleTitle: 'Cycle',
+    cycleSub: 'Vos règles et la suite.',
+    cycleDayN: 'Jour {n}',
+    phaseMenstrual: 'Règles',
+    phaseFollicular: 'Phase folliculaire',
+    phaseFertile: 'Période fertile',
+    phaseLuteal: 'Phase lutéale',
+    phaseUnknown: 'Pas encore de données',
+    nextPeriodIn: 'Prochaines règles dans {n} jours',
+    nextPeriodTomorrow: 'Prochaines règles attendues demain',
+    periodToday: 'Règles attendues aujourd’hui',
+    periodLate: 'Règles en retard de {n} jours',
+    periodDayN: 'Règles · jour {n}',
+    fertileFrom: 'Période fertile à partir du {date} (estimation)',
+    fertileNow: 'Vous êtes en période fertile (estimation)',
+    periodStartedToday: 'Mes règles ont commencé aujourd’hui',
+    periodEndedToday: 'Mes règles se sont terminées aujourd’hui',
+    periodStartedOn: 'Elles ont commencé ce jour-là',
+    periodEndedOn: 'Elles se sont terminées ce jour-là',
+    anotherDay: 'Choisir un autre jour',
+    cycleEmpty: 'Indiquez le premier jour de vos règles pour commencer. Imara apprend votre cycle au fil du temps.',
+    legendPeriod: 'Règles',
+    legendPredicted: 'Règles prévues',
+    legendFertile: 'Période fertile',
+    legendOvulation: 'Ovulation (estimation)',
+    avgCycle: 'Durée du cycle',
+    avgPeriod: 'Durée des règles',
+    usingTypical: 'Durées habituelles (28 et 5 jours) utilisées jusqu’à deux règles notées.',
+    periodsHistory: 'RÈGLES PASSÉES',
+    ongoing: 'En cours',
+    daysN: '{n} jours',
+    removePeriodConfirm: 'Supprimer ces règles ?',
+    periodSaved: 'Enregistré',
+    periodRemoved: 'Règles supprimées',
+    cycleDisclaimer: 'Les dates sont des estimations d’après les règles notées. Elles peuvent être fausses et ne sont pas une méthode de contraception. Consultez un agent de santé si vos règles sont très irrégulières, très douloureuses, très abondantes ou s’arrêtent.',
+    flowNone: 'Aucun',
+    flowSpotting: 'Traces',
+    flowLight: 'Léger',
+    flowMedium: 'Moyen',
+    flowHeavy: 'Abondant',
+    symCramps: 'Crampes',
+    symHeadache: 'Mal de tête',
+    symBackPain: 'Mal de dos',
+    symBloating: 'Ballonnements',
+    symTenderBreasts: 'Seins sensibles',
+    symAcne: 'Acné',
+    symFatigue: 'Fatigue',
+    symNausea: 'Nausée',
+    symCravings: 'Fringales',
+    symInsomnia: 'Mauvais sommeil',
+    symMoodSwings: 'Sautes d’humeur',
+    symAnxiety: 'Anxiété',
+    disDry: 'Sèche',
+    disSticky: 'Collante',
+    disCreamy: 'Crémeuse',
+    disWatery: 'Aqueuse',
+    disEggWhite: 'Blanc d’œuf',
+    disUnusual: 'Inhabituelle',
+    tipMenstrual: 'Reposez-vous si besoin. La chaleur sur le ventre et bouger doucement peuvent soulager les crampes. Buvez beaucoup d’eau.',
+    tipFollicular: 'L’énergie remonte souvent après les règles. Un bon moment pour bouger davantage.',
+    tipFertile: 'La probabilité de grossesse est la plus élevée en ce moment. C’est une estimation, pas une méthode de contraception.',
+    tipLuteal: 'Certaines personnes se sentent gonflées, fatiguées ou tristes avant les règles. Le sommeil, l’eau et un peu d’exercice peuvent aider.',
+    tipUnknown: 'Notez vos règles pour obtenir des estimations et des conseils pour chaque phase.',
+    inMenstrual: 'pendant vos règles',
+    inFollicular: 'après vos règles',
+    inFertile: 'autour de votre période fertile',
+    inLuteal: 'dans les jours avant vos règles',
+    noteIrregular: 'Vos cycles varient de plus de 9 jours. Le stress ou une maladie peuvent en être la cause ; si cela continue, parlez-en à un agent de santé.',
+    noteShort: 'Vos cycles durent souvent moins de 24 jours. Si cela continue, parlez-en à un agent de santé.',
+    noteLong: 'Vos cycles durent souvent plus de 38 jours. Si cela continue, parlez-en à un agent de santé.',
+    noteLongPeriods: 'Des règles récentes ont duré plus de 8 jours. Si c’est fréquent ou très abondant, parlez-en à un agent de santé.',
+    noteVeryLate: 'Vos règles ont plus d’une semaine de retard. Si vous pourriez être enceinte, un test de grossesse peut vous le dire. Un agent de santé peut vous aider.',
+    legendLogged: 'Symptômes notés',
+    todayLogTitle: 'AUJOURD’HUI',
+    nothingLogged: 'Rien de noté. Comment va votre corps aujourd’hui ?',
+    logToday: 'Noter aujourd’hui',
+    editToday: 'Modifier aujourd’hui',
+    insightsTitle: 'CONSEILS',
+    patternText: '{symptom} vient souvent {phase}',
+    patternCount: 'Noté {n} fois',
+    upcomingTitle: 'PROCHAINES RÈGLES',
+    upcomingFertile: 'Période fertile {range}',
+    openCalendar: 'Ouvrir le calendrier',
+    calendarPageTitle: 'Calendrier',
+    calendarPageSub: 'Votre parcours de règles',
+    calendarAhead: 'CE MOIS ET LA SUITE',
+    calendarJourney: 'VOTRE PARCOURS',
+    variationLabel: 'Variation',
+    cycleOfN: 'cycle de {n} jours',
+    autoEndedNote: 'Considérées comme finies après vos {n} jours habituels. Toujours des saignements ? Notez le flux ces jours-là ou indiquez le jour de fin.',
+    setEndDay: 'Indiquer le jour de fin',
+    cycleReminders: 'Rappels du cycle',
+    cycleRemindersNote: 'Deux jours avant vos règles, et au début de votre période fertile.',
+    periodSoonTitle: 'Règles attendues dans 2 jours',
+    periodSoonBody: 'Vos règles pourraient commencer vers le {date}. Pensez à préparer des protections.',
+    fertileTitle: 'La période fertile commence aujourd’hui',
+    fertileBody: 'Estimation d’après votre cycle. Pas une méthode de contraception.',
+    dayLogTitle: 'Journal du jour',
+    flowLabel: 'FLUX',
+    symptomsLabel: 'SYMPTÔMES',
+    dischargeLabel: 'PERTES',
+    dayNoteLabel: 'NOTE (FACULTATIF)',
+    futureDay: 'Ce jour n’est pas encore arrivé. Voici ce qui est prévu.',
+    dayTooOld: 'Les jours de plus de 90 jours ne peuvent plus être modifiés.',
+    dayInPeriod: 'Pendant vos règles',
+    dayExpectedPeriod: 'Règles prévues (estimation)',
+    dayFertile: 'Période fertile (estimation)',
+    dayOvulation: 'Ovulation estimée',
+    periodStartedHere: 'Mes règles ont commencé ce jour',
+    periodEndedHere: 'Mes règles ont fini ce jour',
+    reportTitle: 'Rapport de santé',
+    reportSub: 'Un résumé du cycle à montrer à un agent de santé',
+    shareReport: 'Partager le rapport',
+    reportSummary: 'RÉSUMÉ',
+    reportGenerated: 'Créé avec Imara Afya le {date}',
+    reportTypicalCycle: 'Cycle habituel',
+    reportTypicalPeriod: 'Règles habituelles',
+    reportCyclesLogged: 'Règles notées',
+    reportNextPeriod: 'Prochaines règles prévues',
+    reportNotes: 'Remarques',
+    reportSymptoms: 'Symptômes fréquents',
+    reportCycles: 'Cycles',
+    reportNoPeriods: 'Aucunes règles notées.',
+    checkInAgain: 'Refaire un bilan',
+    checkInsToday: '{n} bilans aujourd’hui',
+    checkInsTodayOne: '1 bilan aujourd’hui',
+    checkInTodayList: 'BILANS DU JOUR',
+    checkInRemoveOne: 'Supprimer ce bilan ?',
+    trendTitle: 'TENDANCE',
+    trend7: '7 jours',
+    trend30: '30 jours',
+    trendUp: 'Votre humeur est meilleure que la semaine dernière.',
+    trendDown: 'Votre humeur est un peu plus basse que la semaine dernière. Prenez soin de vous.',
+    trendSteady: 'Votre humeur est stable par rapport à la semaine dernière.',
+    trendNotEnough: 'Faites votre bilan quelques jours de plus pour voir votre tendance.',
+    bestMorning: 'Vous vous sentez souvent mieux le matin.',
+    bestAfternoon: 'Vous vous sentez souvent mieux l’après-midi.',
+    bestEvening: 'Vous vous sentez souvent mieux le soir.',
     moodLabel: 'HUMEUR',
     energyLabel: 'ÉNERGIE',
     checkInNote: 'NOTE (FACULTATIF)',
     checkInNotePlaceholder: 'Quelque chose en tête ?',
     checkInSave: 'Enregistrer le bilan',
-    checkInUpdate: 'Mettre à jour le bilan',
     checkInSaved: 'Bilan enregistré',
-    checkInRemove: 'Supprimer le bilan du jour',
-    checkInRemoveConfirm: 'Supprimer le bilan du jour ?',
     checkInRemoved: 'Bilan supprimé',
     remove: 'Supprimer',
     moodAverage: 'Humeur (7 jours)',
@@ -619,7 +1203,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInDays: 'Jours avec bilan (30 jours)',
     checkInHistory: 'BILANS RÉCENTS',
     noCheckIns: 'Aucun bilan pour l’instant. Le premier lance votre série.',
-    pickBoth: 'Choisissez votre humeur et votre énergie.',
     moodName: 'Humeur',
     energyName: 'Énergie',
     last30Days: '30 DERNIERS JOURS',
@@ -746,7 +1329,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Inapakia',
     retry: 'Jaribu tena',
     outOfRange: 'Nambari hiyo iko nje ya kiwango kinachoruhusiwa.',
-    habitsToday: 'LEO',
     dayToday: 'Leo',
     waterLabel: 'Maji',
     stepsLabel: 'Hatua',
@@ -778,7 +1360,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     addHalfHour: 'Ongeza nusu saa',
     removeHalfHour: 'Punguza nusu saa',
     seeHistory: 'Historia ya hatua',
-    seeHistorySub: 'Siku 30 zilizopita',
     menuHome: 'Nyumbani',
     menuProfile: 'Wasifu',
     trackSleep: 'Fuatilia usingizi wangu moja kwa moja',
@@ -792,6 +1373,13 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterReminderTitle: 'Ni wakati wa glasi ya maji',
     waterReminderBody: 'Gusa “+1 glasi” ukishakunywa moja.',
     addGlassAction: '+1 glasi',
+    moodReminders: 'Vikumbusho vya hali',
+    moodRemindersNote: 'Saa 3:00 asubuhi, 8:00 mchana na 1:00 usiku. Havitumwi kama umeandika hali muda mfupi kabla.',
+    moodReminderTitle: 'Unajisikiaje?',
+    moodReminderBody: 'Chukua muda kuandika hali yako: chagua uso na betri.',
+    warmMessages: 'Ujumbe wa faraja',
+    warmMessagesNote: 'Ujumbe mzuri saa chache baada ya kuandika hali yako, kulingana na unavyojisikia.',
+    warmMessageTitle: 'Ujumbe kwa ajili yako',
     remindMe: 'Nikumbushe kunywa maji',
     remindersOn: 'Vikumbusho vya maji vimewashwa',
     notificationsDenied: 'Arifa zimezimwa kwa Imara Afya. Ziwashe kwenye mipangilio ya simu.',
@@ -807,17 +1395,210 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInLabel: 'Hali ya leo',
     checkInSub: 'Unavyojisikia, dakika moja kila siku.',
     checkInPrompt: 'Unajisikiaje leo?',
-    checkInPromptSub: 'Miguso miwili: hali ya moyo na nguvu zako.',
-    checkInCta: 'Andika hali',
+    checkInQuickHint: 'Gusa uso na betri. Inahifadhiwa yenyewe.',
+    checkInDetails: 'Maelezo',
+    menuCheckIn: 'Hisia',
+    moodMessages: {
+      low: {
+        low: 'Leo inaonekana nzito, na hilo ni sawa. Jihurumie: pumzika, kunywa maji na chukua hatua ndogo moja baada ya nyingine.',
+        mid: 'Si kila siku ni rahisi. Jaribu jambo dogo linalokufurahisha: matembezi mafupi, wimbo unaoupenda au kumpigia rafiki simu.',
+        high: 'Una nguvu hata kama moyo uko chini. Matembezi nje au kuzungumza na mtu unayemwamini kunaweza kukupunguzia uzito.',
+      },
+      mid: {
+        low: 'Siku ya kawaida yenye nguvu kidogo. Pumzika unapoweza, na ujaribu kulala mapema kidogo leo usiku.',
+        mid: 'Siku tulivu. Endelea: tabia ndogo kama kunywa maji na kutembea zina maana.',
+        high: 'Una nguvu nzuri leo. Tumia sehemu yake kwa jambo linalokufanya utabasamu.',
+      },
+      high: {
+        low: 'Hali yako ni nzuri ingawa umechoka. Furahia hisia hiyo na upe mwili wako mapumziko unayoyahitaji.',
+        mid: 'Inafurahisha kukuona ukiwa vizuri! Kumbuka kilichoifanya leo kuwa nzuri.',
+        high: 'Unang’aa leo! Shiriki nguvu hiyo, inaweza kuifurahisha siku ya mtu mwingine pia.',
+      },
+    },
+    moodSupport: 'Hali yako imekuwa chini kwa siku kadhaa. Si lazima ubebe hili peke yako: kuzungumza na mtu unayemwamini au mhudumu wa afya kunaweza kusaidia.',
+    sleepScheduleTitle: 'RATIBA YA USINGIZI',
+    sleepScheduleEmpty: 'Weka saa ya kulala na ya kuamka. Imara inazitumia kufuatilia usingizi wako kila usiku, kama Apple Health, na kukukumbusha wakati wa kulala.',
+    sleepScheduleSet: 'Weka ratiba ya usingizi',
+    bedtimeLabel: 'Kulala',
+    wakeUpLabel: 'Kuamka',
+    sleepGoalShort: 'Lengo la usingizi',
+    inBedHours: '{h} kitandani',
+    meetsGoal: 'Inafikia lengo lako la {h}',
+    shortOfGoal: '{h} chini ya lengo lako',
+    saveSchedule: 'Hifadhi ratiba',
+    removeSchedule: 'Ondoa ratiba',
+    scheduleSaved: 'Ratiba ya usingizi imehifadhiwa',
+    scheduleRemoved: 'Ratiba ya usingizi imeondolewa',
+    bedtimeReminders: 'Vikumbusho vya kulala',
+    bedtimeRemindersNote: 'Kikumbusho dakika 30 kabla ya kulala na salamu ya asubuhi unapoamka.',
+    windDownTitle: 'Kulala baada ya dakika 30',
+    windDownBody: 'Ni wakati wa kupumzika: punguza mwanga na weka simu pembeni.',
+    goodMorningTitle: 'Habari za asubuhi!',
+    goodMorningBody: 'Fungua Imara uone ulivyolala.',
+    sleepFromSchedule: 'Usiku ambao simu haikupima unakadiriwa kutoka ratiba yako na mwendo wako · rekebisha kwa − na +',
+    dragToAdjust: 'Buruta kitanda au saa ya kengele kuzunguka duara, au buruta tao kusogeza vyote viwili.',
+    weekdaysLabel: 'Siku za kazi',
+    weekendLabel: 'Wikendi',
+    weekendDifferent: 'Saa tofauti wikendi',
+    weekendNote: 'Kwa usiku wa Ijumaa na Jumamosi.',
+    bedtimeRemindersNeedsSchedule: 'Weka ratiba ya usingizi kwenye ukurasa wa Usingizi ili kupata hivi.',
+    tonightSchedule: 'Leo usiku: kulala {bed} · kuamka {wake}',
+    menuSleep: 'Usingizi',
+    flowMoodTitle: 'Unajisikiaje sasa hivi?',
+    flowEnergyTitle: 'Nguvu zako ziko vipi sasa hivi?',
+    flowNoteTitle: 'Kuna chochote ungependa kuongeza?',
+    newCheckIn: 'Andika hali mpya',
+    sectionFeel: 'UNAVYOJISIKIA',
+    sectionActivity: 'SHUGHULI',
+    sectionWaterSleep: 'MAJI NA USINGIZI',
+    goalsMet: 'Malengo {n} kati ya 3 yamefikiwa leo',
+    goalsAllMet: 'Malengo yote 3 yamefikiwa leo. Hongera!',
+    goalsNone: 'Malengo yako ya leo yanakusubiri',
+    menuCycle: 'Mzunguko',
+    cycleTitle: 'Mzunguko',
+    cycleSub: 'Hedhi zako na kinachofuata.',
+    cycleDayN: 'Siku {n}',
+    phaseMenstrual: 'Hedhi',
+    phaseFollicular: 'Awamu ya folikuli',
+    phaseFertile: 'Kipindi cha rutuba',
+    phaseLuteal: 'Awamu ya luteal',
+    phaseUnknown: 'Bado hakuna taarifa',
+    nextPeriodIn: 'Hedhi ijayo baada ya siku {n}',
+    nextPeriodTomorrow: 'Hedhi ijayo inatarajiwa kesho',
+    periodToday: 'Hedhi inatarajiwa leo',
+    periodLate: 'Hedhi imechelewa siku {n}',
+    periodDayN: 'Hedhi · siku {n}',
+    fertileFrom: 'Kipindi cha rutuba kuanzia {date} (makadirio)',
+    fertileNow: 'Uko kwenye kipindi cha rutuba (makadirio)',
+    periodStartedToday: 'Hedhi yangu imeanza leo',
+    periodEndedToday: 'Hedhi yangu imeisha leo',
+    periodStartedOn: 'Ilianza siku hii',
+    periodEndedOn: 'Iliisha siku hii',
+    anotherDay: 'Chagua siku nyingine',
+    cycleEmpty: 'Andika siku ya kwanza ya hedhi yako kuanza. Imara itajifunza mzunguko wako polepole.',
+    legendPeriod: 'Hedhi',
+    legendPredicted: 'Hedhi inayotarajiwa',
+    legendFertile: 'Kipindi cha rutuba',
+    legendOvulation: 'Ovulesheni (makadirio)',
+    avgCycle: 'Urefu wa mzunguko',
+    avgPeriod: 'Urefu wa hedhi',
+    usingTypical: 'Tunatumia urefu wa kawaida (siku 28 na 5) hadi uandike hedhi mbili.',
+    periodsHistory: 'HEDHI ZILIZOPITA',
+    ongoing: 'Inaendelea',
+    daysN: 'siku {n}',
+    removePeriodConfirm: 'Ondoa hedhi hii?',
+    periodSaved: 'Imehifadhiwa',
+    periodRemoved: 'Hedhi imeondolewa',
+    cycleDisclaimer: 'Tarehe ni makadirio kutoka hedhi unazoandika. Zinaweza kukosea na si njia ya kuzuia mimba. Muone mhudumu wa afya kama hedhi zako haziko sawa kabisa, zinauma sana, ni nzito sana, au zimekoma.',
+    flowNone: 'Hakuna',
+    flowSpotting: 'Matone',
+    flowLight: 'Kidogo',
+    flowMedium: 'Wastani',
+    flowHeavy: 'Nyingi',
+    symCramps: 'Maumivu ya tumbo',
+    symHeadache: 'Kichwa kuuma',
+    symBackPain: 'Maumivu ya mgongo',
+    symBloating: 'Kuvimba tumbo',
+    symTenderBreasts: 'Matiti kuuma',
+    symAcne: 'Chunusi',
+    symFatigue: 'Uchovu',
+    symNausea: 'Kichefuchefu',
+    symCravings: 'Hamu ya chakula',
+    symInsomnia: 'Kukosa usingizi',
+    symMoodSwings: 'Hisia kubadilika',
+    symAnxiety: 'Wasiwasi',
+    disDry: 'Kavu',
+    disSticky: 'Nata',
+    disCreamy: 'Kama krimu',
+    disWatery: 'Majimaji',
+    disEggWhite: 'Kama ute wa yai',
+    disUnusual: 'Si ya kawaida',
+    tipMenstrual: 'Pumzika unapohitaji. Joto tumboni na kutembea polepole kunaweza kupunguza maumivu. Kunywa maji mengi.',
+    tipFollicular: 'Nguvu mara nyingi huongezeka baada ya hedhi. Ni wakati mzuri wa kufanya mazoezi zaidi.',
+    tipFertile: 'Uwezekano wa kupata mimba ni mkubwa zaidi wakati huu. Haya ni makadirio, si njia ya kuzuia mimba.',
+    tipLuteal: 'Baadhi ya watu huvimba, huchoka au huhisi huzuni kabla ya hedhi. Usingizi, maji na mazoezi mepesi yanaweza kusaidia.',
+    tipUnknown: 'Andika hedhi yako ili kupata makadirio na ushauri kwa kila awamu.',
+    inMenstrual: 'wakati wa hedhi',
+    inFollicular: 'baada ya hedhi',
+    inFertile: 'karibu na kipindi cha rutuba',
+    inLuteal: 'siku chache kabla ya hedhi',
+    noteIrregular: 'Mizunguko yako inatofautiana kwa zaidi ya siku 9. Msongo au ugonjwa unaweza kusababisha hili; likiendelea, zungumza na mhudumu wa afya.',
+    noteShort: 'Mizunguko yako mara nyingi ni mifupi kuliko siku 24. Likiendelea, zungumza na mhudumu wa afya.',
+    noteLong: 'Mizunguko yako mara nyingi ni mirefu kuliko siku 38. Likiendelea, zungumza na mhudumu wa afya.',
+    noteLongPeriods: 'Hedhi ya karibuni ilidumu zaidi ya siku 8. Ikiwa hutokea mara nyingi au ni nzito sana, zungumza na mhudumu wa afya.',
+    noteVeryLate: 'Hedhi yako imechelewa zaidi ya wiki moja. Kama unaweza kuwa mjamzito, kipimo cha mimba kitakuambia. Mhudumu wa afya anaweza kusaidia.',
+    legendLogged: 'Dalili zimeandikwa',
+    todayLogTitle: 'LEO',
+    nothingLogged: 'Bado hakuna kilichoandikwa. Mwili wako uko vipi leo?',
+    logToday: 'Andika leo',
+    editToday: 'Hariri leo',
+    insightsTitle: 'MAARIFA',
+    patternText: '{symptom} mara nyingi hutokea {phase}',
+    patternCount: 'Imeandikwa mara {n}',
+    upcomingTitle: 'HEDHI ZIJAZO',
+    upcomingFertile: 'Kipindi cha rutuba {range}',
+    openCalendar: 'Fungua kalenda nzima',
+    calendarPageTitle: 'Kalenda',
+    calendarPageSub: 'Safari ya hedhi yako',
+    calendarAhead: 'MWEZI HUU NA IJAYO',
+    calendarJourney: 'SAFARI YAKO',
+    variationLabel: 'Tofauti',
+    cycleOfN: 'mzunguko wa siku {n}',
+    autoEndedNote: 'Imewekwa kuwa imeisha baada ya siku {n} zako za kawaida. Bado unatoka damu? Andika mtiririko siku hizo au weka siku ya mwisho.',
+    setEndDay: 'Weka siku ya mwisho',
+    cycleReminders: 'Vikumbusho vya mzunguko',
+    cycleRemindersNote: 'Siku mbili kabla ya hedhi, na kipindi cha rutuba kinapoanza.',
+    periodSoonTitle: 'Hedhi inatarajiwa baada ya siku 2',
+    periodSoonBody: 'Hedhi yako inaweza kuanza karibu {date}. Ni vizuri kuwa na pedi tayari.',
+    fertileTitle: 'Kipindi cha rutuba kinaanza leo',
+    fertileBody: 'Makadirio kutoka mzunguko wako. Si njia ya kuzuia mimba.',
+    dayLogTitle: 'Kumbukumbu ya siku',
+    flowLabel: 'MTIRIRIKO',
+    symptomsLabel: 'DALILI',
+    dischargeLabel: 'UTOKAJI',
+    dayNoteLabel: 'MAELEZO (SI LAZIMA)',
+    futureDay: 'Siku hii bado haijafika. Hiki ndicho kinachotarajiwa.',
+    dayTooOld: 'Siku zaidi ya 90 zilizopita haziwezi kubadilishwa.',
+    dayInPeriod: 'Sehemu ya hedhi yako',
+    dayExpectedPeriod: 'Hedhi inatarajiwa (makadirio)',
+    dayFertile: 'Kipindi cha rutuba (makadirio)',
+    dayOvulation: 'Ovulesheni inayokadiriwa',
+    periodStartedHere: 'Hedhi yangu ilianza siku hii',
+    periodEndedHere: 'Hedhi yangu iliisha siku hii',
+    reportTitle: 'Ripoti ya afya',
+    reportSub: 'Muhtasari wa mzunguko kumwonyesha mhudumu wa afya',
+    shareReport: 'Shiriki ripoti',
+    reportSummary: 'MUHTASARI',
+    reportGenerated: 'Imetengenezwa na Imara Afya tarehe {date}',
+    reportTypicalCycle: 'Mzunguko wa kawaida',
+    reportTypicalPeriod: 'Hedhi ya kawaida',
+    reportCyclesLogged: 'Hedhi zilizoandikwa',
+    reportNextPeriod: 'Hedhi ijayo inayotarajiwa',
+    reportNotes: 'Maelezo',
+    reportSymptoms: 'Dalili za kawaida',
+    reportCycles: 'Mizunguko',
+    reportNoPeriods: 'Bado hakuna hedhi iliyoandikwa.',
+    checkInAgain: 'Andika hali tena',
+    checkInsToday: 'Mara {n} leo',
+    checkInsTodayOne: 'Mara 1 leo',
+    checkInTodayList: 'HALI ZA LEO',
+    checkInRemoveOne: 'Ondoa hali hii?',
+    trendTitle: 'MWENENDO',
+    trend7: 'Siku 7',
+    trend30: 'Siku 30',
+    trendUp: 'Hali yako ni bora kuliko wiki iliyopita.',
+    trendDown: 'Hali yako iko chini kidogo kuliko wiki iliyopita. Jitunze.',
+    trendSteady: 'Hali yako imekuwa tulivu ukilinganisha na wiki iliyopita.',
+    trendNotEnough: 'Andika hali yako siku chache zaidi ili kuona mwenendo wako.',
+    bestMorning: 'Mara nyingi unajisikia vizuri zaidi asubuhi.',
+    bestAfternoon: 'Mara nyingi unajisikia vizuri zaidi mchana.',
+    bestEvening: 'Mara nyingi unajisikia vizuri zaidi jioni.',
     moodLabel: 'HALI YA MOYO',
     energyLabel: 'NGUVU',
     checkInNote: 'MAELEZO (SI LAZIMA)',
     checkInNotePlaceholder: 'Kuna jambo lolote akilini?',
     checkInSave: 'Hifadhi hali',
-    checkInUpdate: 'Sasisha hali',
     checkInSaved: 'Hali imehifadhiwa',
-    checkInRemove: 'Futa hali ya leo',
-    checkInRemoveConfirm: 'Futa hali ya leo?',
     checkInRemoved: 'Hali imefutwa',
     remove: 'Futa',
     moodAverage: 'Hali ya moyo (siku 7)',
@@ -825,7 +1606,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInDays: 'Siku zilizoandikwa (siku 30)',
     checkInHistory: 'HALI ZA KARIBUNI',
     noCheckIns: 'Bado hakuna hali iliyoandikwa. Ya kwanza inaanzisha mfululizo wako.',
-    pickBoth: 'Chagua hali ya moyo na nguvu zako.',
     moodName: 'Hali ya moyo',
     energyName: 'Nguvu',
     last30Days: 'SIKU 30 ZILIZOPITA',
@@ -952,7 +1732,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     loading: 'Birapakirwa',
     retry: 'Gerageza',
     outOfRange: 'Iyo nomero iri hanze y’urugero rwemewe.',
-    habitsToday: 'UYU MUNSI',
     dayToday: 'Uyu munsi',
     waterLabel: 'Amazi',
     stepsLabel: 'Intambwe',
@@ -984,7 +1763,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     addHalfHour: 'Ongeramwo isaha igice',
     removeHalfHour: 'Kuramwo isaha igice',
     seeHistory: 'Kahise k’intambwe',
-    seeHistorySub: 'Imisi 30 iheze',
     menuHome: 'Ahabanza',
     menuProfile: 'Umwirondoro',
     trackSleep: 'Kurikirana ibitotsi vyanje ubwavyo',
@@ -998,6 +1776,13 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterReminderTitle: 'N’igihe c’ikirobo c’amazi',
     waterReminderBody: 'Fyonda “+1 ikirobo” umaze kunywa kimwe.',
     addGlassAction: '+1 ikirobo',
+    moodReminders: 'Kwibutswa kwandika uko umerewe',
+    moodRemindersNote: 'Isaha 9:00, 14:00 na 19:00. Ntibiza niwaba umaze kwandika hari hageze.',
+    moodReminderTitle: 'Wiyumva gute?',
+    moodReminderBody: 'Fata akanya wandike uko umerewe: hitamwo isura na bateri.',
+    warmMessages: 'Ubutumwa buhumuriza',
+    warmMessagesNote: 'Akajambo keza amasaha makeyi inyuma yo kwandika uko umerewe, bivanye n’ingene wiyumva.',
+    warmMessageTitle: 'Akajambo kawe',
     remindMe: 'Nyibutsa kunywa amazi',
     remindersOn: 'Ivyibutsa vy’amazi vyatanguye',
     notificationsDenied: 'Imenyesha ryahagaritswe kuri Imara Afya. Ritangure mu mategeko ya terefone.',
@@ -1013,17 +1798,210 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInLabel: 'Uko gute uyu munsi',
     checkInSub: 'Ingene wiyumva, akanya gato buri munsi.',
     checkInPrompt: 'Wiyumva gute uyu munsi?',
-    checkInPromptSub: 'Gukanda kabiri: umutima wawe n’inguvu zawe.',
-    checkInCta: 'Andika',
+    checkInQuickHint: 'Kora ku isura no kuri bateri. Birabikwa ubwabyo.',
+    checkInDetails: 'Ibisobanuro',
+    menuCheckIn: 'Uko ndi',
+    moodMessages: {
+      low: {
+        low: 'Uyu munsi uraremereye, kandi ni ibisanzwe. Iyiteho: ruhuka, nywa amazi kandi ugende intambwe ntoya ku yindi.',
+        mid: 'Si iminsi yose yoroshe. Gerageza ikintu gitoyi gikunda kukunezereza: gutembera gato, indirimbo ukunda canke guhamagara umugenzi.',
+        high: 'Ufise inguvu naho umutima wiyumva nabi. Gutembera hanze canke kuyaga n’uwo wizigira vyogufasha kworoherwa.',
+      },
+      mid: {
+        low: 'Umunsi umeze neza ariko inguvu ni nke. Ruhuka igihe ubishoboye, kandi ugerageze kuryama kare gatoyi iri joro.',
+        mid: 'Umunsi utekanye. Bandanya: utumenyero dutoyi nko kunywa amazi no kwinyegeza turafasha.',
+        high: 'Ufise inguvu nziza uyu munsi. Koresha zimwe mu kintu gituma umwenyura.',
+      },
+      high: {
+        low: 'Wiyumva neza naho uruhiye. Nezerwa kandi uhe umubiri wawe akaruhuko usaba.',
+        mid: 'Birashimishije kukubona umeze neza! Ibuka icatumye uyu munsi uba mwiza.',
+        high: 'Uyu munsi urarabagirana! Sangiza abandi izo nguvu, zoshobora kunezereza umunsi w’uwundi.',
+      },
+    },
+    moodSupport: 'Hari iminsi itari mike wiyumva nabi. Ntukwiye kubyikorera wenyene: kuyaga n’uwo wizigira canke umukozi w’amagara vyogufasha.',
+    sleepScheduleTitle: 'INGENGABIHE Y’IBITOTSI',
+    sleepScheduleEmpty: 'Shinga isaha yo kuryama n’iyo kuvyuka. Imara izikoresha mu gukurikirana ibitotsi vyawe buri joro, nka Apple Health, no kukwibutsa igihe co kuryama.',
+    sleepScheduleSet: 'Shinga ingengabihe',
+    bedtimeLabel: 'Kuryama',
+    wakeUpLabel: 'Kuvyuka',
+    sleepGoalShort: 'Intumbero y’ibitotsi',
+    inBedHours: '{h} ku buriri',
+    meetsGoal: 'Ushikira intumbero yawe ya {h}',
+    shortOfGoal: '{h} munsi y’intumbero yawe',
+    saveSchedule: 'Bika ingengabihe',
+    removeSchedule: 'Kuraho ingengabihe',
+    scheduleSaved: 'Ingengabihe y’ibitotsi yabitswe',
+    scheduleRemoved: 'Ingengabihe y’ibitotsi yakuweho',
+    bedtimeReminders: 'Kwibutswa kuryama',
+    bedtimeRemindersNote: 'Kwibutswa iminota 30 imbere yo kuryama n’akajambo keza mu gitondo.',
+    windDownTitle: 'Kuryama mu minota 30',
+    windDownBody: 'Igihe co kuruhuka: gabanya umuco kandi ushire terefone hirya.',
+    goodMorningTitle: 'Mwaramutse!',
+    goodMorningBody: 'Fungura Imara urabe ingene waryamye.',
+    sleepFromSchedule: 'Amajoro terefone itapimye aharurwa bivanye n’ingengabihe yawe n’ukwinyegeza kwawe · kosora na − na +',
+    dragToAdjust: 'Kwegera uburiri canke isaha yo kuvyuka ku ruziga, canke kwegera umurongo wose ngo uhindure vyose.',
+    weekdaysLabel: 'Iminsi y’akazi',
+    weekendLabel: 'Impera y’indwi',
+    weekendDifferent: 'Amasaha atandukanye mu mpera y’indwi',
+    weekendNote: 'Ku majoro yo ku wa gatanu no ku wa gatandatu.',
+    bedtimeRemindersNeedsSchedule: 'Shinga ingengabihe y’ibitotsi ku rupapuro rw’Ibitotsi kugira ubironke.',
+    tonightSchedule: 'Iri joro: kuryama {bed} · kuvyuka {wake}',
+    menuSleep: 'Ibitotsi',
+    flowMoodTitle: 'Wiyumva gute ubu nyene?',
+    flowEnergyTitle: 'Inguvu zawe zimeze gute ubu nyene?',
+    flowNoteTitle: 'Hari ico wokwongerako?',
+    newCheckIn: 'Andika uko umerewe',
+    sectionFeel: 'INGENE WIYUMVA',
+    sectionActivity: 'IBIKORWA',
+    sectionWaterSleep: 'AMAZI N’IBITOTSI',
+    goalsMet: 'Intumbero {n} kuri 3 zashitswe uyu munsi',
+    goalsAllMet: 'Intumbero 3 zose zashitswe uyu munsi. Ni vyiza!',
+    goalsNone: 'Intumbero zawe z’uyu munsi ziragutegereje',
+    menuCycle: 'Ukwezi',
+    cycleTitle: 'Ukwezi',
+    cycleSub: 'Imihango yawe n’ibizokurikira.',
+    cycleDayN: 'Umunsi {n}',
+    phaseMenstrual: 'Imihango',
+    phaseFollicular: 'Igihe ca folikile',
+    phaseFertile: 'Igihe co kwibaruka',
+    phaseLuteal: 'Igihe ca luteyale',
+    phaseUnknown: 'Nta makuru arahari',
+    nextPeriodIn: 'Imihango ikurikira mu minsi {n}',
+    nextPeriodTomorrow: 'Imihango ikurikira yitezwe ejo',
+    periodToday: 'Imihango yitezwe uyu munsi',
+    periodLate: 'Imihango yatevye iminsi {n}',
+    periodDayN: 'Imihango · umunsi {n}',
+    fertileFrom: 'Igihe co kwibaruka kuva {date} (igereranyo)',
+    fertileNow: 'Uri mu gihe co kwibaruka (igereranyo)',
+    periodStartedToday: 'Imihango yanje yatanguye uyu munsi',
+    periodEndedToday: 'Imihango yanje yarangiye uyu munsi',
+    periodStartedOn: 'Yatanguye uwo munsi',
+    periodEndedOn: 'Yarangiye uwo munsi',
+    anotherDay: 'Hitamwo uwundi munsi',
+    cycleEmpty: 'Andika umunsi wa mbere w’imihango yawe gutangura. Imara izogenda imenya ukwezi kwawe.',
+    legendPeriod: 'Imihango',
+    legendPredicted: 'Imihango yitezwe',
+    legendFertile: 'Igihe co kwibaruka',
+    legendOvulation: 'Ovilasiyo (igereranyo)',
+    avgCycle: 'Uburebure bw’ukwezi',
+    avgPeriod: 'Uburebure bw’imihango',
+    usingTypical: 'Dukoresha uburebure busanzwe (iminsi 28 na 5) gushika wanditse imihango ibiri.',
+    periodsHistory: 'IMIHANGO YAHESHEJE',
+    ongoing: 'Iriko irabandanya',
+    daysN: 'iminsi {n}',
+    removePeriodConfirm: 'Ukuraho iyi mihango?',
+    periodSaved: 'Vyabitswe',
+    periodRemoved: 'Imihango yakuweho',
+    cycleDisclaimer: 'Amatariki ni igereranyo rivanye n’imihango wanditse. Arashobora kuba ataribyo kandi si uburyo bwo kwirinda imbanyi. Raba umukozi w’amagara niba imihango yawe idahoraho, ibabaza cane, iremereye cane, canke yahagaze.',
+    flowNone: 'Nta na kimwe',
+    flowSpotting: 'Udutonyanga',
+    flowLight: 'Bike',
+    flowMedium: 'Hagati',
+    flowHeavy: 'Vyinshi',
+    symCramps: 'Kuribwa mu nda',
+    symHeadache: 'Kuribwa n’umutwe',
+    symBackPain: 'Kuribwa mu mugongo',
+    symBloating: 'Kuvyimba inda',
+    symTenderBreasts: 'Amabere aribwa',
+    symAcne: 'Ibiheri',
+    symFatigue: 'Uburuhe',
+    symNausea: 'Iseseme',
+    symCravings: 'Ukwipfuza ibifungurwa',
+    symInsomnia: 'Kubura ibitotsi',
+    symMoodSwings: 'Guhindagurika kw’umutima',
+    symAnxiety: 'Amaganya',
+    disDry: 'Vyumye',
+    disSticky: 'Bifata',
+    disCreamy: 'Nk’amavuta',
+    disWatery: 'Nk’amazi',
+    disEggWhite: 'Nk’umweru w’igi',
+    disUnusual: 'Bidasanzwe',
+    tipMenstrual: 'Ruhuka igihe bikenewe. Ubushuhe ku nda no kwinyegeza buhoro birashobora kugabanya ububabare. Nywa amazi menshi.',
+    tipFollicular: 'Inguvu akenshi ziriyongera inyuma y’imihango. Ni igihe ciza co kwinyegeza kurushirizaho.',
+    tipFertile: 'Igihe co kwibaruka kiri hejuru ubu. Ni igereranyo, si uburyo bwo kwirinda imbanyi.',
+    tipLuteal: 'Bamwe biyumva bavyimbye, baruhiye canke bababaye imbere y’imihango. Ibitotsi, amazi n’imyitozo mitoya birashobora gufasha.',
+    tipUnknown: 'Andika imihango yawe kugira uronke igereranyo n’impanuro kuri buri gihe.',
+    inMenstrual: 'mu gihe c’imihango',
+    inFollicular: 'inyuma y’imihango',
+    inFertile: 'hafi y’igihe co kwibaruka',
+    inLuteal: 'mu minsi iri imbere y’imihango',
+    noteIrregular: 'Ukwezi kwawe guhinduka ku minsi irenga 9. Umuhangayiko canke indwara birashobora kubitera; nibibandanya, vugana n’umukozi w’amagara.',
+    noteShort: 'Ukwezi kwawe akenshi kuri munsi y’iminsi 24. Nibibandanya, vugana n’umukozi w’amagara.',
+    noteLong: 'Ukwezi kwawe akenshi kurenza iminsi 38. Nibibandanya, vugana n’umukozi w’amagara.',
+    noteLongPeriods: 'Imihango iheruka yamaze iminsi irenga 8. Niba bikunda kuba canke iremereye cane, vugana n’umukozi w’amagara.',
+    noteVeryLate: 'Imihango yawe yatevye indwi irenga imwe. Niba ushobora kuba wibungenze, igipimo c’imbanyi kirabikwereka. Umukozi w’amagara arashobora gufasha.',
+    legendLogged: 'Ibimenyetso vyanditswe',
+    todayLogTitle: 'UYU MUNSI',
+    nothingLogged: 'Nta co wanditse. Umubiri wawe umeze gute uyu munsi?',
+    logToday: 'Andika uyu munsi',
+    editToday: 'Hindura uyu munsi',
+    insightsTitle: 'IMPANURO',
+    patternText: '{symptom} akenshi kiza {phase}',
+    patternCount: 'Vyanditswe incuro {n}',
+    upcomingTitle: 'IMIHANGO IKURIKIRA',
+    upcomingFertile: 'Igihe co kwibaruka {range}',
+    openCalendar: 'Fungura kalindari yose',
+    calendarPageTitle: 'Kalindari',
+    calendarPageSub: 'Urugendo rw’imihango yawe',
+    calendarAhead: 'UKU KWEZI N’IBIZOKURIKIRA',
+    calendarJourney: 'URUGENDO RWAWE',
+    variationLabel: 'Ihinduka',
+    cycleOfN: 'ukwezi kw’iminsi {n}',
+    autoEndedNote: 'Yafashwe nk’iyarangiye inyuma y’iminsi {n} isanzwe. Uracava amaraso? Andika amaraso kuri iyo minsi canke ushinge umunsi yaherereyeko.',
+    setEndDay: 'Shinga umunsi yaherereyeko',
+    cycleReminders: 'Kwibutswa ukwezi',
+    cycleRemindersNote: 'Imisi ibiri imbere y’imihango, n’igihe co kwibaruka gitanguye.',
+    periodSoonTitle: 'Imihango yitezwe mu minsi 2',
+    periodSoonBody: 'Imihango yawe irashobora gutangura hafi ya {date}. Ni vyiza kwitegurira ibikoresho.',
+    fertileTitle: 'Igihe co kwibaruka gitanguye uyu munsi',
+    fertileBody: 'Igereranyo rivanye n’ukwezi kwawe. Si uburyo bwo kwirinda imbanyi.',
+    dayLogTitle: 'Ivyo wanditse ku munsi',
+    flowLabel: 'AMARASO',
+    symptomsLabel: 'IBIMENYETSO',
+    dischargeLabel: 'IVISOHOKA',
+    dayNoteLabel: 'ICIBUTSO (SI NGOMBWA)',
+    futureDay: 'Uyu munsi ntarashika. Ng’ibi ibitezwe.',
+    dayTooOld: 'Iminsi irenga 90 iheze ntishobora guhindurwa.',
+    dayInPeriod: 'Mu mihango yawe',
+    dayExpectedPeriod: 'Imihango yitezwe (igereranyo)',
+    dayFertile: 'Igihe co kwibaruka (igereranyo)',
+    dayOvulation: 'Ovilasiyo igereranijwe',
+    periodStartedHere: 'Imihango yanje yatanguye uyu munsi',
+    periodEndedHere: 'Imihango yanje yarangiye uyu munsi',
+    reportTitle: 'Raporo y’amagara',
+    reportSub: 'Incamake y’ukwezi kwereka umukozi w’amagara',
+    shareReport: 'Sangiza raporo',
+    reportSummary: 'INCAMAKE',
+    reportGenerated: 'Yakozwe na Imara Afya ku wa {date}',
+    reportTypicalCycle: 'Ukwezi gusanzwe',
+    reportTypicalPeriod: 'Imihango isanzwe',
+    reportCyclesLogged: 'Imihango yanditswe',
+    reportNextPeriod: 'Imihango ikurikira yitezwe',
+    reportNotes: 'Ivyitonderwa',
+    reportSymptoms: 'Ibimenyetso bikunda kuza',
+    reportCycles: 'Amezi',
+    reportNoPeriods: 'Nta mihango irandikwa.',
+    checkInAgain: 'Andika kandi',
+    checkInsToday: 'Incuro {n} uyu munsi',
+    checkInsTodayOne: 'Incuro 1 uyu munsi',
+    checkInTodayList: 'UKO WARI UMEREWE UYU MUNSI',
+    checkInRemoveOne: 'Ukuraho ivyo wanditse?',
+    trendTitle: 'UKO BIGENDA',
+    trend7: 'Iminsi 7',
+    trend30: 'Iminsi 30',
+    trendUp: 'Wiyumva neza kuruta indwi iheze.',
+    trendDown: 'Wiyumva nabi gatoyi kuruta indwi iheze. Iyiteho.',
+    trendSteady: 'Uko wiyumva ntivyahindutse ugereranije n’indwi iheze.',
+    trendNotEnough: 'Andika uko umerewe iminsi mikeyi yindi kugira ubone uko bigenda.',
+    bestMorning: 'Akenshi wiyumva neza mu gitondo.',
+    bestAfternoon: 'Akenshi wiyumva neza ku murango.',
+    bestEvening: 'Akenshi wiyumva neza ku mugoroba.',
     moodLabel: 'INGENE WIYUMVA',
     energyLabel: 'INGUVU',
     checkInNote: 'ICANDIKO (SI NGOMBWA)',
     checkInNotePlaceholder: 'Hari ico uriko uriyumvira?',
     checkInSave: 'Bika',
-    checkInUpdate: 'Hindura',
     checkInSaved: 'Vyabitswe',
-    checkInRemove: 'Kuraho ivy’uyu munsi',
-    checkInRemoveConfirm: 'Kuraho ivy’uyu munsi?',
     checkInRemoved: 'Vyakuweho',
     remove: 'Kuraho',
     moodAverage: 'Ingene wiyumva (iminsi 7)',
@@ -1031,7 +2009,6 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     checkInDays: 'Iminsi wanditse (iminsi 30)',
     checkInHistory: 'IVYANDITSWE VUBA',
     noCheckIns: 'Nta co urandika. Ica mbere gitangura urukurikirane rwawe.',
-    pickBoth: 'Hitamwo ingene wiyumva n’inguvu zawe.',
     moodName: 'Ingene wiyumva',
     energyName: 'Inguvu',
     last30Days: 'IMINSI 30 IHERUKA',

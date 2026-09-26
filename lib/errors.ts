@@ -50,6 +50,7 @@ const TOO_MANY: Record<Lang, string> = {
   rn: 'Wagerageje kenshi cane. Rindira gato hanyuma ugerageze.',
 };
 
+/** Any error as a code, a message in the user's language and the field it concerns. */
 export function readError(error: unknown, lang: Lang): BackendError {
   // The ordinary case: the server answered 200 with an `errors` array.
   if (CombinedGraphQLErrors.is(error)) {
@@ -93,6 +94,7 @@ export function readError(error: unknown, lang: Lang): BackendError {
   return { code: 'NETWORK', message: OFFLINE[lang] };
 }
 
+/** Just the translated message of an error. */
 export const errorMessage = (error: unknown, lang: Lang): string => readError(error, lang).message;
 
 // Appends the retry time when the server sends one.
@@ -103,6 +105,7 @@ const IN_SECONDS: Record<Lang, (s: number) => string> = {
   rn: (s) => `Gerageza bushasha mu masegonda ${s}.`,
 };
 
+/** The message, plus the wait time when the server says to retry later. */
 export function errorWithWait(error: unknown, lang: Lang): string {
   const failure = readError(error, lang);
   if (!failure.retryAfterSeconds) return failure.message;
@@ -132,4 +135,5 @@ const FIELD_OF: Record<string, FieldKey> = {
   INVALID_CREDENTIALS: null,
 };
 
+/** The form field an error code belongs to, if any. */
 export const fieldOf = (code: string): FieldKey => FIELD_OF[code] ?? null;

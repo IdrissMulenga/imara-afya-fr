@@ -1,15 +1,5 @@
-// Automatic step counting and syncing to the server.
-//
-// Modes:
-//   hardware  Android with the native step counter: each reading is a total since
-//             boot; the difference from the previous reading is added to the day(s)
-//             it happened in. Counts steps taken while the app was closed.
-//   ios       iOS: the system's step history gives each day's total, counted only
-//             from when counting was switched on (startedAt), not from midnight.
-//   live      Android without the native module (Expo Go): only steps taken while
-//             the app is open are counted.
-//   none      No step sensor (or web).
-// Days are the phone's local calendar days; a new day starts at 0.
+// Automatic step counting and syncing. Modes: hardware (Android counter, counts while
+// closed), ios (system history), live (Expo Go, only while open), none.
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { Pedometer } from 'expo-sensors';
@@ -68,6 +58,7 @@ const nextMidnight = (ms: number): number => {
   return d.getTime();
 };
 
+/** How steps can be counted on this phone. */
 export function stepMode(): StepMode {
   if (Platform.OS === 'ios') return 'ios';
   if (Platform.OS === 'android') return hasStepCounter() ? 'hardware' : 'live';
@@ -112,6 +103,7 @@ export function getLocalSteps(day: string): number {
   return state?.totals[day] ?? 0;
 }
 
+/** The motion permission, without asking. */
 export async function getStepPermission(): Promise<StepPermission> {
   try {
     const { granted, canAskAgain } = await Pedometer.getPermissionsAsync();
@@ -121,6 +113,7 @@ export async function getStepPermission(): Promise<StepPermission> {
   }
 }
 
+/** Asks for the motion permission. */
 export async function requestStepPermission(): Promise<StepPermission> {
   try {
     const { granted, canAskAgain } = await Pedometer.requestPermissionsAsync();
@@ -160,9 +153,7 @@ function recordHardware(s: StepState, reading: StepCounterReading, now: number):
   }
 }
 
-// iOS: today's total since midnight or since counting started, whichever is later,
-// and yesterday's final total when counting was already on yesterday and the day has
-// changed since the last reading.
+// iOS: today's total since counting started, plus yesterday's final total after midnight.
 async function recordIos(s: StepState, now: number): Promise<void> {
   if (s.startedAt == null) s.startedAt = now;
   const startedAt = s.startedAt;

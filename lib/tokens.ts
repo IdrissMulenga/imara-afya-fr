@@ -10,6 +10,7 @@ const SECURE: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
 };
 
+/** The session token, kept in secure storage. */
 export async function saveToken(token?: string | null): Promise<void> {
   if (!token) return;
   try {
@@ -38,7 +39,7 @@ export async function clearToken(): Promise<void> {
 // Last known profile, cached with the token so the app can start offline.
 
 // Cache version. Must change whenever USER_FIELDS in graphql/auth.ts changes.
-const PROFILE_SHAPE = 2;
+const PROFILE_SHAPE = 4;
 
 type StoredProfile = { v: number; user: AuthUser };
 
@@ -59,6 +60,7 @@ const REQUIRED: readonly (keyof AuthUser)[] = [
   'createdAt',
 ];
 
+/** The cached profile, so the app can open signed in without a network. */
 export async function saveProfile(user: AuthUser): Promise<void> {
   try {
     const wrapped: StoredProfile = { v: PROFILE_SHAPE, user };
@@ -154,6 +156,7 @@ function decodeBase64Url(input: string): string {
   return out;
 }
 
+/** A token's claims, read without checking the signature (the server checks it). */
 export function decodeToken(token?: string | null): TokenClaims | null {
   if (!token) return null;
   const parts = token.split('.');
@@ -168,6 +171,7 @@ export function decodeToken(token?: string | null): TokenClaims | null {
 // Allowed clock skew.
 const CLOCK_SKEW_SECONDS = 60;
 
+/** True when the token has expired, allowing a minute of clock skew. */
 export function isExpired(token?: string | null): boolean {
   const claims = decodeToken(token);
   if (!claims?.exp) return true;
@@ -177,6 +181,7 @@ export function isExpired(token?: string | null): boolean {
 // Renew the token when fewer than this many days remain.
 const RENEW_WHEN_DAYS_LEFT = 7;
 
+/** True when fewer than 7 days of the token are left. */
 export function shouldRefresh(token?: string | null): boolean {
   const claims = decodeToken(token);
   if (!claims?.exp) return false;

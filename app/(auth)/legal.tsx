@@ -1,6 +1,6 @@
 // Placeholder for the Terms and Privacy pages until the real text exists.
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Screen, Spacer } from '@/components/screen';
 import { Heading, BackButton, InfoNote } from '@/components/ui';

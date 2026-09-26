@@ -6,6 +6,7 @@ import { font, welcome } from '@/theme/tokens';
 
 const LOGO = require('@/assets/images/imara-afya-logo.png');
 
+/** The Imara Afya name as a logo, with an optional tagline. */
 export function Wordmark({ onDark = false, tagline }: { onDark?: boolean; tagline?: string }) {
   const { c } = useTheme();
   const ink = onDark ? welcome.ink : c.text;
