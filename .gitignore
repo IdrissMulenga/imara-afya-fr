@@ -43,3 +43,7 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Private notes (store copy and reviewer login): kept on this computer, not uploaded.
+docs/store-listing.md
+*.docx
