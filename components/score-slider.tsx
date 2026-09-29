@@ -41,7 +41,7 @@ export function ScoreSlider({
   };
   const follow = (x: number) => {
     const next = toValue(x);
-    value.value = next;
+    value.set(next);
     const rounded = Math.round(next);
     if (rounded !== latest.current.score) {
       latest.current.score = rounded;
@@ -58,10 +58,10 @@ export function ScoreSlider({
       onPanResponderGrant: (e) => follow(e.nativeEvent.locationX),
       onPanResponderMove: (e) => follow(e.nativeEvent.locationX),
       onPanResponderRelease: () => {
-        value.value = withSpring(latest.current.score, { damping: 14, stiffness: 180 });
+        value.set(withSpring(latest.current.score, { damping: 14, stiffness: 180 }));
       },
       onPanResponderTerminate: () => {
-        value.value = withSpring(latest.current.score, { damping: 14, stiffness: 180 });
+        value.set(withSpring(latest.current.score, { damping: 14, stiffness: 180 }));
       },
     }),
   ).current;
@@ -82,7 +82,7 @@ export function ScoreSlider({
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
         onAccessibilityAction={(e) => {
           const next = Math.min(5, Math.max(1, score + (e.nativeEvent.actionName === 'increment' ? 1 : -1)));
-          value.value = withSpring(next);
+          value.set(withSpring(next));
           onScore(next);
         }}
         {...responder.panHandlers}

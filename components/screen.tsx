@@ -1,5 +1,5 @@
 // Screen frame: safe area, keyboard handling, pinned header and footer, backdrop.
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   View,
   Animated,
@@ -81,7 +81,7 @@ export function Screen({
   const [footerHeight, setFooterHeight] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [scrollLocked, setScrollLocked] = useState(false);
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const [scrollY] = useState(() => new Animated.Value(0));
 
   const refresh = async () => {
     if (!onRefresh) return;

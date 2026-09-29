@@ -1,6 +1,6 @@
 // One cycle day (?day=YYYY-MM-DD): flow, symptoms, discharge, note, period start/end.
 // A future day shows what is expected instead.
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -82,14 +82,15 @@ export default function CycleDayScreen() {
   const [discharge, setDischarge] = useState<CycleDischarge | null>(null);
   const [note, setNote] = useState('');
 
-  // Fills the form once the saved log arrives.
-  useEffect(() => {
-    if (!saved) return;
+  // Fills the form once per day when the saved log arrives; later refetches leave edits alone.
+  const [filledDay, setFilledDay] = useState<string | null>(null);
+  if (saved && filledDay !== day) {
+    setFilledDay(day);
     setFlow(saved.flow);
     setSymptoms(saved.symptoms);
     setDischarge(saved.discharge);
     setNote(saved.note);
-  }, [saved]);
+  }
 
   const s = summaryQuery.data?.cycleSummary;
   const mark = s ? markDay(day, s, dayQuery.byDay, today) : null;

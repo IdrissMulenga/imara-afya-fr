@@ -75,7 +75,7 @@ function useKeyboardUp(): boolean {
   return up;
 }
 
-/** The floating glass pill holding the menu. */
+/** The menu: the Android navigation bar, or the floating glass pill on iOS. */
 export function TabDock({ state, navigation }: TabBarProps) {
   const { isDark } = useTheme();
   const space = useMenuSpace();
@@ -87,40 +87,18 @@ export function TabDock({ state, navigation }: TabBarProps) {
 
   if (Platform.OS === 'android') return <NavigationBar state={state} navigation={navigation} />;
 
-  const bar = <MenuBar state={state} navigation={navigation} />;
-  // iOS: real blur, shadow on the wrapper (Glass clips). Android: a translucent fill (blur
-  // is too slow on low-end phones) carrying its own elevation.
+  // Real blur, with the shadow on the wrapper because Glass clips.
   return (
-    <View style={[styles.dock, { bottom: space.bottom }, Platform.OS === 'ios' ? styles.liftIOS : null]}>
-      {Platform.OS === 'ios' ? (
-        <Glass intensity={80} radius={PILL} flat style={[styles.inner, { borderWidth: 1, borderColor: rim }]}>
-          {bar}
-        </Glass>
-      ) : (
-        <View
-          style={[
-            styles.inner,
-            styles.liftAndroid,
-            {
-              borderRadius: PILL,
-              backgroundColor: isDark ? 'rgba(38,39,42,0.94)' : 'rgba(255,255,255,0.94)',
-              borderWidth: 1,
-              borderColor: rim,
-            },
-          ]}
-        >
-          {bar}
-        </View>
-      )}
+    <View style={[styles.dock, styles.lift, { bottom: space.bottom }]}>
+      <Glass intensity={80} radius={PILL} flat style={[styles.inner, { borderWidth: 1, borderColor: rim }]}>
+        <MenuBar state={state} navigation={navigation} />
+      </Glass>
     </View>
   );
 }
 
 // The tabs this user sees, their labels, the active one, and switching to one.
-function useMenuTabs(
-  { state, navigation }: Pick<TabBarProps, 'state' | 'navigation'>,
-  onSwitch?: (index: number) => void,
-) {
+function useMenuTabs({ state, navigation }: Pick<TabBarProps, 'state' | 'navigation'>) {
   const { lang } = useLang();
   const { user } = useSession();
   const a = APP_COPY[lang];
@@ -136,14 +114,15 @@ function useMenuTabs(
   const activeFolder = folderOf(state.routes[state.index]?.name);
   const activeIndex = Math.max(0, tabs.findIndex((t) => t.route === activeFolder));
 
-  const press = (index: number) => {
+  // True when it switched to another tab.
+  const press = (index: number): boolean => {
     const route = state.routes.find((r) => folderOf(r.name) === tabs[index].route);
-    if (!route) return;
+    if (!route) return false;
     const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-    if (index === activeIndex || event.defaultPrevented) return;
+    if (index === activeIndex || event.defaultPrevented) return false;
     Haptics.selectionAsync().catch(() => {});
-    onSwitch?.(index);
     navigation.navigate(route.name, route.params);
+    return true;
   };
 
   return { tabs, labels, activeIndex, press };
@@ -204,7 +183,7 @@ function NavItem({
   const active = useSharedValue(on ? 1 : 0);
 
   useEffect(() => {
-    active.value = reduced ? (on ? 1 : 0) : withTiming(on ? 1 : 0, { duration: 220 });
+    active.set(reduced ? (on ? 1 : 0) : withTiming(on ? 1 : 0, { duration: 220 }));
   }, [on, reduced, active]);
 
   const indicatorStyle = useAnimatedStyle(() => ({
@@ -250,11 +229,13 @@ function NavItem({
 /** iOS: the floating glass pill with a sliding highlight. */
 function MenuBar({ state, navigation }: Pick<TabBarProps, 'state' | 'navigation'>) {
   const reduced = useReducedMotion();
-  // The callback runs on a press, after pos below exists.
-  const { tabs, labels, activeIndex, press } = useMenuTabs({ state, navigation }, (index) => {
-    pos.value = reduced ? index : withSpring(index, SPRING);
-  });
+  const { tabs, labels, activeIndex, press: open } = useMenuTabs({ state, navigation });
   const pos = useSharedValue(activeIndex);
+
+  // Slides the highlight at once rather than waiting for the new page.
+  const press = (index: number) => {
+    if (open(index)) pos.set(reduced ? index : withSpring(index, SPRING));
+  };
   const stops = tabs.map((_, i) => i);
   const pillColors = tabs.map((t) => `${t.color}24`);
 
@@ -262,7 +243,7 @@ function MenuBar({ state, navigation }: Pick<TabBarProps, 'state' | 'navigation'
 
   // Follows tab changes made elsewhere (links, notifications, back).
   useEffect(() => {
-    pos.value = reduced ? activeIndex : withSpring(activeIndex, SPRING);
+    pos.set(reduced ? activeIndex : withSpring(activeIndex, SPRING));
   }, [activeIndex, reduced, pos]);
 
   const itemWidth = width / tabs.length;
@@ -340,10 +321,10 @@ function Item({
     <Pressable
       onPress={onPress}
       onPressIn={() => {
-        squeeze.value = withTiming(0.86, { duration: 90 });
+        squeeze.set(withTiming(0.86, { duration: 90 }));
       }}
       onPressOut={() => {
-        squeeze.value = withSpring(1, { damping: 10, stiffness: 300 });
+        squeeze.set(withSpring(1, { damping: 10, stiffness: 300 }));
       }}
       accessibilityRole="tab"
       accessibilityLabel={label}
@@ -368,13 +349,12 @@ function Item({
 const styles = StyleSheet.create({
   dock: { position: 'absolute', left: 36, right: 36 },
   inner: { padding: DOCK_PADDING },
-  liftIOS: {
+  lift: {
     shadowColor: '#0C1A2E',
     shadowOpacity: 0.2,
     shadowRadius: 22,
     shadowOffset: { width: 0, height: 10 },
   },
-  liftAndroid: { elevation: 14 },
   bar: { flexDirection: 'row' },
   pill: { position: 'absolute', top: 0, bottom: 0, left: 0, borderRadius: PILL },
   item: { flex: 1, height: ITEM_HEIGHT, alignItems: 'center', justifyContent: 'center', gap: 2 },

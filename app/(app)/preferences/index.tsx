@@ -60,7 +60,7 @@ export default function Preferences() {
 
   const [setPreferences, { loading }] = useMutation<{ setPreferences: AuthUser }>(SET_PREFERENCES);
 
-  const detected = useMemo(detectedZone, []);
+  const detected = useMemo(() => detectedZone(), []);
 
   // Detected zone first, then the region, then the current value if it is none of those.
   const zoneOptions = useMemo(() => {
