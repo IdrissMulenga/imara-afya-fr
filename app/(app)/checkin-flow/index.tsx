@@ -1,6 +1,7 @@
 // Step-by-step check-in like Apple Health's State of Mind: mood, energy, then a note.
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -144,6 +145,7 @@ export default function CheckInFlow() {
 
         <View style={{ flex: 1, minHeight: 24 }} />
         <Pressable
+          ripple="light"
           onPress={scoring ? next : submit}
           disabled={saving}
           accessibilityRole="button"

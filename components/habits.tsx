@@ -1,7 +1,8 @@
 // Daily habits UI: the dashboard's Today section (steps card, water and sleep tiles),
 // the tracking prompts, the −/+ controls, and the hooks that read and change habit data.
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Linking, Platform, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, Linking, Platform, Animated } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useRouter } from 'expo-router';
 import { useApolloClient, useMutation, useQuery } from '@apollo/client/react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,7 +14,7 @@ import { WaterGlass, SleepRing, WATER_COLOR, SLEEP_COLOR } from '@/components/ha
 import { usePressScale } from '@/components/motion';
 import { useLang, type Lang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
-import { type as T, font } from '@/theme/tokens';
+import { type as T, font, radius } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
 import { errorMessage } from '@/lib/errors';
 import { useSteps } from '@/lib/steps-provider';
@@ -241,6 +242,7 @@ function HabitTile({
         accessibilityRole="button"
         accessibilityLabel={title}
         accessibilityHint={a.openDetails}
+        style={{ borderRadius: radius.card }}
       >
         <Glass style={{ padding: 16 }}>
           <View style={styles.tileHead}>

@@ -1,6 +1,6 @@
 // Shared animation hooks and components. Only opacity and transform are animated, so everything runs on the native thread.
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, AccessibilityInfo, type ViewStyle } from 'react-native';
+import { Animated, Easing, AccessibilityInfo, Platform, type ViewStyle } from 'react-native';
 
 // Whether the OS "reduce motion" setting is on.
 export function useReducedMotion(): boolean {
@@ -114,12 +114,17 @@ export function usePressScale(to = 0.96) {
     [scale],
   );
 
+  // Android shows a ripple instead (components/pressable.tsx), so nothing shrinks there.
+  if (Platform.OS === 'android') return NO_SCALE;
+
   return {
     onPressIn: () => run(to),
     onPressOut: () => run(1),
     style: { transform: [{ scale }] },
   };
 }
+
+const NO_SCALE = { onPressIn: () => {}, onPressOut: () => {}, style: {} };
 
 // Animates an overlay's opacity between 0 and 1.
 export function useFade(on: boolean, duration = 160) {

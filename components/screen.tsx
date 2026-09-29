@@ -1,8 +1,8 @@
 // Screen frame: safe area, keyboard handling, pinned header and footer, backdrop.
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
-  ScrollView,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
@@ -23,6 +23,12 @@ const ScrollLockContext = createContext<(locked: boolean) => void>(() => {});
 
 /** Call with true while a drag is in progress, false when it ends. */
 export const useScrollLock = () => useContext(ScrollLockContext);
+
+// How far the page has scrolled, for headers that shrink their title (iOS).
+const ScrollYContext = createContext<Animated.Value | null>(null);
+
+/** The page's scroll offset, or null outside a Screen. */
+export const useScrollY = () => useContext(ScrollYContext);
 
 /** Whether the keyboard is on screen. */
 function useKeyboardVisible(): boolean {
@@ -75,6 +81,7 @@ export function Screen({
   const [footerHeight, setFooterHeight] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [scrollLocked, setScrollLocked] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const refresh = async () => {
     if (!onRefresh) return;
@@ -97,10 +104,14 @@ export function Screen({
     >
       {backdrop ? <AuthBackdrop /> : null}
 
-      {header}
+      <ScrollYContext.Provider value={scrollY}>{header}</ScrollYContext.Provider>
 
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <ScrollView
+        <Animated.ScrollView
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })}
+          scrollEventThrottle={16}
           contentContainerStyle={[
             styles.content,
             {
@@ -126,7 +137,7 @@ export function Screen({
           }
         >
           <ScrollLockContext.Provider value={setScrollLocked}>{children}</ScrollLockContext.Provider>
-        </ScrollView>
+        </Animated.ScrollView>
       </TouchableWithoutFeedback>
 
       {toast ? (

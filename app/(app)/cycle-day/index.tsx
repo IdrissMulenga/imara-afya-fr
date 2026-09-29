@@ -1,7 +1,8 @@
 // One cycle day (?day=YYYY-MM-DD): flow, symptoms, discharge, note, period start/end.
 // A future day shows what is expected instead.
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import * as Haptics from 'expo-haptics';

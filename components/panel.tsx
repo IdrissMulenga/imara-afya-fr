@@ -4,12 +4,12 @@ import {
   View,
   Text,
   Image,
-  Pressable,
   Switch,
   StyleSheet,
   Animated,
   type ViewStyle,
 } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Glass } from '@/components/glass';
@@ -531,6 +531,7 @@ export function IdentityCard({
         onPressOut={press.onPressOut}
         accessibilityRole="button"
         accessibilityLabel={`${name || email} — ${action}`}
+        style={{ borderRadius: radius.card }}
       >
         <Glass style={{ padding: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>

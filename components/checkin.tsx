@@ -1,7 +1,8 @@
 // Daily check-in UI: the 1–5 mood and energy pickers, the interactive dashboard card,
 // and the hooks that read and change check-ins.
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useRouter } from 'expo-router';
 import { useMutation, useQuery } from '@apollo/client/react';
 import * as Haptics from 'expo-haptics';
@@ -215,6 +216,7 @@ export function CheckInCard({ summary }: { summary?: CheckInSummary }) {
           {a.checkInLabel.toUpperCase()}
         </Text>
         <Pressable
+          ripple="borderless"
           onPress={() => router.push('/checkin')}
           accessibilityRole="button"
           accessibilityLabel={a.checkInDetails}

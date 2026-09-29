@@ -1,7 +1,8 @@
 // Steps visuals: the animated progress ring and the dashboard's steps card with
 // its decorative hills-and-footprints art.
 import React, { useEffect, useId, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import Animated, {
   Easing,
   useAnimatedProps,

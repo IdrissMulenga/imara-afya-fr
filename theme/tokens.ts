@@ -1,4 +1,5 @@
 // Colours, sizes and font names.
+import { Platform } from 'react-native';
 
 export const font = {
   display: 'Sora_600SemiBold',
@@ -87,7 +88,11 @@ export const dark: Palette = {
 
 export type Theme = Palette;
 
-export const radius = { field: 16, button: 16, card: 18, chip: 12 } as const;
+// iOS: soft rounded corners. Android: Material 3 shapes (pill buttons, tighter fields and chips).
+export const radius = Platform.select({
+  android: { field: 12, button: 27, card: 16, chip: 8 },
+  default: { field: 16, button: 16, card: 18, chip: 12 },
+});
 
 export const size = {
   control: 54,

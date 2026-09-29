@@ -1,7 +1,8 @@
 // Shared cycle UI: colours, date helpers, labels, how calendar days are marked, and the
 // month grid.
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useQuery } from '@apollo/client/react';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';

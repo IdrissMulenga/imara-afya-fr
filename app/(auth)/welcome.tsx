@@ -1,7 +1,8 @@
 // Welcome screen. Always deep blue, in both themes.
 // The language rotates every 3.8s until the user picks one or moves on to a form.
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Animated, Easing, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, StatusBar } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import * as Haptics from 'expo-haptics';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -117,6 +118,7 @@ export default function Welcome() {
                 accessibilityLabel={COPY[code].label}
                 accessibilityState={{ selected: on }}
                 hitSlop={{ top: 6, bottom: 6, left: 3, right: 3 }}
+                ripple="light"
                 style={styles.langPress}
               >
                 <Animated.View
@@ -171,6 +173,7 @@ export default function Welcome() {
       <Glass tone="dark" intensity={18} style={styles.panel} radius={22}>
         <View style={styles.panelInner}>
           <Pressable
+            android_ripple={{ color: 'rgba(15,58,114,0.14)', foreground: true }}
             onPress={() => goTo('/(auth)/signup')}
             accessibilityRole="button"
             accessibilityLabel={t.primary}
@@ -180,6 +183,7 @@ export default function Welcome() {
           </Pressable>
 
           <Pressable
+            ripple="light"
             onPress={() => goTo('/(auth)/login')}
             accessibilityRole="button"
             accessibilityLabel={t.secondary}

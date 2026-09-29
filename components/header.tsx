@@ -1,7 +1,8 @@
 // The blue header for in-app screens: HeaderShell, AppHeader (back + title)
 // and ProfileHeader (dashboard). Sets light status-bar text while focused.
 import React, { useCallback } from 'react';
-import { View, Text, Pressable, Animated, Platform, StyleSheet } from 'react-native';
+import { View, Text, Animated, Platform, StyleSheet } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
@@ -9,6 +10,7 @@ import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg'
 import * as Haptics from 'expo-haptics';
 import { Avatar } from '@/components/panel';
 import { useFade, usePressScale } from '@/components/motion';
+import { useScrollY } from '@/components/screen';
 import { useTheme } from '@/theme/theme';
 import { type as T, font, welcome as W } from '@/theme/tokens';
 
@@ -111,21 +113,55 @@ export function AppHeader({
   /** A step marker, e.g. "2 / 3". */
   eyebrow?: string;
 }) {
+  const scrollY = useScrollY();
+  // iOS large-title feel: the title shrinks and the lines around it fade as the page scrolls.
+  const shrink =
+    Platform.OS === 'ios' && scrollY
+      ? {
+          title: {
+            transformOrigin: 'left center',
+            transform: [
+              {
+                scale: scrollY.interpolate({
+                  inputRange: [0, 90],
+                  outputRange: [1, 0.82],
+                  extrapolate: 'clamp',
+                }),
+              },
+            ],
+          },
+          fade: {
+            opacity: scrollY.interpolate({
+              inputRange: [0, 60],
+              outputRange: [1, 0.35],
+              extrapolate: 'clamp',
+            }),
+          },
+        }
+      : null;
+
   return (
     <HeaderShell>
       {onBack ? <BackChip label={backLabel ?? ''} onPress={onBack} /> : null}
 
       <View style={{ marginTop: onBack ? 18 : 4, gap: 7 }}>
         {eyebrow ? (
-          <Text style={[T.label, { color: W.inkFaint }]}>{eyebrow}</Text>
+          <Animated.Text style={[T.label, { color: W.inkFaint }, shrink?.fade]}>
+            {eyebrow}
+          </Animated.Text>
         ) : null}
-        <Text
-          style={{ fontFamily: font.displayBold, fontSize: 27, color: W.ink, letterSpacing: -0.5 }}
+        <Animated.Text
+          style={[
+            { fontFamily: font.displayBold, fontSize: 27, color: W.ink, letterSpacing: -0.5 },
+            shrink?.title,
+          ]}
         >
           {title}
-        </Text>
+        </Animated.Text>
         {subtitle ? (
-          <Text style={[T.sub, { color: W.inkSoft, maxWidth: 320 }]}>{subtitle}</Text>
+          <Animated.Text style={[T.sub, { color: W.inkSoft, maxWidth: 320 }, shrink?.fade]}>
+            {subtitle}
+          </Animated.Text>
         ) : null}
       </View>
     </HeaderShell>

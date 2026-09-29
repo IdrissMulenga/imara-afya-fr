@@ -1,7 +1,8 @@
 // Check-in: a card that opens the step-by-step check-in (several a day), today's
 // check-ins, the trend chart, the streak and averages, and the last 30 days.
 import React from 'react';
-import { View, Text, StyleSheet, Alert, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@apollo/client/react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -275,7 +276,7 @@ function EntryRow({
         ) : null}
       </View>
       {onRemove ? (
-        <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={a.remove} hitSlop={10}>
+        <Pressable ripple="borderless" onPress={onRemove} accessibilityRole="button" accessibilityLabel={a.remove} hitSlop={10}>
           <MaterialCommunityIcons name="trash-can-outline" size={20} color={c.faint} />
         </Pressable>
       ) : null}

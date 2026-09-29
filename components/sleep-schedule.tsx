@@ -1,7 +1,8 @@
 // Sleep schedule card like Apple Health's: a draggable 24-hour dial, optional weekend
 // times, the sleep goal and bedtime reminders.
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, PanResponder } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useMutation } from '@apollo/client/react';
 import * as Haptics from 'expo-haptics';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';

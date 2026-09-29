@@ -10,7 +10,8 @@ export default function AppLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
+        // Each phone's own page transition and back gesture.
+        animation: 'default',
         contentStyle: { backgroundColor: c.bg },
       }}
     >

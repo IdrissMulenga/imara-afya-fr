@@ -1,7 +1,8 @@
 // Mood and energy trend: daily averages over 7 or 30 days as two lines coloured from
 // red (1) to green (5), with a short insight about the week and the best time of day.
 import React, { useEffect, useId, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, type LayoutChangeEvent } from 'react-native';
+import { View, Text, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

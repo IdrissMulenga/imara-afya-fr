@@ -5,7 +5,6 @@ import {
   View,
   Text,
   TextInput,
-  Pressable,
   ActivityIndicator,
   StyleSheet,
   Animated,
@@ -13,6 +12,7 @@ import {
   type TextInputProps,
   type ViewStyle,
 } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme/theme';
@@ -200,6 +200,7 @@ export function Field({
 
         {secure ? (
           <Pressable
+            ripple="borderless"
             onPress={() => setHidden((v) => !v)}
             accessibilityRole="button"
             accessibilityLabel={hidden ? t.show : t.hide}
@@ -307,6 +308,7 @@ export function PrimaryButton({
         accessibilityRole="button"
         accessibilityLabel={label}
         accessibilityState={{ disabled: !!off, busy: !!busy }}
+        ripple="light"
         style={[styles.control, styles.clip, { backgroundColor: c.primary }]}
       >
         <Animated.View
@@ -381,6 +383,7 @@ export function LinkText({ label, onPress }: { label: string; onPress: () => voi
         onPressOut={press.onPressOut}
         accessibilityRole="button"
         hitSlop={10}
+        ripple="borderless"
       >
         <Text style={[T.button, { color: c.primary }]}>{label}</Text>
       </Pressable>

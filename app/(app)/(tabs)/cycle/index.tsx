@@ -1,7 +1,8 @@
 // Cycle tab (women only): cycle day and phase, period logging, today's log, insights,
 // the next three periods, a month calendar, averages, reminders, report and history.
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { Redirect, useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import * as Haptics from 'expo-haptics';
@@ -296,13 +297,13 @@ export default function CycleScreen() {
           <FadeIn delay={130}>
             <Glass style={{ padding: 16 }}>
               <View style={styles.calHead}>
-                <Pressable onPress={() => setMonthOffset(monthOffset - 1)} hitSlop={10} accessibilityRole="button">
+                <Pressable ripple="borderless" onPress={() => setMonthOffset(monthOffset - 1)} hitSlop={10} accessibilityRole="button">
                   <MaterialCommunityIcons name="chevron-left" size={24} color={c.text} />
                 </Pressable>
                 <Text style={[T.body, styles.monthName, { color: c.text }]}>
                   {shown.toLocaleDateString(lang === 'rn' ? 'fr' : lang, { month: 'long', year: 'numeric', timeZone: 'UTC' })}
                 </Text>
-                <Pressable onPress={() => setMonthOffset(monthOffset + 1)} hitSlop={10} accessibilityRole="button">
+                <Pressable ripple="borderless" onPress={() => setMonthOffset(monthOffset + 1)} hitSlop={10} accessibilityRole="button">
                   <MaterialCommunityIcons name="chevron-right" size={24} color={c.text} />
                 </Pressable>
               </View>
@@ -390,7 +391,7 @@ export default function CycleScreen() {
                             {p.cycleLength ? ` · ${a.cycleOfN.replace('{n}', String(p.cycleLength))}` : ''}
                           </Text>
                         </View>
-                        <Pressable onPress={() => remove(p.id)} accessibilityRole="button" accessibilityLabel={a.remove} hitSlop={10}>
+                        <Pressable ripple="borderless" onPress={() => remove(p.id)} accessibilityRole="button" accessibilityLabel={a.remove} hitSlop={10}>
                           <MaterialCommunityIcons name="trash-can-outline" size={20} color={c.faint} />
                         </Pressable>
                       </View>

@@ -1,7 +1,8 @@
 // The dashboard's overview card: four small rings (steps, water, sleep and the latest
 // mood) with a line saying how many goals are met today. Each ring opens its page.
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Pressable } from '@/components/pressable';
 import { useRouter, type Href } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Glass } from '@/components/glass';
