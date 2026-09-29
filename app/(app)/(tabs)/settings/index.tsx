@@ -184,6 +184,25 @@ export default function Settings() {
               {a.remindersNeedApp}
             </Text>
           ) : null}
+          {/* Where reminders cannot run (Android's Expo Go), the same switches show, greyed out. */}
+          {!notificationsSupported
+            ? [
+                [a.waterReminders, a.waterRemindersNote],
+                [a.moodReminders, a.moodRemindersNote],
+                [a.warmMessages, a.warmMessagesNote],
+                [a.bedtimeReminders, a.bedtimeRemindersNote],
+                ...(user.gender === 'female' ? [[a.cycleReminders, a.cycleRemindersNote]] : []),
+              ].map(([label, hint]) => (
+                <SwitchRow
+                  key={label}
+                  label={label}
+                  hint={hint}
+                  value={false}
+                  onChange={() => {}}
+                  disabled
+                />
+              ))
+            : null}
           {blocked ? (
             <NavRow
               label={a.notificationsBlocked}

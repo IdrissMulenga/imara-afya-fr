@@ -1,5 +1,6 @@
-// Floating menu under the main tabs: a pill slides to the tapped tab, whose outline icon
-// fills in its own colour. The cycle tab is shown to women only.
+// The main menu. iOS: a floating glass pill whose highlight slides to the tapped tab.
+// Android: a Material 3 navigation bar along the bottom edge. In both, the active tab's
+// outline icon fills in its own colour. The cycle tab is shown to women only.
 import React, { useEffect, useState } from 'react';
 import { Keyboard, Platform, Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import type { Tabs } from 'expo-router';
@@ -45,10 +46,16 @@ const DOCK_PADDING = 5;
 const ITEM_HEIGHT = 58;
 // Radius large enough to make the menu a pill whatever its height.
 const PILL = 999;
+// Material 3 navigation bar: bar height and the indicator behind the active icon.
+const NAV_HEIGHT = 80;
+const INDICATOR_WIDTH = 64;
+const INDICATOR_HEIGHT = 32;
 
 /** Where the floating menu sits: its distance from the bottom edge and its height. */
 export function useMenuSpace(): { bottom: number; height: number } {
   const insets = useSafeAreaInsets();
+  // Android's bar sits on the bottom edge and covers the gesture-bar inset.
+  if (Platform.OS === 'android') return { bottom: 0, height: NAV_HEIGHT + insets.bottom };
   // Just above the home indicator / gesture bar, overlapping part of its empty inset,
   // with a small margin on phones that have none.
   return { bottom: Math.max(insets.bottom - 10, 10), height: ITEM_HEIGHT + DOCK_PADDING * 2 + 2 };
@@ -77,6 +84,8 @@ export function TabDock({ state, navigation }: TabBarProps) {
   const rim = isDark ? 'rgba(255,255,255,0.16)' : 'rgba(19,35,58,0.08)';
 
   if (keyboardUp) return null;
+
+  if (Platform.OS === 'android') return <NavigationBar state={state} navigation={navigation} />;
 
   const bar = <MenuBar state={state} navigation={navigation} />;
   // iOS: real blur, shadow on the wrapper (Glass clips). Android: a translucent fill (blur
@@ -107,10 +116,13 @@ export function TabDock({ state, navigation }: TabBarProps) {
   );
 }
 
-function MenuBar({ state, navigation }: Pick<TabBarProps, 'state' | 'navigation'>) {
+// The tabs this user sees, their labels, the active one, and switching to one.
+function useMenuTabs(
+  { state, navigation }: Pick<TabBarProps, 'state' | 'navigation'>,
+  onSwitch?: (index: number) => void,
+) {
   const { lang } = useLang();
   const { user } = useSession();
-  const reduced = useReducedMotion();
   const a = APP_COPY[lang];
   const labels: Record<string, string> = {
     dashboard: a.menuHome,
@@ -120,35 +132,138 @@ function MenuBar({ state, navigation }: Pick<TabBarProps, 'state' | 'navigation'
     settings: a.settings,
   };
 
-  const female = user?.gender === 'female';
-  const tabs = female ? TABS : TABS.filter((t) => t.route !== 'cycle');
+  const tabs = user?.gender === 'female' ? TABS : TABS.filter((t) => t.route !== 'cycle');
+  const activeFolder = folderOf(state.routes[state.index]?.name);
+  const activeIndex = Math.max(0, tabs.findIndex((t) => t.route === activeFolder));
+
+  const press = (index: number) => {
+    const route = state.routes.find((r) => folderOf(r.name) === tabs[index].route);
+    if (!route) return;
+    const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+    if (index === activeIndex || event.defaultPrevented) return;
+    Haptics.selectionAsync().catch(() => {});
+    onSwitch?.(index);
+    navigation.navigate(route.name, route.params);
+  };
+
+  return { tabs, labels, activeIndex, press };
+}
+
+/** Android: a Material 3 navigation bar along the bottom edge. */
+function NavigationBar(props: Pick<TabBarProps, 'state' | 'navigation'>) {
+  const { isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+  const { tabs, labels, activeIndex, press } = useMenuTabs(props);
+
+  return (
+    <View
+      accessibilityRole="tablist"
+      style={[
+        styles.nav,
+        {
+          paddingBottom: insets.bottom,
+          height: NAV_HEIGHT + insets.bottom,
+          backgroundColor: isDark ? '#17191D' : '#F1F3F7',
+          borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(19,35,58,0.08)',
+        },
+      ]}
+    >
+      {tabs.map(({ route, icon, outline, color }, index) => (
+        <NavItem
+          key={route}
+          label={labels[route]}
+          icon={icon}
+          outline={outline}
+          color={color}
+          on={index === activeIndex}
+          onPress={() => press(index)}
+        />
+      ))}
+    </View>
+  );
+}
+
+// One Android tab: the indicator grows out from the icon's centre when it becomes active.
+function NavItem({
+  label,
+  icon,
+  outline,
+  color,
+  on,
+  onPress,
+}: {
+  label: string;
+  icon: IconName;
+  outline: IconName;
+  color: string;
+  on: boolean;
+  onPress: () => void;
+}) {
+  const { c } = useTheme();
+  const reduced = useReducedMotion();
+  const active = useSharedValue(on ? 1 : 0);
+
+  useEffect(() => {
+    active.value = reduced ? (on ? 1 : 0) : withTiming(on ? 1 : 0, { duration: 220 });
+  }, [on, reduced, active]);
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    opacity: active.value,
+    transform: [{ scaleX: 0.4 + 0.6 * active.value }],
+  }));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: on }}
+      style={styles.navItem}
+    >
+      <View style={styles.indicatorBox}>
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.indicator, { backgroundColor: `${color}2E` }, indicatorStyle]}
+        />
+        <Pressable
+          onPress={onPress}
+          android_ripple={{ color: `${color}40`, borderless: false }}
+          importantForAccessibility="no"
+          style={styles.indicatorTouch}
+        >
+          <MaterialCommunityIcons name={on ? icon : outline} size={24} color={on ? color : c.muted} />
+        </Pressable>
+      </View>
+      <Animated.Text
+        numberOfLines={1}
+        style={[
+          styles.navLabel,
+          { color: on ? c.text : c.muted, fontFamily: on ? font.bodySemi : font.bodyMedium },
+        ]}
+      >
+        {label}
+      </Animated.Text>
+    </Pressable>
+  );
+}
+
+/** iOS: the floating glass pill with a sliding highlight. */
+function MenuBar({ state, navigation }: Pick<TabBarProps, 'state' | 'navigation'>) {
+  const reduced = useReducedMotion();
+  // The callback runs on a press, after pos below exists.
+  const { tabs, labels, activeIndex, press } = useMenuTabs({ state, navigation }, (index) => {
+    pos.value = reduced ? index : withSpring(index, SPRING);
+  });
+  const pos = useSharedValue(activeIndex);
   const stops = tabs.map((_, i) => i);
   const pillColors = tabs.map((t) => `${t.color}24`);
 
-  const activeFolder = folderOf(state.routes[state.index]?.name);
-  const activeIndex = Math.max(0, tabs.findIndex((t) => t.route === activeFolder));
-  const pos = useSharedValue(activeIndex);
   const [width, setWidth] = useState(0);
-
-  const slideTo = (index: number) => {
-    pos.value = reduced ? index : withSpring(index, SPRING);
-  };
 
   // Follows tab changes made elsewhere (links, notifications, back).
   useEffect(() => {
     pos.value = reduced ? activeIndex : withSpring(activeIndex, SPRING);
   }, [activeIndex, reduced, pos]);
-
-  const press = (index: number) => {
-    const route = state.routes.find((r) => folderOf(r.name) === tabs[index].route);
-    if (!route) return;
-    const focused = index === activeIndex;
-    const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-    if (focused || event.defaultPrevented) return;
-    Haptics.selectionAsync().catch(() => {});
-    slideTo(index);
-    navigation.navigate(route.name, route.params);
-  };
 
   const itemWidth = width / tabs.length;
   const pillStyle = useAnimatedStyle(() => ({
@@ -266,4 +381,25 @@ const styles = StyleSheet.create({
   icon: { width: 28, height: 28 },
   center: { alignItems: 'center', justifyContent: 'center' },
   label: { fontSize: 10 },
+  nav: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    elevation: 3,
+  },
+  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, paddingTop: 12, paddingBottom: 16 },
+  indicatorBox: { width: INDICATOR_WIDTH, height: INDICATOR_HEIGHT, alignItems: 'center', justifyContent: 'center' },
+  indicator: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, borderRadius: INDICATOR_HEIGHT / 2 },
+  indicatorTouch: {
+    width: INDICATOR_WIDTH,
+    height: INDICATOR_HEIGHT,
+    borderRadius: INDICATOR_HEIGHT / 2,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLabel: { fontSize: 12 },
 });
