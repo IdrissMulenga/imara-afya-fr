@@ -1,14 +1,13 @@
-// Shared notification setup: availability (off in Expo Go), permission, on/off stores, and
+// Shared notification setup: availability, permission, on/off stores, and
 // opening the right page when a notification is tapped.
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
-import { isRunningInExpoGo } from 'expo';
 import { useRouter, type Href } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import type { NotificationResponse } from 'expo-notifications';
 
-/** True when local notifications can be used (a phone build, not Expo Go). */
-export const supported = (Platform.OS === 'android' || Platform.OS === 'ios') && !isRunningInExpoGo();
+/** True on a phone. Local (scheduled) reminders also work in Expo Go; only server push does not. */
+export const supported = Platform.OS === 'android' || Platform.OS === 'ios';
 
 // Loaded only when supported; every use must be behind a `supported` check.
 export const Notifications = (supported ? require('expo-notifications') : null) as typeof import('expo-notifications');

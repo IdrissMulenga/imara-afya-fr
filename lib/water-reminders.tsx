@@ -70,7 +70,8 @@ export async function handleWaterResponse(response: NotificationResponse): Promi
   }
 }
 
-async function schedule(lang: Lang): Promise<void> {
+// Registers the "+1 glass" button and the Android channel.
+async function prepare(lang: Lang): Promise<void> {
   const a = APP_COPY[lang];
   await Notifications.setNotificationCategoryAsync(CATEGORY, [
     {
@@ -85,6 +86,11 @@ async function schedule(lang: Lang): Promise<void> {
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }
+}
+
+async function schedule(lang: Lang): Promise<void> {
+  const a = APP_COPY[lang];
+  await prepare(lang);
   await cancel();
   for (const hour of REMINDER_HOURS) {
     await Notifications.scheduleNotificationAsync({
@@ -117,6 +123,27 @@ export async function enableWaterReminders(lang: Lang): Promise<'enabled' | 'den
   await schedule(lang);
   await enabledStore.set(true);
   return 'enabled';
+}
+
+/** Development only: shows a water reminder in 5 seconds, to try it without waiting. */
+export async function sendTestWaterReminder(lang: Lang): Promise<'sent' | 'denied'> {
+  if (!(await ensurePermission())) return 'denied';
+  const a = APP_COPY[lang];
+  await prepare(lang);
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: a.waterReminderTitle,
+      body: a.waterReminderBody,
+      categoryIdentifier: CATEGORY,
+      data: { kind: 'water' },
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 5,
+      channelId: CHANNEL,
+    },
+  });
+  return 'sent';
 }
 
 /** Cancels the water reminders and turns them off. */

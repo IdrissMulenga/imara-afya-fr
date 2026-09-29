@@ -9,7 +9,7 @@ import { AppHeader } from '@/components/header';
 import { NavRow, Badge, Divider, IdentityCard, SwitchRow, OptionList } from '@/components/panel';
 import { useNotice } from '@/components/notice';
 import { supported as notificationsSupported, useNotificationsBlocked } from '@/lib/notifications';
-import { useWaterReminders } from '@/lib/water-reminders';
+import { useWaterReminders, sendTestWaterReminder } from '@/lib/water-reminders';
 import { useCheckInNotifications } from '@/lib/checkin-reminders';
 import { BedtimeRemindersSwitch } from '@/components/sleep-schedule';
 import { useCycleReminders } from '@/lib/cycle-reminders';
@@ -190,6 +190,19 @@ export default function Settings() {
               hint={a.openPhoneSettings}
               danger
               onPress={() => void Linking.openSettings()}
+            />
+          ) : null}
+          {__DEV__ && notificationsSupported ? (
+            // Development only, so it never reaches the store build.
+            <NavRow
+              label="Send a test reminder"
+              hint="Shows a water reminder in 5 seconds. Leave the app to see it arrive."
+              onPress={() => {
+                void sendTestWaterReminder(lang).then((result) => {
+                  if (result === 'denied') notice.failure(a.waterReminders, a.notificationsDenied);
+                  else notice.toast('Reminder in 5 seconds');
+                });
+              }}
             />
           ) : null}
           {reminders.supported ? (
