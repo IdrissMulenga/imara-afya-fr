@@ -1,23 +1,37 @@
 // Settings hub: each row shows its current value and opens a screen for that group.
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useMutation } from '@apollo/client/react';
 import { Screen, Spacer, Gap } from '@/components/screen';
-import { QuietButton } from '@/components/ui';
+import { QuietButton, ChoiceRow } from '@/components/ui';
 import { AppHeader } from '@/components/header';
-import { NavRow, Badge, Divider, IdentityCard, SwitchRow } from '@/components/panel';
+import { NavRow, Badge, Divider, IdentityCard, SwitchRow, OptionList } from '@/components/panel';
 import { useNotice } from '@/components/notice';
+import { supported as notificationsSupported, useNotificationsBlocked } from '@/lib/notifications';
 import { useWaterReminders } from '@/lib/water-reminders';
 import { useCheckInNotifications } from '@/lib/checkin-reminders';
 import { BedtimeRemindersSwitch } from '@/components/sleep-schedule';
 import { useCycleReminders } from '@/lib/cycle-reminders';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
-import { useLang, COPY } from '@/theme/i18n';
-import { useTheme } from '@/theme/theme';
+import { useLang, COPY, LANGS, type Lang } from '@/theme/i18n';
+import { useTheme, THEME_MODES, type ThemeMode } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY, ageFrom } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
+import { errorMessage } from '@/lib/errors';
+import { SET_PREFERENCES, type AuthUser } from '@/graphql/auth';
+
+const LANGUAGE_OPTIONS = LANGS.map((code) => ({ value: code, label: COPY[code].label }));
+
+/** A small grey heading above a group. */
+function SectionTitle({ text }: { text: string }) {
+  const { c } = useTheme();
+  return (
+    <Text style={[T.label, { color: c.faint, marginLeft: 2, marginBottom: 10 }]}>{text}</Text>
+  );
+}
 
 /** A card of rows with dividers between them. */
 function Group({ children }: { children: React.ReactNode }) {
@@ -36,17 +50,37 @@ function Group({ children }: { children: React.ReactNode }) {
 
 export default function Settings() {
   const router = useRouter();
-  const { t, lang } = useLang();
-  const { c } = useTheme();
-  const { user, signOut, refreshUser } = useSession();
+  const { t, lang, setLang } = useLang();
+  const { c, mode, setMode } = useTheme();
+  const { user, setUser, signOut, refreshUser } = useSession();
   const notice = useNotice();
   const reminders = useWaterReminders();
   const checkInNotes = useCheckInNotifications();
   const cycleReminders = useCycleReminders();
+  const blocked = useNotificationsBlocked();
+  const [savePreferences] = useMutation<{ setPreferences: AuthUser }>(SET_PREFERENCES);
 
   const a = APP_COPY[lang];
 
   if (!user) return <Screen />;
+
+  const themeOptions = THEME_MODES.map((value) => ({
+    value,
+    label: { system: a.themeSystem, light: a.themeLight, dark: a.themeDark }[value],
+  }));
+
+  // Shows the new language at once and saves it to the account; goes back if saving fails.
+  const changeLanguage = async (next: Lang) => {
+    if (next === user.language) return;
+    setLang(next, false);
+    try {
+      const { data } = await savePreferences({ variables: { input: { language: next } } });
+      if (data?.setPreferences) setUser(data.setPreferences);
+    } catch (e) {
+      setLang(user.language, false);
+      notice.failure(a.language, errorMessage(e, user.language));
+    }
+  };
 
   // Row subtitles come from the stored values.
   const age = ageFrom(user.birthDate);
@@ -62,9 +96,7 @@ export default function Settings() {
 
   const goals = `${user.stepGoal.toLocaleString()} ${a.steps} · ${user.waterGoalGlasses} ${a.glasses} · ${user.sleepGoalHours}${a.hours.slice(0, 1)}`;
 
-  const prefs = [COPY[user.language].label, user.units === 'metric' ? a.unitsMetric : a.unitsImperial]
-    .filter(Boolean)
-    .join(' · ');
+  const units = user.units === 'metric' ? a.unitsMetric : a.unitsImperial;
 
   return (
     <Screen
@@ -108,9 +140,7 @@ export default function Settings() {
       <Gap h={26} />
 
       <FadeIn delay={180}>
-        <Text style={[T.label, { color: c.faint, marginLeft: 2, marginBottom: 10 }]}>
-          {a.youSection}
-        </Text>
+        <SectionTitle text={a.youSection} />
         <Group>
           <NavRow
             label={a.personalDetails}
@@ -124,16 +154,44 @@ export default function Settings() {
       <Gap h={22} />
 
       <FadeIn delay={220}>
-        <Text style={[T.label, { color: c.faint, marginLeft: 2, marginBottom: 10 }]}>
-          {a.appSection}
-        </Text>
+        <SectionTitle text={a.appearanceSection} />
         <Group>
-          <NavRow
-            label={a.appPreferences}
-            hint={user.timezone}
-            value={prefs}
-            onPress={() => router.push('/(app)/preferences')}
+          <ChoiceRow<ThemeMode>
+            label={a.theme}
+            options={themeOptions}
+            value={mode}
+            onChange={setMode}
+            hint={a.themeNote}
           />
+          <View style={{ gap: 4 }}>
+            <Text style={[T.label, { color: c.faint, marginTop: 4 }]}>{a.language}</Text>
+            <OptionList<Lang>
+              options={LANGUAGE_OPTIONS}
+              value={lang}
+              onChange={(next) => void changeLanguage(next)}
+            />
+          </View>
+        </Group>
+      </FadeIn>
+
+      <Gap h={22} />
+
+      <FadeIn delay={260}>
+        <SectionTitle text={a.remindersSection} />
+        <Group>
+          {!notificationsSupported ? (
+            <Text style={[T.fine, { color: c.faint, paddingVertical: 8 }]}>
+              {a.remindersNeedApp}
+            </Text>
+          ) : null}
+          {blocked ? (
+            <NavRow
+              label={a.notificationsBlocked}
+              hint={a.openPhoneSettings}
+              danger
+              onPress={() => void Linking.openSettings()}
+            />
+          ) : null}
           {reminders.supported ? (
             <SwitchRow
               label={a.waterReminders}
@@ -192,10 +250,22 @@ export default function Settings() {
 
       <Gap h={22} />
 
-      <FadeIn delay={260}>
-        <Text style={[T.label, { color: c.faint, marginLeft: 2, marginBottom: 10 }]}>
-          {a.sectionSecurity}
-        </Text>
+      <FadeIn delay={300}>
+        <SectionTitle text={a.appSection} />
+        <Group>
+          <NavRow
+            label={a.appPreferences}
+            hint={user.timezone}
+            value={units}
+            onPress={() => router.push('/(app)/preferences')}
+          />
+        </Group>
+      </FadeIn>
+
+      <Gap h={22} />
+
+      <FadeIn delay={340}>
+        <SectionTitle text={a.sectionSecurity} />
         <Group>
           <NavRow
             label={a.changePassword}
@@ -212,10 +282,8 @@ export default function Settings() {
 
       <Gap h={22} />
 
-      <FadeIn delay={300}>
-        <Text style={[T.label, { color: c.faint, marginLeft: 2, marginBottom: 10 }]}>
-          {a.sectionAccount}
-        </Text>
+      <FadeIn delay={380}>
+        <SectionTitle text={a.sectionAccount} />
         <Group>
           <NavRow label={t.signOut} onPress={signOut} />
           <NavRow

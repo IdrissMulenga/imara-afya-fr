@@ -49,6 +49,15 @@ export type AppCopy = {
   // settings hub
   youSection: string;
   appSection: string;
+  appearanceSection: string;
+  theme: string;
+  themeSystem: string;
+  themeLight: string;
+  themeDark: string;
+  themeNote: string;
+  notificationsBlocked: string;
+  openPhoneSettings: string;
+  remindersNeedApp: string;
   personalDetails: string;
   personalDetailsSub: string;
   dailyGoals: string;
@@ -447,6 +456,15 @@ export const APP_COPY: Record<Lang, AppCopy> = {
 
     youSection: 'YOU',
     appSection: 'THE APP',
+    appearanceSection: 'APPEARANCE & LANGUAGE',
+    theme: 'Theme',
+    themeSystem: 'System',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeNote: 'System follows your phone’s setting.',
+    notificationsBlocked: 'Notifications are blocked',
+    openPhoneSettings: 'Tap to open your phone settings and allow them.',
+    remindersNeedApp: 'Reminders work in the installed app.',
     personalDetails: 'Personal details',
     personalDetailsSub: 'Name, gender, date of birth, height and weight',
     dailyGoals: 'Daily goals',
@@ -848,6 +866,15 @@ export const APP_COPY: Record<Lang, AppCopy> = {
 
     youSection: 'VOUS',
     appSection: 'L’APPLICATION',
+    appearanceSection: 'APPARENCE ET LANGUE',
+    theme: 'Thème',
+    themeSystem: 'Système',
+    themeLight: 'Clair',
+    themeDark: 'Sombre',
+    themeNote: 'Système suit le réglage de votre téléphone.',
+    notificationsBlocked: 'Notifications bloquées',
+    openPhoneSettings: 'Touchez pour ouvrir les réglages du téléphone et les autoriser.',
+    remindersNeedApp: 'Les rappels fonctionnent dans l’application installée.',
     personalDetails: 'Informations personnelles',
     personalDetailsSub: 'Nom, genre, date de naissance, taille et poids',
     dailyGoals: 'Objectifs quotidiens',
@@ -1251,6 +1278,15 @@ export const APP_COPY: Record<Lang, AppCopy> = {
 
     youSection: 'WEWE',
     appSection: 'PROGRAMU',
+    appearanceSection: 'MWONEKANO NA LUGHA',
+    theme: 'Mandhari',
+    themeSystem: 'Kama simu',
+    themeLight: 'Mwanga',
+    themeDark: 'Giza',
+    themeNote: 'Kama simu hufuata mpangilio wa simu yako.',
+    notificationsBlocked: 'Arifa zimezuiwa',
+    openPhoneSettings: 'Gusa ili kufungua mipangilio ya simu na kuziruhusu.',
+    remindersNeedApp: 'Vikumbusho hufanya kazi kwenye programu iliyosakinishwa.',
     personalDetails: 'Taarifa zako',
     personalDetailsSub: 'Jina, jinsia, tarehe ya kuzaliwa, urefu na uzito',
     dailyGoals: 'Malengo ya kila siku',
@@ -1654,6 +1690,15 @@ export const APP_COPY: Record<Lang, AppCopy> = {
 
     youSection: 'WEWE',
     appSection: 'POROGARAMU',
+    appearanceSection: 'ISURA N’URURIMI',
+    theme: 'Amabara',
+    themeSystem: 'Nk’iterefone',
+    themeLight: 'Umuco',
+    themeDark: 'Umwiza',
+    themeNote: 'Nk’iterefone ikurikira ivyo watoranije kuri terefone yawe.',
+    notificationsBlocked: 'Imenyesha rirabujijwe',
+    openPhoneSettings: 'Kora hano ugurure amategeko ya terefone uyemere.',
+    remindersNeedApp: 'Ivyibutsa bikora muri porogaramu yashizwe kuri terefone.',
     personalDetails: 'Amakuru yawe',
     personalDetailsSub: 'Izina, igitsina, itariki y’ivuka, uburebure n’ibiro',
     dailyGoals: 'Intumbero z’umusi',

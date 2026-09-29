@@ -1,7 +1,7 @@
 // Shared notification setup: availability (off in Expo Go), permission, on/off stores, and
 // opening the right page when a notification is tapped.
-import { useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, Platform } from 'react-native';
 import { isRunningInExpoGo } from 'expo';
 import { useRouter, type Href } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -37,6 +37,28 @@ export async function ensurePermission(): Promise<boolean> {
 export async function hasPermission(): Promise<boolean> {
   if (!supported) return false;
   return (await Notifications.getPermissionsAsync()).granted;
+}
+
+/** True when the phone has refused notifications and the app can no longer ask; rechecked
+ *  whenever the app comes back to the front (e.g. from the phone settings). */
+export function useNotificationsBlocked(): boolean {
+  const [blocked, setBlocked] = useState(false);
+
+  useEffect(() => {
+    if (!supported) return;
+    const check = () => {
+      Notifications.getPermissionsAsync()
+        .then((p) => setBlocked(!p.granted && !p.canAskAgain))
+        .catch(() => {});
+    };
+    check();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') check();
+    });
+    return () => sub.remove();
+  }, []);
+
+  return blocked;
 }
 
 // A tap that launched the app is only acted on if this recent (older ones were handled
