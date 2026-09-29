@@ -1,5 +1,5 @@
-// Preferences: language, units, time zone and cycle tracking.
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+// Preferences: units, time zone and cycle tracking.
+import React, { useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
@@ -9,7 +9,7 @@ import { AppHeader } from '@/components/header';
 import { Section, OptionList, SwitchRow, Divider } from '@/components/panel';
 import { FadeIn } from '@/components/motion';
 import { useNotice } from '@/components/notice';
-import { useLang, LANGS, COPY, type Lang } from '@/theme/i18n';
+import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -42,14 +42,13 @@ const REGION_ZONES = [
 
 export default function Preferences() {
   const router = useRouter();
-  const { t, lang, setLang } = useLang();
+  const { t, lang } = useLang();
   const { c } = useTheme();
   const { user, setUser } = useSession();
   const notice = useNotice();
 
   const a = APP_COPY[lang];
 
-  const [language, setLanguage] = useState<Lang>(user?.language ?? lang);
   const [units, setUnits] = useState<Units>(user?.units ?? 'metric');
   const [zone, setZone] = useState(user?.timezone ?? '');
   const [cycle, setCycle] = useState(Boolean(user?.cycleTrackingEnabled));
@@ -60,16 +59,6 @@ export default function Preferences() {
   const [error, setError] = useState('');
 
   const [setPreferences, { loading }] = useMutation<{ setPreferences: AuthUser }>(SET_PREFERENCES);
-
-  // Leaving without saving restores the account language.
-  const accountLanguage = useRef(user?.language);
-  accountLanguage.current = user?.language;
-  useEffect(
-    () => () => {
-      if (accountLanguage.current) setLang(accountLanguage.current);
-    },
-    [setLang],
-  );
 
   const detected = useMemo(detectedZone, []);
 
@@ -91,11 +80,6 @@ export default function Preferences() {
     return list;
   }, [detected, user?.timezone, a.useDetectedZone]);
 
-  const languages = useMemo(
-    () => LANGS.map((code) => ({ value: code, label: COPY[code].label })),
-    [],
-  );
-
   const unitOptions: readonly { value: Units; label: string; hint: string }[] = [
     { value: 'metric', label: a.unitsMetric, hint: 'kg · cm' },
     { value: 'imperial', label: a.unitsImperial, hint: 'lb · ft' },
@@ -104,35 +88,30 @@ export default function Preferences() {
   const dirty = useMemo(
     () =>
       Boolean(user) &&
-      (language !== user!.language ||
-        units !== user!.units ||
+      (units !== user!.units ||
         zone !== user!.timezone ||
         cycle !== user!.cycleTrackingEnabled),
-    [user, language, units, zone, cycle],
+    [user, units, zone, cycle],
   );
 
   const changed = useMemo((): string[] => {
     if (!user) return [];
     const list: string[] = [];
-    if (language !== user.language) list.push(COPY[language].label);
     if (units !== user.units) list.push(units === 'metric' ? a.unitsMetric : a.unitsImperial);
     if (zone !== user.timezone) list.push(zone);
     if (cycle !== user.cycleTrackingEnabled) {
       list.push(`${a.cycleTracking}: ${cycle ? 'on' : 'off'}`);
     }
     return list;
-  }, [user, language, units, zone, cycle, a]);
+  }, [user, units, zone, cycle, a]);
 
   const reset = () => {
     if (!user) return;
-    setLanguage(user.language);
     setUnits(user.units);
     setZone(user.timezone);
     setCycle(user.cycleTrackingEnabled);
     setTyping(false);
     setError('');
-    // Also restore the app language, which the picker previews live.
-    setLang(user.language);
   };
 
   if (!user) return <Screen />;
@@ -145,7 +124,6 @@ export default function Preferences() {
       const { data } = await setPreferences({
         variables: {
           input: {
-            language,
             units,
             ...(zone.trim() ? { timezone: zone.trim() } : {}),
             cycleTrackingEnabled: showCycle ? cycle : false,
@@ -181,22 +159,6 @@ export default function Preferences() {
     >
 
       <FadeIn delay={100}>
-        <Section title={a.language}>
-          {/* Changing the language applies it immediately, before Save. */}
-          <OptionList<Lang>
-            options={languages}
-            value={language}
-            onChange={(next) => {
-              setLanguage(next);
-              setLang(next, false);
-            }}
-          />
-        </Section>
-      </FadeIn>
-
-      <Gap h={18} />
-
-      <FadeIn delay={150}>
         <Section title={a.units}>
           <OptionList<Units> options={unitOptions} value={units} onChange={setUnits} />
         </Section>
@@ -204,7 +166,7 @@ export default function Preferences() {
 
       <Gap h={18} />
 
-      <FadeIn delay={200}>
+      <FadeIn delay={150}>
         <Section title={a.timezone}>
           <Text style={[T.fine, { color: c.faint }]}>{a.timezoneNote}</Text>
 
@@ -232,7 +194,7 @@ export default function Preferences() {
       {showCycle ? (
         <>
           <Gap h={18} />
-          <FadeIn delay={250}>
+          <FadeIn delay={200}>
             <Section title={a.cycleTracking}>
               <SwitchRow label={a.cycleTracking} hint={a.cycleNote} value={cycle} onChange={setCycle} />
             </Section>
