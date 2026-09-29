@@ -19,12 +19,13 @@ import {
   type CycleSummary,
   type CycleSymptom,
 } from '@/graphql/cycle';
+import { onScreen } from '@/lib/apollo';
 
 export const CYCLE_COLOR = '#E0527E';
 export const CYCLE_COLOR_TO = '#F59AB8';
 export const FERTILE_COLOR = '#2BA89A';
 /** Queries refreshed after any cycle change. */
-export const CYCLE_REFETCH = ['CycleSummary', 'CycleDays'];
+export const CYCLE_REFETCH = onScreen(['CycleSummary', 'CycleDays']);
 
 /** Date maths on YYYY-MM-DD strings. */
 export const addDays = (day: string, n: number): string => {

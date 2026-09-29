@@ -100,3 +100,11 @@ export const client = new ApolloClient({
     watchQuery: { fetchPolicy: 'cache-and-network' },
   },
 });
+
+/** The named queries that are on screen right now, so a refetch skips the rest quietly. */
+export const onScreen = (names: readonly string[]) => (): string[] => {
+  const active = new Set(
+    [...client.getObservableQueries('active')].map((query) => query.queryName),
+  );
+  return names.filter((name) => active.has(name));
+};

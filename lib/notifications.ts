@@ -2,12 +2,15 @@
 // opening the right page when a notification is tapped.
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
+import { isRunningInExpoGo } from 'expo';
 import { useRouter, type Href } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import type { NotificationResponse } from 'expo-notifications';
 
-/** True on a phone. Local (scheduled) reminders also work in Expo Go; only server push does not. */
-export const supported = Platform.OS === 'android' || Platform.OS === 'ios';
+/** True when local reminders can be used: any iPhone, and Android outside Expo Go (Android's
+ *  Expo Go refuses to load expo-notifications at all). */
+export const supported =
+  Platform.OS === 'ios' || (Platform.OS === 'android' && !isRunningInExpoGo());
 
 // Loaded only when supported; every use must be behind a `supported` check.
 export const Notifications = (supported ? require('expo-notifications') : null) as typeof import('expo-notifications');

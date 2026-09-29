@@ -24,6 +24,7 @@ import {
   type CheckIn,
   type CheckInSummary,
 } from '@/graphql/checkin';
+import { onScreen } from '@/lib/apollo';
 
 export type ScoreKind = 'mood' | 'energy';
 
@@ -87,7 +88,7 @@ export function WarmMessage({ mood, energy, summary }: { mood: number; energy: n
 /** An average such as 3.4 shown as "3.4 / 5", or a dash when there is none. */
 export const formatAverage = (value: number | null): string => (value == null ? '–' : `${value.toLocaleString()} / 5`);
 
-const REFETCH = ['CheckInSummary', 'CheckInHistory'];
+const REFETCH = onScreen(['CheckInSummary', 'CheckInHistory']);
 
 /** Today's check-ins, the latest one, the streak and the averages. */
 export function useCheckInSummary() {
