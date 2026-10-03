@@ -25,6 +25,7 @@ import { type as T, font } from '@/theme/tokens';
 import { useSession } from '@/lib/session';
 import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
+import { openLegal } from '@/lib/legal';
 import { SIGNUP, UPDATE_PROFILE, type AuthPayload, type AuthUser, type Gender } from '@/graphql/auth';
 
 const MIN_PASSWORD = 8;
@@ -208,14 +209,14 @@ export default function Signup() {
             {t.termsPrefix}{' '}
             <Text
               style={{ color: c.primary, fontFamily: font.bodySemi }}
-              onPress={() => router.push({ pathname: '/(auth)/legal', params: { doc: 'terms' } })}
+              onPress={() => openLegal('terms', lang)}
             >
               {t.termsLink}
             </Text>{' '}
             {t.termsMiddle}{' '}
             <Text
               style={{ color: c.primary, fontFamily: font.bodySemi }}
-              onPress={() => router.push({ pathname: '/(auth)/legal', params: { doc: 'privacy' } })}
+              onPress={() => openLegal('privacy', lang)}
             >
               {t.privacyLink}
             </Text>

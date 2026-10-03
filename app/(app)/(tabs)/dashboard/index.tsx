@@ -1,5 +1,5 @@
 // Dashboard: the date, today at a glance (steps, water, sleep and mood rings), then
-// sections for how you feel (check-in), activity (steps) and water and sleep.
+// sections for how you feel (check-in), activity (steps), water and sleep, and insights.
 import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/panel';
 import { SleepTile, StepsPrompt, WaterTile, useHabitSummary } from '@/components/habits';
 import { StepsHero } from '@/components/steps-ring';
 import { CheckInCard, useCheckInSummary } from '@/components/checkin';
+import { InsightsCard, useInsights } from '@/components/insights';
 import { TodayGlance } from '@/components/today-glance';
 import { ProfileHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
@@ -59,6 +60,7 @@ export default function Dashboard() {
 
   const { data: habits, refetch: refetchHabits } = useHabitSummary();
   const { data: checkIn, refetch: refetchCheckIn } = useCheckInSummary();
+  const { data: insights, refetch: refetchInsights } = useInsights();
   const summary = habits?.habitSummary;
   const steps = useTodaySteps(summary?.today);
 
@@ -70,9 +72,10 @@ export default function Dashboard() {
       if (focusedOnce.current) {
         void refetchHabits();
         void refetchCheckIn();
+        void refetchInsights();
       }
       focusedOnce.current = true;
-    }, [refetchHabits, refetchCheckIn]),
+    }, [refetchHabits, refetchCheckIn, refetchInsights]),
   );
 
   // The user can be null briefly while signing out.
@@ -84,7 +87,7 @@ export default function Dashboard() {
 
   return (
     <Screen
-      onRefresh={() => Promise.all([refetchHabits(), refetchCheckIn(), syncHealth(), refreshUser()])}
+      onRefresh={() => Promise.all([refetchHabits(), refetchCheckIn(), refetchInsights(), syncHealth(), refreshUser()])}
       header={
         <ProfileHeader
           greeting={`${greetingFor(a)}${firstName ? ',' : ''}`}
@@ -158,6 +161,11 @@ export default function Dashboard() {
           <WaterTile user={user} today={today} streak={summary?.streaks.water} />
           <SleepTile user={user} today={today} streak={summary?.streaks.sleep} />
         </View>
+      </FadeIn>
+
+      <FadeIn delay={290}>
+        <SectionTitle icon="chart-timeline-variant" title={a.sectionInsights} />
+        <InsightsCard insights={insights?.insights} />
       </FadeIn>
     </Screen>
   );

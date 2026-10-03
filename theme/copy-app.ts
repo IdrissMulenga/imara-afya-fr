@@ -79,6 +79,7 @@ export type AppCopy = {
   sectionGoals: string;
   sectionSecurity: string;
   sectionAccount: string;
+  sectionLegal: string;
   save: string;
   saving: string;
   saved: string;
@@ -462,6 +463,28 @@ export type AppCopy = {
   moodName: string;
   energyName: string;
   last30Days: string;
+
+  // insights
+  sectionInsights: string;
+  insightsPageTitle: string;
+  insightsSub: string;
+  insightsWeekTitle: string;
+  insightsThisWeek: string;
+  insightsLastWeek: string;
+  insightsGoalDays: string;
+  insightsPatternsTitle: string;
+  insightsPattern: string;
+  insightsGoalSleep: string;
+  insightsGoalSteps: string;
+  insightsGoalWater: string;
+  insightsOutcomeMood: string;
+  insightsOutcomeEnergy: string;
+  insightsGoalMet: string;
+  insightsGoalMissed: string;
+  insightsNoPatterns: string;
+  insightsNote: string;
+  insightsCardTitle: string;
+  insightsCardEmpty: string;
   moodWords: [string, string, string, string, string];
   energyWords: [string, string, string, string, string];
 };
@@ -536,6 +559,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     sectionGoals: 'DAILY GOALS',
     sectionSecurity: 'SECURITY',
     sectionAccount: 'ACCOUNT',
+    sectionLegal: 'LEGAL',
     save: 'Save changes',
     saving: 'Saving',
     saved: 'Saved',
@@ -922,6 +946,26 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     moodName: 'Mood',
     energyName: 'Energy',
     last30Days: 'LAST 30 DAYS',
+    sectionInsights: 'INSIGHTS',
+    insightsPageTitle: 'Your insights',
+    insightsSub: 'How your week compares, and what tends to go with your better days.',
+    insightsWeekTitle: 'THIS WEEK VS LAST WEEK',
+    insightsThisWeek: 'This week',
+    insightsLastWeek: 'Last week',
+    insightsGoalDays: '{n} of 7 days at goal',
+    insightsPatternsTitle: 'PATTERNS',
+    insightsPattern: 'On days you met {goal}, {outcome} averaged {met} / 5, compared with {missed} / 5 on other days.',
+    insightsGoalSleep: 'your sleep goal',
+    insightsGoalSteps: 'your step goal',
+    insightsGoalWater: 'your water goal',
+    insightsOutcomeMood: 'your mood',
+    insightsOutcomeEnergy: 'your energy',
+    insightsGoalMet: 'Goal met',
+    insightsGoalMissed: 'Below goal',
+    insightsNoPatterns: 'No patterns yet. Keep checking in and logging water, steps and sleep: a pattern appears once there are at least 5 days on each side of a goal.',
+    insightsNote: 'These are patterns in your own logs, not causes or medical advice.',
+    insightsCardTitle: 'Your week in review',
+    insightsCardEmpty: 'See how this week compares with last week.',
     moodWords: ['Very low', 'Low', 'Okay', 'Good', 'Very good'],
     energyWords: ['Exhausted', 'Tired', 'Okay', 'Energetic', 'Full of energy'],
   },
@@ -996,6 +1040,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     sectionGoals: 'OBJECTIFS QUOTIDIENS',
     sectionSecurity: 'SÉCURITÉ',
     sectionAccount: 'COMPTE',
+    sectionLegal: 'MENTIONS LÉGALES',
     save: 'Enregistrer',
     saving: 'Enregistrement',
     saved: 'Enregistré',
@@ -1384,6 +1429,26 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     moodName: 'Humeur',
     energyName: 'Énergie',
     last30Days: '30 DERNIERS JOURS',
+    sectionInsights: 'ANALYSES',
+    insightsPageTitle: 'Vos analyses',
+    insightsSub: 'Votre semaine comparée à la précédente, et ce qui accompagne vos meilleurs jours.',
+    insightsWeekTitle: 'CETTE SEMAINE ET LA PRÉCÉDENTE',
+    insightsThisWeek: 'Cette semaine',
+    insightsLastWeek: 'Semaine passée',
+    insightsGoalDays: 'Objectif atteint {n} jours sur 7',
+    insightsPatternsTitle: 'TENDANCES',
+    insightsPattern: 'Les jours où vous avez atteint {goal}, {outcome} était en moyenne de {met} / 5, contre {missed} / 5 les autres jours.',
+    insightsGoalSleep: 'votre objectif de sommeil',
+    insightsGoalSteps: 'votre objectif de pas',
+    insightsGoalWater: 'votre objectif d’eau',
+    insightsOutcomeMood: 'votre humeur',
+    insightsOutcomeEnergy: 'votre énergie',
+    insightsGoalMet: 'Objectif atteint',
+    insightsGoalMissed: 'Sous l’objectif',
+    insightsNoPatterns: 'Pas encore de tendance. Continuez à faire votre bilan et à noter l’eau, les pas et le sommeil : une tendance apparaît dès 5 jours de chaque côté d’un objectif.',
+    insightsNote: 'Ce sont des tendances dans vos propres données, pas des causes ni un avis médical.',
+    insightsCardTitle: 'Votre semaine en bref',
+    insightsCardEmpty: 'Comparez cette semaine à la précédente.',
     moodWords: ['Très bas', 'Bas', 'Correct', 'Bien', 'Très bien'],
     energyWords: ['Épuisé', 'Fatigué', 'Correct', 'En forme', 'Plein d’énergie'],
   },
@@ -1458,6 +1523,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     sectionGoals: 'MALENGO YA KILA SIKU',
     sectionSecurity: 'USALAMA',
     sectionAccount: 'AKAUNTI',
+    sectionLegal: 'KISHERIA',
     save: 'Hifadhi mabadiliko',
     saving: 'Inahifadhi',
     saved: 'Imehifadhiwa',
@@ -1846,6 +1912,26 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     moodName: 'Hali ya moyo',
     energyName: 'Nguvu',
     last30Days: 'SIKU 30 ZILIZOPITA',
+    sectionInsights: 'UCHAMBUZI',
+    insightsPageTitle: 'Uchambuzi wako',
+    insightsSub: 'Wiki yako ikilinganishwa na iliyopita, na kinachoambatana na siku zako nzuri.',
+    insightsWeekTitle: 'WIKI HII NA WIKI ILIYOPITA',
+    insightsThisWeek: 'Wiki hii',
+    insightsLastWeek: 'Wiki iliyopita',
+    insightsGoalDays: 'Lengo limefikiwa siku {n} kati ya 7',
+    insightsPatternsTitle: 'MIFUMO',
+    insightsPattern: 'Siku ulizofikia {goal}, wastani wa {outcome} ulikuwa {met} / 5, ikilinganishwa na {missed} / 5 siku nyingine.',
+    insightsGoalSleep: 'lengo lako la usingizi',
+    insightsGoalSteps: 'lengo lako la hatua',
+    insightsGoalWater: 'lengo lako la maji',
+    insightsOutcomeMood: 'hali yako ya moyo',
+    insightsOutcomeEnergy: 'nguvu zako',
+    insightsGoalMet: 'Lengo limefikiwa',
+    insightsGoalMissed: 'Chini ya lengo',
+    insightsNoPatterns: 'Bado hakuna mfumo. Endelea kuandika hali yako na kurekodi maji, hatua na usingizi: mfumo huonekana baada ya angalau siku 5 kila upande wa lengo.',
+    insightsNote: 'Hii ni mifumo katika kumbukumbu zako mwenyewe, si visababishi wala ushauri wa kitabibu.',
+    insightsCardTitle: 'Muhtasari wa wiki yako',
+    insightsCardEmpty: 'Linganisha wiki hii na wiki iliyopita.',
     moodWords: ['Mbaya sana', 'Mbaya', 'Sawa', 'Nzuri', 'Nzuri sana'],
     energyWords: ['Nimechoka sana', 'Nimechoka', 'Sawa', 'Nina nguvu', 'Nguvu tele'],
   },
@@ -1920,6 +2006,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     sectionGoals: 'INTUMBERO Z’UMUSI',
     sectionSecurity: 'UMUTEKANO',
     sectionAccount: 'KONTE',
+    sectionLegal: 'AMATEGEKO',
     save: 'Bika impinduka',
     saving: 'Birabikwa',
     saved: 'Vyabitswe',
@@ -2308,6 +2395,26 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     moodName: 'Ingene wiyumva',
     energyName: 'Inguvu',
     last30Days: 'IMINSI 30 IHERUKA',
+    sectionInsights: 'ISESENGURA',
+    insightsPageTitle: 'Isesengura ryawe',
+    insightsSub: 'Indwi yawe ugereranije n’iheze, n’ibijana n’iminsi yawe myiza.',
+    insightsWeekTitle: 'INDWI IRIHO N’IHEZE',
+    insightsThisWeek: 'Iyi ndwi',
+    insightsLastWeek: 'Indwi iheze',
+    insightsGoalDays: 'Intumbero yashitse iminsi {n} kuri 7',
+    insightsPatternsTitle: 'IBIKUNDA GUSUBIRAMWO',
+    insightsPattern: 'Mu minsi washikije {goal}, ugereranije {outcome} vyari {met} / 5, mu gihe mu yindi minsi vyari {missed} / 5.',
+    insightsGoalSleep: 'intumbero yawe y’ibitotsi',
+    insightsGoalSteps: 'intumbero yawe y’intambwe',
+    insightsGoalWater: 'intumbero yawe y’amazi',
+    insightsOutcomeMood: 'ingene wiyumva',
+    insightsOutcomeEnergy: 'inguvu zawe',
+    insightsGoalMet: 'Intumbero yashitse',
+    insightsGoalMissed: 'Munsi y’intumbero',
+    insightsNoPatterns: 'Nta kintu kirasubiramwo. Bandanya wandika ingene wiyumva, amazi, intambwe n’ibitotsi: bizoboneka haciye nibura iminsi 5 ku mpande zose z’intumbero.',
+    insightsNote: 'Ibi ni ibisubiramwo mu vyo wanditse, si ivyabiteye canke impanuro z’abaganga.',
+    insightsCardTitle: 'Indwi yawe mu ncamake',
+    insightsCardEmpty: 'Gereranya iyi ndwi n’iheze.',
     moodWords: ['Nabi cane', 'Nabi', 'Ni sawa', 'Neza', 'Neza cane'],
     energyWords: ['Naruhijwe cane', 'Naruhijwe', 'Ni sawa', 'Mfise inguvu', 'Inguvu nyinshi'],
   },

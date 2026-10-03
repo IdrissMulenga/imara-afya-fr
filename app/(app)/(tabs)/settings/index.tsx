@@ -21,6 +21,7 @@ import { type as T } from '@/theme/tokens';
 import { APP_COPY, ageFrom } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
+import { openLegal } from '@/lib/legal';
 import { SET_PREFERENCES, type AuthUser } from '@/graphql/auth';
 
 const LANGUAGE_OPTIONS = LANGS.map((code) => ({ value: code, label: COPY[code].label }));
@@ -327,9 +328,17 @@ export default function Settings() {
         </Group>
       </FadeIn>
 
-      <Spacer />
       <Gap h={22} />
-      <Text style={[T.fine, { color: c.faint, textAlign: 'center' }]}>{t.legalPending}</Text>
+
+      <FadeIn delay={420}>
+        <SectionTitle text={a.sectionLegal} />
+        <Group>
+          <NavRow label={t.termsLink} onPress={() => openLegal('terms', lang)} />
+          <NavRow label={t.privacyLink} onPress={() => openLegal('privacy', lang)} />
+        </Group>
+      </FadeIn>
+
+      <Spacer />
     </Screen>
   );
 }
