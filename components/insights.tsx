@@ -174,7 +174,7 @@ export function InsightsCard({ insights }: { insights?: Insights }) {
   const top = insights?.patterns[0];
 
   return (
-    <Glass style={{ paddingVertical: 6 }}>
+    <Glass style={{ paddingHorizontal: 16, paddingVertical: 6 }}>
       <NavRow
         label={a.insightsCardTitle}
         hint={top ? patternText(top, a) : a.insightsCardEmpty}
