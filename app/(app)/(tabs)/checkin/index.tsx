@@ -120,7 +120,7 @@ export default function CheckInScreen() {
         <>
           <Gap h={18} />
           <FadeIn delay={80}>
-            <MoodTrend days={history} today={today} />
+            <MoodTrend days={history} today={today} onOpen={() => router.push('/checkin-history')} />
           </FadeIn>
         </>
       ) : null}
@@ -138,8 +138,18 @@ export default function CheckInScreen() {
                   tint={streak > 0 ? '#E8772E' : c.faint}
                 />
               </Glass>
-              <AverageCard kind="mood" value={summary.week.mood} caption={a.moodAverage} />
-              <AverageCard kind="energy" value={summary.week.energy} caption={a.energyAverage} />
+              <AverageCard
+                kind="mood"
+                value={summary.week.mood}
+                caption={a.moodAverage}
+                onPress={() => router.push({ pathname: '/checkin-history', params: { focus: 'mood' } })}
+              />
+              <AverageCard
+                kind="energy"
+                value={summary.week.energy}
+                caption={a.energyAverage}
+                onPress={() => router.push({ pathname: '/checkin-history', params: { focus: 'energy' } })}
+              />
             </View>
           </FadeIn>
           <Gap h={18} />
@@ -284,21 +294,39 @@ function EntryRow({
   );
 }
 
-// A 7-day average with its face or battery, coloured by the score.
-function AverageCard({ kind, value, caption }: { kind: 'mood' | 'energy'; value: number | null; caption: string }) {
+// A 7-day average with its face or battery, coloured by the score. Opens its full chart.
+function AverageCard({
+  kind,
+  value,
+  caption,
+  onPress,
+}: {
+  kind: 'mood' | 'energy';
+  value: number | null;
+  caption: string;
+  onPress: () => void;
+}) {
   const { c } = useTheme();
   return (
-    <Glass style={styles.statCard}>
-      <View style={{ alignItems: 'center', gap: 4 }}>
-        {value == null ? <View style={{ height: 26 }} /> : <ScoreArt kind={kind} score={value} size={26} animate />}
-        <Text style={{ fontFamily: font.bodySemi, fontSize: 15, color: value == null ? c.faint : scoreTone(value) }}>
-          {formatAverage(value)}
-        </Text>
-        <Text style={[T.fine, { color: c.faint, textAlign: 'center' }]} numberOfLines={1}>
-          {caption}
-        </Text>
-      </View>
-    </Glass>
+    <Pressable
+      ripple="none"
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${caption}: ${formatAverage(value)}`}
+      style={({ pressed }) => [{ flex: 1 }, pressed ? { opacity: 0.7 } : null]}
+    >
+      <Glass style={styles.statCard}>
+        <View style={{ alignItems: 'center', gap: 4 }}>
+          {value == null ? <View style={{ height: 26 }} /> : <ScoreArt kind={kind} score={value} size={26} animate />}
+          <Text style={{ fontFamily: font.bodySemi, fontSize: 15, color: value == null ? c.faint : scoreTone(value) }}>
+            {formatAverage(value)}
+          </Text>
+          <Text style={[T.fine, { color: c.faint, textAlign: 'center' }]} numberOfLines={1}>
+            {caption}
+          </Text>
+        </View>
+      </Glass>
+    </Pressable>
   );
 }
 

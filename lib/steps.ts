@@ -3,11 +3,11 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { Pedometer } from 'expo-sensors';
-import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { client } from './apollo';
 import { getToken } from './tokens';
+import { syncDays } from './band';
 import { hasStepCounter, readStepCounter, type StepCounterReading } from '@/modules/step-counter';
-import { HABIT_DAY_FIELDS, HABIT_LIMITS, LOG_HABITS, type HabitDay } from '@/graphql/habits';
+import { HABIT_DAY_FIELDS, HABIT_LIMITS, type HabitDay } from '@/graphql/habits';
 
 export type StepMode = 'hardware' | 'ios' | 'live' | 'none';
 export type StepPermission = 'granted' | 'denied' | 'undetermined';
@@ -198,32 +198,25 @@ function cachedServerSteps(day: string): number {
   }
 }
 
-const REJECTED_DAY = new Set(['FUTURE_DAY', 'DAY_TOO_OLD', 'INVALID_DAY']);
-
-// Sends each day whose total changed. Never lowers a value the server already has.
+// Sends every day whose total changed, in one sync. Never lowers a value the server already has.
+// Days the server skips (future, or too old) count as sent.
 async function push(s: StepState): Promise<boolean> {
-  let sent = false;
+  const changed: { day: string; steps: number }[] = [];
   for (const day of Object.keys(s.totals).sort()) {
     const value = Math.min(HABIT_LIMITS.steps, Math.max(s.totals[day], cachedServerSteps(day)));
     s.totals[day] = value;
     if (value === 0 || s.synced[day] === value) continue;
-
-    try {
-      await client.mutate({ mutation: LOG_HABITS, variables: { input: { day, steps: value } } });
-      s.synced[day] = value;
-      sent = true;
-    } catch (error) {
-      const reason = CombinedGraphQLErrors.is(error)
-        ? (error.errors[0]?.extensions as { reason?: string } | undefined)?.reason
-        : undefined;
-      if (reason && REJECTED_DAY.has(reason)) {
-        s.synced[day] = value;
-        continue;
-      }
-      break;
-    }
+    changed.push({ day, steps: value });
   }
-  return sent;
+  if (changed.length === 0) return false;
+
+  try {
+    await syncDays(changed);
+  } catch {
+    return false;
+  }
+  for (const { day, steps } of changed) s.synced[day] = steps;
+  return true;
 }
 
 /** Takes a reading (if the mode allows) and sends changed totals to the server. */

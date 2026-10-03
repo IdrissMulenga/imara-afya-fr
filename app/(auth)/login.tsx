@@ -11,7 +11,7 @@ import { FadeIn } from '@/components/motion';
 import { useLang } from '@/theme/i18n';
 import { useSession } from '@/lib/session';
 import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
-import { getDeviceId, getDeviceLabel } from '@/lib/device';
+import { getDeviceCredentials } from '@/lib/device';
 import { LOGIN, type LoginResult } from '@/graphql/auth';
 
 export default function Login() {
@@ -34,9 +34,9 @@ export default function Login() {
 
     // No client-side validation; the backend returns the errors.
     try {
-      const [deviceId, deviceLabel] = [await getDeviceId(), getDeviceLabel()];
+      const device = await getDeviceCredentials();
       const { data } = await login({
-        variables: { input: { email: email.trim(), password, deviceId, deviceLabel } },
+        variables: { input: { email: email.trim(), password, ...device } },
       });
 
       const result = data?.login;

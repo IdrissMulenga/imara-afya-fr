@@ -1,14 +1,16 @@
-// Steps: today's ring, streak and averages, a 14-day chart and the last 30 days.
+// Steps: today's ring, streak and averages, a 14-day chart (tap it for the full chart) and the
+// last 30 days.
 // Manual entry is offered only when the phone cannot count steps.
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useApolloClient, useQuery } from '@apollo/client/react';
 import { Screen, Gap } from '@/components/screen';
 import { Field, PrimaryButton, ErrorNote, QuietButton } from '@/components/ui';
 import { AppHeader } from '@/components/header';
 import { Section } from '@/components/panel';
 import { Glass } from '@/components/glass';
+import { Pressable } from '@/components/pressable';
 import { FadeIn } from '@/components/motion';
 import { useNotice } from '@/components/notice';
 import { StepsRing, MiniStat, stepsToKm } from '@/components/steps-ring';
@@ -22,12 +24,13 @@ import { useSession } from '@/lib/session';
 import { useSteps, useTodaySteps } from '@/lib/steps-provider';
 import { syncSteps } from '@/lib/steps';
 import { errorMessage } from '@/lib/errors';
-import { HABIT_HISTORY, HABIT_LIMITS, LOG_HABITS, type HabitDay } from '@/graphql/habits';
+import { syncDays } from '@/lib/band';
+import { HABIT_HISTORY, HABIT_LIMITS, type HabitDay } from '@/graphql/habits';
 
 const HISTORY_DAYS = 30;
 const CHART_DAYS = 14;
 
-const stepsOf = (day: HabitDay) => day.steps;
+const stepsOf = (day: HabitDay) => day.steps ?? 0;
 const formatSteps = (n: number) => Math.round(n).toLocaleString();
 
 // Steps typed with or without thousands separators; NaN when not a whole number.
@@ -56,7 +59,7 @@ export default function StepsScreen() {
   // History with today's value replaced by the live count.
   const history = useMemo(() => {
     const days = historyQuery.data?.habitHistory ?? [];
-    return days.map((entry, i) => (i === 0 ? { ...entry, steps: Math.max(entry.steps, todaySteps) } : entry));
+    return days.map((entry, i) => (i === 0 ? { ...entry, steps: Math.max(entry.steps ?? 0, todaySteps) } : entry));
   }, [historyQuery.data, todaySteps]);
 
   if (!user) return <Screen />;
@@ -117,7 +120,17 @@ export default function StepsScreen() {
           <Gap h={18} />
           <FadeIn delay={160}>
             <Section title={a.last14Days}>
-              <HabitChart days={history.slice(0, CHART_DAYS).reverse()} goal={goal} value={stepsOf} color={c.primary} />
+              <Pressable
+                ripple="none"
+                onPress={() => router.push('/steps-history')}
+                accessibilityRole="button"
+                accessibilityLabel={a.seeFullChart}
+              >
+                <View pointerEvents="none">
+                  <HabitChart days={history.slice(0, CHART_DAYS).reverse()} goal={goal} value={stepsOf} color={c.primary} />
+                </View>
+              </Pressable>
+              <QuietButton label={a.seeFullChart} onPress={() => router.push('/steps-history')} />
             </Section>
           </FadeIn>
 
@@ -137,9 +150,10 @@ function ManualSteps({ day, current }: { day?: string; current: number }) {
   const { lang } = useLang();
   const a = APP_COPY[lang];
   const notice = useNotice();
+  const client = useApolloClient();
   const [text, setText] = useState(current ? String(current) : '');
   const [error, setError] = useState('');
-  const [logHabits, { loading }] = useMutation<{ logHabits: HabitDay }>(LOG_HABITS);
+  const [loading, setLoading] = useState(false);
 
   const steps = parseSteps(text);
   const invalid = Number.isNaN(steps) || steps > HABIT_LIMITS.steps;
@@ -147,11 +161,15 @@ function ManualSteps({ day, current }: { day?: string; current: number }) {
   const save = async () => {
     if (invalid || !day) return;
     setError('');
+    setLoading(true);
     try {
-      await logHabits({ variables: { input: { day, steps } }, refetchQueries: ['HabitSummary'] });
+      await syncDays([{ day, steps }]);
+      await client.refetchQueries({ include: ['HabitSummary', 'HabitHistory'] }).catch(() => {});
       notice.success(a.saved, a.stepsLabel);
     } catch (e) {
       setError(errorMessage(e, lang));
+    } finally {
+      setLoading(false);
     }
   };
 

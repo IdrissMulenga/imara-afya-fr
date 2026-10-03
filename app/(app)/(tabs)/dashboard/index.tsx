@@ -131,7 +131,7 @@ export default function Dashboard() {
           user={user}
           steps={steps}
           water={today.waterGlasses}
-          sleep={today.sleepHours}
+          sleep={today.sleepHours ?? 0}
           mood={latest}
         />
       </FadeIn>

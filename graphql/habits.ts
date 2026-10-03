@@ -44,6 +44,7 @@ export const ADD_WATER = gql`
   }
 `;
 
+// Water only; steps and sleep go through syncBand (graphql/band.ts).
 export const LOG_HABITS = gql`
   ${HABIT_DAY_FIELDS}
   mutation LogHabits($input: LogHabitsInput!) {
@@ -58,8 +59,9 @@ export type HabitDay = {
   __typename?: 'HabitDay';
   day: string;
   waterGlasses: number;
-  steps: number;
-  sleepHours: number;
+  /** null until synced. */
+  steps: number | null;
+  sleepHours: number | null;
 };
 
 export type HabitStreaks = { water: number; steps: number; sleep: number };

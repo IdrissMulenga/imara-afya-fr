@@ -17,6 +17,7 @@ import { useTheme } from '@/theme/theme';
 import { type as T, font, radius } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
 import { errorMessage } from '@/lib/errors';
+import { syncDays } from '@/lib/band';
 import { useSteps } from '@/lib/steps-provider';
 import { schedulesFrom, upcomingNight } from '@/lib/sleep-schedule';
 import type { AuthUser } from '@/graphql/auth';
@@ -25,7 +26,6 @@ import {
   HABIT_DAY_FIELDS,
   HABIT_LIMITS,
   HABIT_SUMMARY,
-  LOG_HABITS,
   type HabitDay,
   type HabitSummary,
 } from '@/graphql/habits';
@@ -64,7 +64,7 @@ function useCachedDay() {
       client.cache.readFragment<HabitDay>({
         id: client.cache.identify({ __typename: 'HabitDay', day }),
         fragment: HABIT_DAY_FIELDS,
-      }) ?? { day, waterGlasses: 0, steps: 0, sleepHours: 0 },
+      }) ?? { day, waterGlasses: 0, steps: null, sleepHours: null },
     [client],
   );
 }
@@ -92,26 +92,43 @@ export function useAddWater() {
   );
 }
 
-/** Adds or removes sleep (in hours) on a day, with the same immediate update. */
+// Pending sleep saves by day: taps within this window are sent as one sync.
+const SLEEP_SAVE_DELAY = 1000;
+const sleepTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+/** Adds or removes sleep (in hours) on a day. The UI updates at once; the total is saved after
+ *  the taps stop, through syncBand. */
 export function useAdjustSleep() {
   const notice = useNotice();
   const { lang } = useLang();
+  const client = useApolloClient();
   const cachedDay = useCachedDay();
-  const [mutate] = useMutation<{ logHabits: HabitDay }>(LOG_HABITS);
 
   return useCallback(
     (day: string, hours: number) => {
       const base = cachedDay(day);
-      const next = Math.min(HABIT_LIMITS.sleep, Math.max(0, base.sleepHours + hours));
-      mutate({
-        variables: { input: { day, sleepHours: next } },
-        optimisticResponse: { logHabits: { ...base, __typename: 'HabitDay', sleepHours: next } },
-        refetchQueries: ['HabitSummary'],
-      }).catch((e: unknown) => {
-        notice.failure(APP_COPY[lang].sleepLabel, errorMessage(e, lang));
+      const next = Math.min(HABIT_LIMITS.sleep, Math.max(0, (base.sleepHours ?? 0) + hours));
+      client.cache.writeFragment<HabitDay>({
+        id: client.cache.identify({ __typename: 'HabitDay', day }),
+        fragment: HABIT_DAY_FIELDS,
+        data: { ...base, __typename: 'HabitDay', sleepHours: next },
       });
+
+      clearTimeout(sleepTimers.get(day));
+      sleepTimers.set(
+        day,
+        setTimeout(() => {
+          sleepTimers.delete(day);
+          const sleepHours = cachedDay(day).sleepHours ?? 0;
+          syncDays([{ day, sleepHours }])
+            .catch((e: unknown) => notice.failure(APP_COPY[lang].sleepLabel, errorMessage(e, lang)))
+            .finally(() => {
+              client.refetchQueries({ include: ['HabitSummary', 'HabitHistory'] }).catch(() => {});
+            });
+        }, SLEEP_SAVE_DELAY),
+      );
     },
-    [cachedDay, mutate, notice, lang],
+    [cachedDay, client, notice, lang],
   );
 }
 
@@ -307,7 +324,8 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
   const { lang } = useLang();
   const a = APP_COPY[lang];
   const goal = user.sleepGoalHours;
-  const met = goal > 0 && today.sleepHours >= goal;
+  const slept = today.sleepHours ?? 0;
+  const met = goal > 0 && slept >= goal;
   const schedules = schedulesFrom(user);
   const night = schedules ? upcomingNight(schedules) : null;
 
@@ -317,12 +335,12 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
       icon="power-sleep"
       tint={SLEEP_COLOR}
       onPress={() => router.push('/sleep')}
-      art={<SleepRing hours={today.sleepHours} goal={goal} size={108} stroke={9} moonOnly />}
+      art={<SleepRing hours={slept} goal={goal} size={108} stroke={9} moonOnly />}
       caption={
         <View style={{ gap: 2 }}>
           <Text style={[T.fine, { color: c.muted }]}>{a.lastNight}</Text>
           <Text style={{ fontFamily: font.displayBold, fontSize: 26, color: met ? c.success : c.text }}>
-            {fmt(today.sleepHours)} h
+            {fmt(slept)} h
             <Text style={[T.fine, { color: c.muted }]}> / {fmt(goal)} {a.hours}</Text>
           </Text>
           {night ? (
@@ -336,7 +354,7 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
         </View>
       }
       streak={streak != null ? streakText(streak, a) : undefined}
-      controls={<SleepButtons day={today.day} hours={today.sleepHours} />}
+      controls={<SleepButtons day={today.day} hours={slept} />}
     />
   );
 }

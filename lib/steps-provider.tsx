@@ -176,8 +176,8 @@ export function StepsProvider({ children }: { children: React.ReactNode }) {
 export const useSteps = () => useContext(StepsContext);
 
 /** Today's steps to show: the higher of the server's value and this phone's count. */
-export function useTodaySteps(server?: { day: string; steps: number } | null): number {
+export function useTodaySteps(server?: { day: string; steps: number | null } | null): number {
   const { today, localToday } = useSteps();
-  const fromServer = server && server.day === today ? server.steps : 0;
+  const fromServer = server && server.day === today ? (server.steps ?? 0) : 0;
   return Math.max(fromServer, localToday);
 }

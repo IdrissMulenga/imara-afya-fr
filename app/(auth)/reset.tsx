@@ -13,7 +13,7 @@ import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
-import { getDeviceId, getDeviceLabel } from '@/lib/device';
+import { getDeviceCredentials } from '@/lib/device';
 import { RESET_PASSWORD, type AuthPayload } from '@/graphql/auth';
 
 const MIN_PASSWORD = 8;
@@ -48,9 +48,9 @@ export default function Reset() {
     }
 
     try {
-      const [deviceId, deviceLabel] = [await getDeviceId(), getDeviceLabel()];
+      const device = await getDeviceCredentials();
       const { data } = await reset({
-        variables: { input: { resetToken, password, deviceId, deviceLabel } },
+        variables: { input: { resetToken, password, ...device } },
       });
       if (!data?.resetPassword) return;
 

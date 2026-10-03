@@ -1,4 +1,4 @@
-// Apollo Client: auth link (token, device id, language), then error link (ends a dead
+// Apollo Client: auth link (token, language), then error link (ends a dead
 // session), then http.
 import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
 import { SetContextLink } from '@apollo/client/link/context';
@@ -7,7 +7,6 @@ import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { getToken, endSession } from './tokens';
-import { getDeviceId } from './device';
 import { currentLang } from '@/theme/i18n';
 
 // Backend URL. EXPO_PUBLIC_GRAPHQL_URL in builds; in development, the Metro host
@@ -48,13 +47,11 @@ if (__DEV__) {
 const httpLink = new HttpLink({ uri: GRAPHQL_URL });
 
 const authLink = new SetContextLink(async (prevContext) => {
-  const [token, deviceId] = await Promise.all([getToken(), getDeviceId()]);
+  const token = await getToken();
   return {
     headers: {
       ...(prevContext.headers ?? {}),
       ...(token ? { authorization: `Bearer ${token}` } : {}),
-      // Identifies this phone in the trusted-device list.
-      'x-device-id': deviceId,
       // Language of error messages returned by the server.
       'accept-language': currentLang(),
     },
@@ -92,7 +89,8 @@ export const client = new ApolloClient({
     typePolicies: {
       // One entry per day, so a mutation updates every screen showing that day.
       HabitDay: { keyFields: ['day'] },
-      CheckIn: { keyFields: ['day'] },
+      CheckInDay: { keyFields: ['day'] },
+      WeightEntry: { keyFields: ['day'] },
     },
   }),
   defaultOptions: {

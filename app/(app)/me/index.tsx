@@ -1,4 +1,5 @@
-// Profile: who the user is (photo, name, details, BMI), with a link to edit them.
+// Profile: who the user is (photo, name, details, BMI), with links to the weight and BMI charts and to
+// edit them.
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -93,6 +94,8 @@ export default function ProfileOverview() {
           ) : (
             <Text style={[T.fine, { color: c.faint }]}>{a.bmiUnknown}</Text>
           )}
+          <NavRow label={a.weightChartTitle} hint={a.weightChartSub} onPress={() => router.push('/weight-history')} />
+          <NavRow label={a.bmiChartTitle} hint={a.bmiChartSub} onPress={() => router.push('/bmi-history')} />
 
           <Divider />
           <FactRow label={a.memberSince} value={shortDate(user.createdAt, lang) ?? '—'} tone="muted" />

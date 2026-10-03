@@ -157,6 +157,54 @@ export type AppCopy = {
   stepsSub: string;
   stepsHistory: string;
   last14Days: string;
+  sleepChartTitle: string;
+  sleepChartSub: string;
+  chartRange: string;
+  averageNight: string;
+  nightsAtGoal: string;
+  seeFullChart: string;
+  chartGoal: string;
+  chartAverage: string;
+  chartNoData: string;
+  stepsChartTitle: string;
+  stepsChartSub: string;
+  averageDay: string;
+  daysAtGoal: string;
+  waterChartTitle: string;
+  waterChartSub: string;
+  moodChartTitle: string;
+  moodChartSub: string;
+  moodNoCheckIn: string;
+  moodCheckInsN: string;
+  daysCheckedIn: string;
+  energyChartTitle: string;
+  chartFocus: string;
+  cycleChartTitle: string;
+  cycleChartSub: string;
+  chartPeriod: string;
+  chartCycle: string;
+  typicalCycle: string;
+  usualRange: string;
+  cycleInProgress: string;
+  cycleChartEmpty: string;
+  weightChartTitle: string;
+  weightChartSub: string;
+  logWeightTitle: string;
+  weightTodayLabel: string;
+  weightHint: string;
+  weightCurrent: string;
+  weightChange: string;
+  weightEntries: string;
+  weightEmpty: string;
+  weightRemoveConfirm: string;
+  weightSaved: string;
+  weightHistoryTitle: string;
+  bmiChartTitle: string;
+  bmiChartSub: string;
+  bmiHeightUsed: string;
+  bmiAddHeight: string;
+  bmiLogWeight: string;
+  bmiHistoryTitle: string;
   enableSteps: string;
   enableStepsNote: string;
   stepsDenied: string;
@@ -328,6 +376,9 @@ export type AppCopy = {
   noteLong: string;
   noteLongPeriods: string;
   noteVeryLate: string;
+  noteProlongedBleeding: string;
+  /** Shown when estimates are stale: asks whether a period came since the latest start. */
+  staleQuestion: string;
   legendLogged: string;
   todayLogTitle: string;
   nothingLogged: string;
@@ -599,6 +650,54 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     lastNight: 'Last night',
     waterSub: 'Glasses of water, one tap at a time.',
     sleepSub: 'Hours slept each night.',
+    sleepChartTitle: 'Sleep chart',
+    sleepChartSub: 'Every night you slept, up to 90 days.',
+    chartRange: 'SHOW',
+    averageNight: 'Average night',
+    nightsAtGoal: 'Nights at goal',
+    seeFullChart: 'See full chart',
+    chartGoal: 'Goal',
+    chartAverage: 'Average',
+    chartNoData: 'Not synced',
+    stepsChartTitle: 'Steps chart',
+    stepsChartSub: 'Every day you walked, up to 90 days.',
+    averageDay: 'Average day',
+    daysAtGoal: 'Days at goal',
+    waterChartTitle: 'Water chart',
+    waterChartSub: 'Every glass you logged, up to 90 days.',
+    moodChartTitle: 'Mood chart',
+    moodChartSub: 'Your mood and energy each day, up to 90 days.',
+    moodNoCheckIn: 'No check-in',
+    moodCheckInsN: '{n} check-ins that day',
+    daysCheckedIn: 'Days checked in',
+    energyChartTitle: 'Energy chart',
+    chartFocus: 'FOCUS ON',
+    cycleChartTitle: 'Cycle chart',
+    cycleChartSub: 'Every cycle you logged: its length and its period days.',
+    chartPeriod: 'Period',
+    chartCycle: 'Cycle',
+    typicalCycle: 'Your typical cycle',
+    usualRange: 'Usual range (24–38 days)',
+    cycleInProgress: 'Current cycle · day {n} so far',
+    cycleChartEmpty: 'Log a period to start your cycle chart.',
+    weightChartTitle: 'Weight chart',
+    weightChartSub: 'Your weight over time. Log it once a week, at the same time of day.',
+    logWeightTitle: 'LOG YOUR WEIGHT',
+    weightTodayLabel: 'Today’s weight (kg)',
+    weightHint: 'Saving updates your profile weight too.',
+    weightCurrent: 'Current',
+    weightChange: 'Change',
+    weightEntries: 'Entries',
+    weightEmpty: 'No weights logged yet. Add today’s above.',
+    weightRemoveConfirm: 'Remove this weight?',
+    weightSaved: 'Weight saved',
+    weightHistoryTitle: 'LOGGED WEIGHTS',
+    bmiChartTitle: 'BMI chart',
+    bmiChartSub: 'Worked out from your logged weights and your current height.',
+    bmiHeightUsed: 'Height used: {cm} cm',
+    bmiAddHeight: 'Add your height',
+    bmiLogWeight: 'Log your weight',
+    bmiHistoryTitle: 'BMI BY DAY',
     longestNight: 'Longest night',
     remindersSection: 'REMINDERS',
     autoTracking: 'AUTOMATIC TRACKING',
@@ -739,6 +838,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     noteLong: 'Your cycles are often longer than 38 days. If this continues, talk to a health worker.',
     noteLongPeriods: 'A recent period lasted more than 8 days. If periods are often this long or very heavy, talk to a health worker.',
     noteVeryLate: 'Your period is more than a week late. If you could be pregnant, a pregnancy test can tell you. A health worker can help.',
+    noteProlongedBleeding: 'Bleeding has lasted more than 15 days. Please see a health worker soon: long bleeding can cause anaemia.',
+    staleQuestion: 'Has a period started since {date}? If yes, log its start with “Pick another day”. If not, read the note below.',
     legendLogged: 'Symptoms logged',
     todayLogTitle: 'TODAY',
     nothingLogged: 'Nothing logged yet. How is your body today?',
@@ -1011,6 +1112,54 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     lastNight: 'La nuit dernière',
     waterSub: 'Des verres d’eau, un geste à la fois.',
     sleepSub: 'Heures de sommeil chaque nuit.',
+    sleepChartTitle: 'Graphique du sommeil',
+    sleepChartSub: 'Chaque nuit de sommeil, jusqu’à 90 jours.',
+    chartRange: 'AFFICHER',
+    averageNight: 'Nuit moyenne',
+    nightsAtGoal: 'Nuits à l’objectif',
+    seeFullChart: 'Voir tout le graphique',
+    chartGoal: 'Objectif',
+    chartAverage: 'Moyenne',
+    chartNoData: 'Non synchronisé',
+    stepsChartTitle: 'Graphique des pas',
+    stepsChartSub: 'Chaque jour de marche, jusqu’à 90 jours.',
+    averageDay: 'Jour moyen',
+    daysAtGoal: 'Jours à l’objectif',
+    waterChartTitle: 'Graphique de l’eau',
+    waterChartSub: 'Chaque verre noté, jusqu’à 90 jours.',
+    moodChartTitle: 'Graphique de l’humeur',
+    moodChartSub: 'Votre humeur et votre énergie chaque jour, jusqu’à 90 jours.',
+    moodNoCheckIn: 'Aucun bilan',
+    moodCheckInsN: '{n} bilans ce jour-là',
+    daysCheckedIn: 'Jours avec bilan',
+    energyChartTitle: 'Graphique de l’énergie',
+    chartFocus: 'METTRE EN AVANT',
+    cycleChartTitle: 'Graphique du cycle',
+    cycleChartSub: 'Chaque cycle noté : sa durée et ses jours de règles.',
+    chartPeriod: 'Règles',
+    chartCycle: 'Cycle',
+    typicalCycle: 'Votre cycle habituel',
+    usualRange: 'Plage habituelle (24–38 jours)',
+    cycleInProgress: 'Cycle en cours · jour {n}',
+    cycleChartEmpty: 'Notez des règles pour commencer le graphique.',
+    weightChartTitle: 'Graphique du poids',
+    weightChartSub: 'Votre poids dans le temps. Pesez-vous une fois par semaine, à la même heure.',
+    logWeightTitle: 'NOTER VOTRE POIDS',
+    weightTodayLabel: 'Poids d’aujourd’hui (kg)',
+    weightHint: 'L’enregistrement met aussi à jour le poids de votre profil.',
+    weightCurrent: 'Actuel',
+    weightChange: 'Évolution',
+    weightEntries: 'Mesures',
+    weightEmpty: 'Aucun poids noté. Ajoutez celui d’aujourd’hui ci-dessus.',
+    weightRemoveConfirm: 'Supprimer ce poids ?',
+    weightSaved: 'Poids enregistré',
+    weightHistoryTitle: 'POIDS NOTÉS',
+    bmiChartTitle: 'Graphique de l’IMC',
+    bmiChartSub: 'Calculé à partir de vos poids notés et de votre taille actuelle.',
+    bmiHeightUsed: 'Taille utilisée : {cm} cm',
+    bmiAddHeight: 'Ajouter votre taille',
+    bmiLogWeight: 'Noter votre poids',
+    bmiHistoryTitle: 'IMC PAR JOUR',
     longestNight: 'Nuit la plus longue',
     remindersSection: 'RAPPELS',
     autoTracking: 'SUIVI AUTOMATIQUE',
@@ -1151,6 +1300,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     noteLong: 'Vos cycles durent souvent plus de 38 jours. Si cela continue, parlez-en à un agent de santé.',
     noteLongPeriods: 'Des règles récentes ont duré plus de 8 jours. Si c’est fréquent ou très abondant, parlez-en à un agent de santé.',
     noteVeryLate: 'Vos règles ont plus d’une semaine de retard. Si vous pourriez être enceinte, un test de grossesse peut vous le dire. Un agent de santé peut vous aider.',
+    noteProlongedBleeding: 'Les saignements durent depuis plus de 15 jours. Consultez rapidement un agent de santé : des saignements longs peuvent causer une anémie.',
+    staleQuestion: 'Vos règles sont-elles venues depuis le {date} ? Si oui, notez leur début avec « Choisir un autre jour ». Sinon, lisez la note ci-dessous.',
     legendLogged: 'Symptômes notés',
     todayLogTitle: 'AUJOURD’HUI',
     nothingLogged: 'Rien de noté. Comment va votre corps aujourd’hui ?',
@@ -1423,6 +1574,54 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     lastNight: 'Usiku uliopita',
     waterSub: 'Glasi za maji, mguso mmoja kwa wakati.',
     sleepSub: 'Masaa ya usingizi kila usiku.',
+    sleepChartTitle: 'Chati ya usingizi',
+    sleepChartSub: 'Kila usiku uliolala, hadi siku 90.',
+    chartRange: 'ONYESHA',
+    averageNight: 'Wastani wa usiku',
+    nightsAtGoal: 'Usiku uliofikia lengo',
+    seeFullChart: 'Ona chati yote',
+    chartGoal: 'Lengo',
+    chartAverage: 'Wastani',
+    chartNoData: 'Haijasawazishwa',
+    stepsChartTitle: 'Chati ya hatua',
+    stepsChartSub: 'Kila siku uliyotembea, hadi siku 90.',
+    averageDay: 'Wastani wa siku',
+    daysAtGoal: 'Siku zilizofikia lengo',
+    waterChartTitle: 'Chati ya maji',
+    waterChartSub: 'Kila glasi uliyoandika, hadi siku 90.',
+    moodChartTitle: 'Chati ya hali ya moyo',
+    moodChartSub: 'Hali yako ya moyo na nguvu kila siku, hadi siku 90.',
+    moodNoCheckIn: 'Hakuna hali iliyoandikwa',
+    moodCheckInsN: 'Mara {n} siku hiyo',
+    daysCheckedIn: 'Siku zilizoandikwa',
+    energyChartTitle: 'Chati ya nguvu',
+    chartFocus: 'ANGAZIA',
+    cycleChartTitle: 'Chati ya mzunguko',
+    cycleChartSub: 'Kila mzunguko ulioandika: urefu wake na siku za hedhi.',
+    chartPeriod: 'Hedhi',
+    chartCycle: 'Mzunguko',
+    typicalCycle: 'Mzunguko wako wa kawaida',
+    usualRange: 'Kiwango cha kawaida (siku 24–38)',
+    cycleInProgress: 'Mzunguko wa sasa · siku ya {n}',
+    cycleChartEmpty: 'Andika hedhi ili kuanza chati ya mzunguko.',
+    weightChartTitle: 'Chati ya uzito',
+    weightChartSub: 'Uzito wako kwa muda. Pima mara moja kwa wiki, saa ileile.',
+    logWeightTitle: 'ANDIKA UZITO WAKO',
+    weightTodayLabel: 'Uzito wa leo (kg)',
+    weightHint: 'Kuhifadhi kunasasisha pia uzito kwenye wasifu wako.',
+    weightCurrent: 'Sasa',
+    weightChange: 'Mabadiliko',
+    weightEntries: 'Vipimo',
+    weightEmpty: 'Bado hakuna uzito ulioandikwa. Ongeza wa leo hapo juu.',
+    weightRemoveConfirm: 'Ondoa uzito huu?',
+    weightSaved: 'Uzito umehifadhiwa',
+    weightHistoryTitle: 'UZITO ULIOANDIKWA',
+    bmiChartTitle: 'Chati ya BMI',
+    bmiChartSub: 'Inahesabiwa kutoka uzito ulioandika na urefu wako wa sasa.',
+    bmiHeightUsed: 'Urefu uliotumika: sentimita {cm}',
+    bmiAddHeight: 'Ongeza urefu wako',
+    bmiLogWeight: 'Andika uzito wako',
+    bmiHistoryTitle: 'BMI KWA SIKU',
     longestNight: 'Usiku mrefu zaidi',
     remindersSection: 'VIKUMBUSHO',
     autoTracking: 'UFUATILIAJI WA MOJA KWA MOJA',
@@ -1563,6 +1762,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     noteLong: 'Mizunguko yako mara nyingi ni mirefu kuliko siku 38. Likiendelea, zungumza na mhudumu wa afya.',
     noteLongPeriods: 'Hedhi ya karibuni ilidumu zaidi ya siku 8. Ikiwa hutokea mara nyingi au ni nzito sana, zungumza na mhudumu wa afya.',
     noteVeryLate: 'Hedhi yako imechelewa zaidi ya wiki moja. Kama unaweza kuwa mjamzito, kipimo cha mimba kitakuambia. Mhudumu wa afya anaweza kusaidia.',
+    noteProlongedBleeding: 'Damu imetoka kwa zaidi ya siku 15. Tafadhali muone mhudumu wa afya mapema: kutokwa na damu kwa muda mrefu kunaweza kusababisha upungufu wa damu.',
+    staleQuestion: 'Je, hedhi imeanza tangu {date}? Kama ndiyo, andika mwanzo wake kwa “Chagua siku nyingine”. Kama hapana, soma maelezo hapa chini.',
     legendLogged: 'Dalili zimeandikwa',
     todayLogTitle: 'LEO',
     nothingLogged: 'Bado hakuna kilichoandikwa. Mwili wako uko vipi leo?',
@@ -1835,6 +2036,54 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     lastNight: 'Ijoro riheze',
     waterSub: 'Ibirobo vy’amazi, gufyonda rimwe.',
     sleepSub: 'Amasaha waryamye buri joro.',
+    sleepChartTitle: 'Igishushanyo c’ibitotsi',
+    sleepChartSub: 'Buri joro waryamye, gushika ku minsi 90.',
+    chartRange: 'EREKANA',
+    averageNight: 'Ijoro risanzwe',
+    nightsAtGoal: 'Amajoro washikeje intumbero',
+    seeFullChart: 'Raba igishushanyo cose',
+    chartGoal: 'Intumbero',
+    chartAverage: 'Ikigereranyo',
+    chartNoData: 'Ntibirahuzwa',
+    stepsChartTitle: 'Igishushanyo c’intambwe',
+    stepsChartSub: 'Buri musi wagenze, gushika ku minsi 90.',
+    averageDay: 'Umusi usanzwe',
+    daysAtGoal: 'Imisi washikeje intumbero',
+    waterChartTitle: 'Igishushanyo c’amazi',
+    waterChartSub: 'Buri kirobo wanditse, gushika ku minsi 90.',
+    moodChartTitle: 'Igishushanyo c’akanyamuneza',
+    moodChartSub: 'Akanyamuneza n’inguvu zawe buri musi, gushika ku minsi 90.',
+    moodNoCheckIn: 'Nta co wanditse',
+    moodCheckInsN: 'Incuro {n} kuri uwo munsi',
+    daysCheckedIn: 'Iminsi wanditse',
+    energyChartTitle: 'Igishushanyo c’inguvu',
+    chartFocus: 'SHIRA IMBERE',
+    cycleChartTitle: 'Igishushanyo c’ukwezi',
+    cycleChartSub: 'Buri kwezi wanditse: uburebure bwako n’iminsi y’imihango.',
+    chartPeriod: 'Imihango',
+    chartCycle: 'Ukwezi',
+    typicalCycle: 'Ukwezi kwawe gusanzwe',
+    usualRange: 'Igihe gisanzwe (iminsi 24–38)',
+    cycleInProgress: 'Ukwezi kuriho · umunsi wa {n}',
+    cycleChartEmpty: 'Andika imihango kugira utangure igishushanyo.',
+    weightChartTitle: 'Igishushanyo c’uburemere',
+    weightChartSub: 'Uburemere bwawe uko igihe kigenda. Bupime rimwe mu ndwi, ku isaha imwe.',
+    logWeightTitle: 'ANDIKA UBUREMERE BWAWE',
+    weightTodayLabel: 'Uburemere bw’uyu munsi (kg)',
+    weightHint: 'Kubika bihindura n’uburemere buri ku mwirondoro wawe.',
+    weightCurrent: 'Ubu',
+    weightChange: 'Ihinduka',
+    weightEntries: 'Ivyo wapimye',
+    weightEmpty: 'Nta buremere urandika. Ongeramwo ubw’uyu munsi hejuru.',
+    weightRemoveConfirm: 'Ukureho ubu buremere?',
+    weightSaved: 'Uburemere bwabitswe',
+    weightHistoryTitle: 'UBUREMERE WANDITSE',
+    bmiChartTitle: 'Igishushanyo ca BMI',
+    bmiChartSub: 'Giharurwa ukoresheje uburemere wanditse n’uburebure bwawe ubu.',
+    bmiHeightUsed: 'Uburebure bukoreshejwe: sentimetero {cm}',
+    bmiAddHeight: 'Ongeramwo uburebure bwawe',
+    bmiLogWeight: 'Andika uburemere bwawe',
+    bmiHistoryTitle: 'BMI KU MUNSI',
     longestNight: 'Ijoro rirerire kuruta',
     remindersSection: 'IVYIBUTSA',
     autoTracking: 'GUKURIKIRANA UBWAVYO',
@@ -1975,6 +2224,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     noteLong: 'Ukwezi kwawe akenshi kurenza iminsi 38. Nibibandanya, vugana n’umukozi w’amagara.',
     noteLongPeriods: 'Imihango iheruka yamaze iminsi irenga 8. Niba bikunda kuba canke iremereye cane, vugana n’umukozi w’amagara.',
     noteVeryLate: 'Imihango yawe yatevye indwi irenga imwe. Niba ushobora kuba wibungenze, igipimo c’imbanyi kirabikwereka. Umukozi w’amagara arashobora gufasha.',
+    noteProlongedBleeding: 'Amaraso amaze imisi irenga 15. Ihute urabe umukozi w’amagara: kuva amaraso igihe kirekire bishobora gutuma ubura amaraso.',
+    staleQuestion: 'Mbega imihango yaraje kuva ku wa {date}? Niba ari ego, andika intango yayo ukoresheje “Hitamwo uwundi munsi”. Niba atari ivyo, soma ivyanditswe hepfo.',
     legendLogged: 'Ibimenyetso vyanditswe',
     todayLogTitle: 'UYU MUNSI',
     nothingLogged: 'Nta co wanditse. Umubiri wawe umeze gute uyu munsi?',

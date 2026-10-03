@@ -87,7 +87,7 @@ export const RESEND_LOGIN_OTP = gql`
 
 export const VERIFY_EMAIL_OTP = gql`
   ${USER_FIELDS}
-  mutation VerifyEmailOtp($input: VerifyOtpInput!) {
+  mutation VerifyEmailOtp($input: VerifyEmailOtpInput!) {
     verifyEmailOtp(input: $input) {
       ...UserFields
     }

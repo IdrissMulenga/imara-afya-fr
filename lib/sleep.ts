@@ -3,10 +3,10 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { Pedometer } from 'expo-sensors';
-import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { client } from './apollo';
 import { getToken } from './tokens';
 import { localDay } from './steps';
+import { syncDays } from './band';
 import {
   hasSleepTracking,
   readSleep,
@@ -14,7 +14,7 @@ import {
   stopSleepTracking,
   type SleepInterval,
 } from '@/modules/sleep';
-import { HABIT_DAY_FIELDS, HABIT_LIMITS, LOG_HABITS, type HabitDay } from '@/graphql/habits';
+import { HABIT_DAY_FIELDS, HABIT_LIMITS, type HabitDay } from '@/graphql/habits';
 import { estimateNight, nightWindow, scheduleFor, type SleepSchedules } from './sleep-schedule';
 
 const STATE_KEY = 'imara.sleep';
@@ -155,8 +155,6 @@ export async function enableSleep(): Promise<boolean> {
   return true;
 }
 
-const REJECTED_DAY = new Set(['FUTURE_DAY', 'DAY_TOO_OLD', 'INVALID_DAY']);
-
 /** Reads detected sleep and sends nights that are new or changed. */
 export function syncSleep(): Promise<void> {
   if (running) return running;
@@ -172,23 +170,19 @@ export function syncSleep(): Promise<void> {
         phone = sleepByDay(await readSleep(Date.now() - LOOKBACK_DAYS * 86_400_000));
       }
       const byDay = { ...(await scheduleNights(s, phone)), ...phone };
+      // One sync for every night that is new or changed; nights the server skips count as sent.
+      const changed = Object.keys(byDay)
+        .sort()
+        .filter((day) => byDay[day] > 0 && s.synced[day] !== byDay[day])
+        .map((day) => ({ day, sleepHours: byDay[day] }));
       let sent = false;
-      for (const day of Object.keys(byDay).sort()) {
-        const hours = byDay[day];
-        if (hours <= 0 || s.synced[day] === hours) continue;
+      if (changed.length > 0) {
         try {
-          await client.mutate({ mutation: LOG_HABITS, variables: { input: { day, sleepHours: hours } } });
-          s.synced[day] = hours;
+          await syncDays(changed);
+          for (const { day, sleepHours } of changed) s.synced[day] = sleepHours;
           sent = true;
-        } catch (error) {
-          const reason = CombinedGraphQLErrors.is(error)
-            ? (error.errors[0]?.extensions as { reason?: string } | undefined)?.reason
-            : undefined;
-          if (reason && REJECTED_DAY.has(reason)) {
-            s.synced[day] = hours;
-            continue;
-          }
-          break;
+        } catch {
+          // kept unsent; retried on the next sync
         }
       }
 

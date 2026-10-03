@@ -13,7 +13,7 @@ import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { useSession } from '@/lib/session';
 import { errorWithWait } from '@/lib/errors';
-import { getDeviceId, getDeviceLabel } from '@/lib/device';
+import { getDeviceCredentials } from '@/lib/device';
 import {
   VERIFY_LOGIN_OTP,
   RESEND_LOGIN_OTP,
@@ -85,9 +85,9 @@ export default function Verify() {
 
     try {
       if (purpose === 'LOGIN') {
-        const [deviceId, deviceLabel] = [await getDeviceId(), getDeviceLabel()];
+        const device = await getDeviceCredentials();
         const { data } = await verifyLogin({
-          variables: { email, input: { code: value, deviceId, deviceLabel } },
+          variables: { email, input: { code: value, ...device } },
         });
         if (data?.verifyLoginOtp) {
           await signIn(data.verifyLoginOtp);
@@ -125,7 +125,7 @@ export default function Verify() {
     setCode('');
     try {
       if (purpose === 'LOGIN') {
-        const deviceId = await getDeviceId();
+        const { deviceId } = await getDeviceCredentials();
         await resendLogin({ variables: { email, deviceId } });
       } else if (purpose === 'SIGNUP') {
         await resendEmail();

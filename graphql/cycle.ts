@@ -40,6 +40,7 @@ export const CYCLE_SUMMARY = gql`
       cyclesUsed
       cycleDay
       phase
+      estimatesStale
       nextPeriodStart
       nextPeriodInDays
       ovulationDay
@@ -126,7 +127,13 @@ export type CycleSymptom =
   | 'ANXIETY';
 export type CycleDischarge = 'DRY' | 'STICKY' | 'CREAMY' | 'WATERY' | 'EGG_WHITE' | 'UNUSUAL';
 export type CyclePhase = 'MENSTRUAL' | 'FOLLICULAR' | 'FERTILE' | 'LUTEAL' | 'UNKNOWN';
-export type CycleNote = 'IRREGULAR' | 'SHORT_CYCLES' | 'LONG_CYCLES' | 'LONG_PERIODS' | 'VERY_LATE';
+export type CycleNote =
+  | 'IRREGULAR'
+  | 'SHORT_CYCLES'
+  | 'LONG_CYCLES'
+  | 'LONG_PERIODS'
+  | 'PROLONGED_BLEEDING'
+  | 'VERY_LATE';
 
 export const FLOWS: CycleFlow[] = ['NONE', 'SPOTTING', 'LIGHT', 'MEDIUM', 'HEAVY'];
 export const SYMPTOMS: CycleSymptom[] = [
@@ -188,6 +195,8 @@ export type CycleSummary = {
   cyclesUsed: number;
   cycleDay: number | null;
   phase: CyclePhase;
+  /** The latest start is over two cycles old with nothing logged in 30 days: estimates are empty. */
+  estimatesStale: boolean;
   nextPeriodStart: string | null;
   /** Negative when the period is late. */
   nextPeriodInDays: number | null;

@@ -7,6 +7,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Glass } from '@/components/glass';
+import { QuietButton } from '@/components/ui';
 import { SCORE_TONES, scoreTone } from '@/components/mood-art';
 import { useReducedMotion } from '@/components/motion';
 import { useLang, type Lang } from '@/theme/i18n';
@@ -88,8 +89,9 @@ const linePath = (points: ({ x: number; y: number } | null)[]): string => {
   return d.trim();
 };
 
-/** The trend card: a 7/30-day switch, the chart, a legend and the insights. */
-export function MoodTrend({ days, today }: { days: CheckInDay[]; today: string }) {
+/** The trend card: a 7/30-day switch, the chart, a legend and the insights. With onOpen, the
+ *  chart and a button under it open the full chart. */
+export function MoodTrend({ days, today, onOpen }: { days: CheckInDay[]; today: string; onOpen?: () => void }) {
   const { c } = useTheme();
   const { lang } = useLang();
   const a = APP_COPY[lang];
@@ -147,10 +149,18 @@ export function MoodTrend({ days, today }: { days: CheckInDay[]; today: string }
         </View>
       </View>
 
-      <View style={{ height: HEIGHT, marginTop: 12 }} onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}>
+      <Pressable
+        ripple="none"
+        disabled={!onOpen}
+        onPress={onOpen}
+        accessibilityRole={onOpen ? 'button' : undefined}
+        accessibilityLabel={onOpen ? a.seeFullChart : undefined}
+        style={{ height: HEIGHT, marginTop: 12 }}
+        onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
+      >
         {width > 0 ? (
           <>
-            <Svg width={width} height={HEIGHT} style={StyleSheet.absoluteFill}>
+            <Svg width={width} height={HEIGHT} style={StyleSheet.absoluteFill} pointerEvents="none">
               {[1, 2, 3, 4, 5].map((score) => (
                 <React.Fragment key={score}>
                   <Line
@@ -181,7 +191,7 @@ export function MoodTrend({ days, today }: { days: CheckInDay[]; today: string }
                 ) : null,
               )}
             </Svg>
-            <Animated.View style={[StyleSheet.absoluteFill, { overflow: 'hidden' }, revealStyle]}>
+            <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { overflow: 'hidden' }, revealStyle]}>
               <Svg width={width} height={HEIGHT}>
                 <Defs>
                   <LinearGradient id={gradientId} x1="0" y1={y(5)} x2="0" y2={y(1)} gradientUnits="userSpaceOnUse">
@@ -222,7 +232,7 @@ export function MoodTrend({ days, today }: { days: CheckInDay[]; today: string }
             </Animated.View>
           </>
         ) : null}
-      </View>
+      </Pressable>
 
       <View style={styles.legend}>
         <View style={styles.legendItem}>
@@ -243,6 +253,12 @@ export function MoodTrend({ days, today }: { days: CheckInDay[]; today: string }
           </View>
         ))}
       </View>
+
+      {onOpen ? (
+        <View style={{ marginTop: 14 }}>
+          <QuietButton label={a.seeFullChart} onPress={onOpen} />
+        </View>
+      ) : null}
     </Glass>
   );
 }

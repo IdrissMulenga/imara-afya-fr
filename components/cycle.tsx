@@ -121,6 +121,7 @@ export const noteText = (note: CycleNote, a: AppCopy): string =>
     SHORT_CYCLES: a.noteShort,
     LONG_CYCLES: a.noteLong,
     LONG_PERIODS: a.noteLongPeriods,
+    PROLONGED_BLEEDING: a.noteProlongedBleeding,
     VERY_LATE: a.noteVeryLate,
   })[note];
 

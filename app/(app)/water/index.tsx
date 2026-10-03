@@ -1,5 +1,5 @@
-// Water: today's glass with −/+, reminders, the 7-day average, a 14-day chart and
-// the last 30 days.
+// Water: today's glass with −/+, reminders, the 7-day average, a 14-day chart (tap it for the
+// full chart) and the last 30 days.
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { ErrorNote, QuietButton } from '@/components/ui';
 import { AppHeader } from '@/components/header';
 import { Section, SwitchRow } from '@/components/panel';
 import { Glass } from '@/components/glass';
+import { Pressable } from '@/components/pressable';
 import { FadeIn } from '@/components/motion';
 import { useNotice } from '@/components/notice';
 import { MiniStat } from '@/components/steps-ring';
@@ -128,7 +129,17 @@ export default function WaterScreen() {
           <Gap h={18} />
           <FadeIn delay={160}>
             <Section title={a.last14Days}>
-              <HabitChart days={history.slice(0, 14).reverse()} goal={goal} value={glasses} color={WATER_COLOR} />
+              <Pressable
+                ripple="none"
+                onPress={() => router.push('/water-history')}
+                accessibilityRole="button"
+                accessibilityLabel={a.seeFullChart}
+              >
+                <View pointerEvents="none">
+                  <HabitChart days={history.slice(0, 14).reverse()} goal={goal} value={glasses} color={WATER_COLOR} />
+                </View>
+              </Pressable>
+              <QuietButton label={a.seeFullChart} onPress={() => router.push('/water-history')} />
             </Section>
           </FadeIn>
           <Gap h={18} />

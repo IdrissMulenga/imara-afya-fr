@@ -35,7 +35,7 @@ import {
   useCycleDays,
   useCycleSummary,
 } from '@/components/cycle';
-import { useLang } from '@/theme/i18n';
+import { useLang, type Lang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
@@ -55,11 +55,14 @@ const PHASE_ICON: Record<CyclePhase, IconName> = {
   UNKNOWN: 'flower-outline',
 };
 
-// The line under the ring: period day, days until the next period, or how late it is.
-function predictionLine(s: CycleSummary, today: string, a: AppCopy): string {
+// The line under the ring: period day, days until the next period, how late it is, or, when
+// the estimates are stale, whether a period has come since the latest start.
+function predictionLine(s: CycleSummary, today: string, lang: Lang, a: AppCopy): string {
   if (s.current && !s.autoEnded) {
     return a.periodDayN.replace('{n}', String(daysBetween(s.current.start, today) + 1));
   }
+  const latest = s.periods[0]?.start;
+  if (s.estimatesStale && latest) return a.staleQuestion.replace('{date}', dateText(latest, lang));
   const n = s.nextPeriodInDays;
   if (n == null) return a.cycleEmpty;
   if (n > 1) return a.nextPeriodIn.replace('{n}', String(n));
@@ -162,7 +165,7 @@ export default function CycleScreen() {
 
             {s ? (
               <Text style={[T.body, { color: c.text, textAlign: 'center', fontFamily: font.bodySemi }]}>
-                {predictionLine(s, today, a)}
+                {predictionLine(s, today, lang, a)}
               </Text>
             ) : null}
             {s?.phase === 'FERTILE' ? (
@@ -324,25 +327,35 @@ export default function CycleScreen() {
 
           <Gap h={18} />
           <FadeIn delay={160}>
-            <View style={styles.stats}>
-              <Glass style={styles.stat}>
-                <MiniStat icon="sync" value={a.daysN.replace('{n}', String(s.averageCycleLength))} caption={a.avgCycle} tint={CYCLE_COLOR} />
-              </Glass>
-              <Glass style={styles.stat}>
-                <MiniStat icon="water" value={a.daysN.replace('{n}', String(s.averagePeriodLength))} caption={a.avgPeriod} tint={CYCLE_COLOR} />
-              </Glass>
-              <Glass style={styles.stat}>
-                <MiniStat
-                  icon="swap-vertical"
-                  value={s.cycleVariation == null ? '–' : a.daysN.replace('{n}', String(s.cycleVariation))}
-                  caption={a.variationLabel}
-                  tint={CYCLE_COLOR}
-                />
-              </Glass>
-            </View>
+            <Pressable
+              ripple="none"
+              onPress={() => router.push('/cycle-history')}
+              accessibilityRole="button"
+              accessibilityLabel={a.seeFullChart}
+              style={({ pressed }) => (pressed ? { opacity: 0.7 } : null)}
+            >
+              <View style={styles.stats}>
+                <Glass style={styles.stat}>
+                  <MiniStat icon="sync" value={a.daysN.replace('{n}', String(s.averageCycleLength))} caption={a.avgCycle} tint={CYCLE_COLOR} />
+                </Glass>
+                <Glass style={styles.stat}>
+                  <MiniStat icon="water" value={a.daysN.replace('{n}', String(s.averagePeriodLength))} caption={a.avgPeriod} tint={CYCLE_COLOR} />
+                </Glass>
+                <Glass style={styles.stat}>
+                  <MiniStat
+                    icon="swap-vertical"
+                    value={s.cycleVariation == null ? '–' : a.daysN.replace('{n}', String(s.cycleVariation))}
+                    caption={a.variationLabel}
+                    tint={CYCLE_COLOR}
+                  />
+                </Glass>
+              </View>
+            </Pressable>
             {s.cyclesUsed === 0 ? (
               <Text style={[T.fine, { color: c.faint, marginTop: 8, textAlign: 'center' }]}>{a.usingTypical}</Text>
             ) : null}
+            <Gap h={12} />
+            <QuietButton label={a.seeFullChart} onPress={() => router.push('/cycle-history')} />
           </FadeIn>
 
           <Gap h={18} />

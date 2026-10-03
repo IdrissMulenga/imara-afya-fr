@@ -24,7 +24,7 @@ import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { useSession } from '@/lib/session';
 import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
-import { getDeviceId, getDeviceLabel } from '@/lib/device';
+import { getDeviceCredentials } from '@/lib/device';
 import { SIGNUP, UPDATE_PROFILE, type AuthPayload, type AuthUser, type Gender } from '@/graphql/auth';
 
 const MIN_PASSWORD = 8;
@@ -73,10 +73,10 @@ export default function Signup() {
     setError('');
     setField(null);
     try {
-      const [deviceId, deviceLabel] = [await getDeviceId(), getDeviceLabel()];
+      const device = await getDeviceCredentials();
       const { data } = await signup({
         variables: {
-          input: { email: email.trim(), password, deviceId, deviceLabel, language: lang },
+          input: { email: email.trim(), password, ...device, language: lang },
         },
       });
       if (!data?.signup) return;
