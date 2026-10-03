@@ -1,6 +1,6 @@
 // Settings hub: each row shows its current value and opens a screen for that group.
 import React from 'react';
-import { View, Text, Linking } from 'react-native';
+import { Alert, View, Text, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import { Screen, Spacer, Gap } from '@/components/screen';
@@ -13,6 +13,8 @@ import { useWaterReminders, sendTestWaterReminder } from '@/lib/water-reminders'
 import { useCheckInNotifications } from '@/lib/checkin-reminders';
 import { BedtimeRemindersSwitch } from '@/components/sleep-schedule';
 import { useCycleReminders } from '@/lib/cycle-reminders';
+import { useStepsReminders } from '@/lib/steps-reminders';
+import { useMorningReminders } from '@/lib/morning-reminders';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
 import { useLang, COPY, LANGS, type Lang } from '@/theme/i18n';
@@ -22,7 +24,7 @@ import { APP_COPY, ageFrom } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { openLegal } from '@/lib/legal';
-import { SET_PREFERENCES, type AuthUser } from '@/graphql/auth';
+import { EMAIL_MY_DATA, SET_PREFERENCES, type AuthUser } from '@/graphql/auth';
 
 const LANGUAGE_OPTIONS = LANGS.map((code) => ({ value: code, label: COPY[code].label }));
 
@@ -58,8 +60,11 @@ export default function Settings() {
   const reminders = useWaterReminders();
   const checkInNotes = useCheckInNotifications();
   const cycleReminders = useCycleReminders();
+  const stepsReminders = useStepsReminders();
+  const morningReminders = useMorningReminders();
   const blocked = useNotificationsBlocked();
   const [savePreferences] = useMutation<{ setPreferences: AuthUser }>(SET_PREFERENCES);
+  const [emailMyData, exporting] = useMutation<{ emailMyData: boolean }>(EMAIL_MY_DATA);
 
   const a = APP_COPY[lang];
 
@@ -98,6 +103,23 @@ export default function Settings() {
   const goals = `${user.stepGoal.toLocaleString()} ${a.steps} · ${user.waterGoalGlasses} ${a.glasses} · ${user.sleepGoalHours}${a.hours.slice(0, 1)}`;
 
   const units = user.units === 'metric' ? a.unitsMetric : a.unitsImperial;
+
+  // Asks first, then emails the data export to the account's address.
+  const confirmExport = () => {
+    if (exporting.loading) return;
+    Alert.alert(a.emailMyData, a.emailMyDataConfirm.replace('{email}', user.email), [
+      { text: a.cancel, style: 'cancel' },
+      {
+        text: a.emailMyDataSend,
+        onPress: () => {
+          if (exporting.loading) return;
+          emailMyData()
+            .then(() => notice.success(a.emailMyDataSent, user.email))
+            .catch((e: unknown) => notice.failure(a.emailMyData, errorMessage(e, lang)));
+        },
+      },
+    ]);
+  };
 
   return (
     <Screen
@@ -191,7 +213,9 @@ export default function Settings() {
                 [a.waterReminders, a.waterRemindersNote],
                 [a.moodReminders, a.moodRemindersNote],
                 [a.warmMessages, a.warmMessagesNote],
+                [a.stepsReminders, a.stepsRemindersNote],
                 [a.bedtimeReminders, a.bedtimeRemindersNote],
+                [a.morningReminders, a.morningRemindersNote],
                 ...(user.gender === 'female' ? [[a.cycleReminders, a.cycleRemindersNote]] : []),
               ].map(([label, hint]) => (
                 <SwitchRow
@@ -265,7 +289,31 @@ export default function Settings() {
               }}
             />
           ) : null}
+          {stepsReminders.supported ? (
+            <SwitchRow
+              label={a.stepsReminders}
+              hint={a.stepsRemindersNote}
+              value={stepsReminders.enabled}
+              onChange={(on) => {
+                void stepsReminders.set(on).then((result) => {
+                  if (result === 'denied') notice.failure(a.stepsReminders, a.notificationsDenied);
+                });
+              }}
+            />
+          ) : null}
           {checkInNotes.supported ? <BedtimeRemindersSwitch /> : null}
+          {morningReminders.supported ? (
+            <SwitchRow
+              label={a.morningReminders}
+              hint={a.morningRemindersNote}
+              value={morningReminders.enabled}
+              onChange={(on) => {
+                void morningReminders.set(on).then((result) => {
+                  if (result === 'denied') notice.failure(a.morningReminders, a.notificationsDenied);
+                });
+              }}
+            />
+          ) : null}
           {cycleReminders.supported && user.gender === 'female' ? (
             <SwitchRow
               label={a.cycleReminders}
@@ -319,6 +367,7 @@ export default function Settings() {
         <SectionTitle text={a.sectionAccount} />
         <Group>
           <NavRow label={t.signOut} onPress={signOut} />
+          <NavRow label={a.emailMyData} hint={a.emailMyDataNote} onPress={confirmExport} />
           <NavRow
             label={a.deleteAccount}
             hint={a.deleteAccountNote}

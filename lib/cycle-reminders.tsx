@@ -1,4 +1,5 @@
-// Cycle reminders two days before each expected period and when each fertile window starts.
+// Cycle reminders three days before each expected period and when each fertile window starts, on
+// the day the next period is due, and, while a period is open past the usual length, to log its end.
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { Platform } from 'react-native';
 import { useQuery } from '@apollo/client/react';
@@ -11,6 +12,7 @@ import {
   useNotificationRoutes,
 } from './notifications';
 import { useSession } from './session';
+import { planPeriod, type PeriodState } from './reminder-plan';
 import { CYCLE_SUMMARY, type CyclePrediction, type CycleSummary } from '@/graphql/cycle';
 import { APP_COPY } from '@/theme/copy-app';
 import { useLang, type Lang } from '@/theme/i18n';
@@ -18,7 +20,7 @@ import { useLang, type Lang } from '@/theme/i18n';
 const CHANNEL = 'cycle';
 const PREFIX = 'cycle-';
 const HOUR = 9;
-const DAYS_BEFORE = 2;
+const DAYS_BEFORE = 3;
 
 const store = createToggle('imara.cycleReminders');
 const ROUTES = { cycle: '/cycle' } as const;
@@ -46,7 +48,7 @@ async function cancel(): Promise<void> {
   );
 }
 
-async function schedule(lang: Lang, predictions: CyclePrediction[]): Promise<void> {
+async function schedule(lang: Lang, predictions: CyclePrediction[], period: PeriodState): Promise<void> {
   const a = APP_COPY[lang];
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL, {
@@ -78,6 +80,20 @@ async function schedule(lang: Lang, predictions: CyclePrediction[]): Promise<voi
       });
     }
   }
+
+  const ask = planPeriod(new Date(), period);
+  if (ask) {
+    const due = ask.kind === 'due';
+    await Notifications.scheduleNotificationAsync({
+      identifier: `${PREFIX}${ask.kind}-${ask.day}`,
+      content: {
+        title: due ? a.periodDueTitle : a.periodEndTitle,
+        body: due ? a.periodDueBody : a.periodEndBody,
+        data: { kind: 'cycle' },
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: ask.date, channelId: CHANNEL },
+    });
+  }
 }
 
 /** Keeps cycle reminders in line with the predictions, and opens the cycle page on a tap. */
@@ -88,20 +104,34 @@ export function CycleReminders() {
   const female = user?.gender === 'female';
 
   const { data } = useQuery<{ cycleSummary: CycleSummary }>(CYCLE_SUMMARY, { skip: !supported || !female || !on });
-  const key = JSON.stringify(data?.cycleSummary.predictions ?? null);
+  const s = data?.cycleSummary;
+  // The predictions and the open period, as one value so the effect re-runs only when they change.
+  const key = JSON.stringify(
+    s
+      ? {
+          predictions: s.predictions,
+          period: {
+            currentStart: s.current?.start ?? null,
+            autoEnded: s.autoEnded,
+            averagePeriodLength: s.averagePeriodLength,
+            nextStart: s.predictions[0]?.start ?? null,
+          },
+        }
+      : null,
+  );
 
   useNotificationRoutes(ROUTES, ready && female);
 
   useEffect(() => {
     if (!supported || !ready) return;
-    const predictions = JSON.parse(key) as CyclePrediction[] | null;
+    const plan = JSON.parse(key) as { predictions: CyclePrediction[]; period: PeriodState } | null;
     if (!on || !female) {
       void cancel();
       return;
     }
-    if (!predictions) return;
+    if (!plan) return;
     void hasPermission().then((granted) => {
-      if (granted) void schedule(lang, predictions).catch(() => {});
+      if (granted) void schedule(lang, plan.predictions, plan.period).catch(() => {});
     });
   }, [ready, on, female, key, lang]);
 

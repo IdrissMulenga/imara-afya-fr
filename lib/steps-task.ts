@@ -1,8 +1,10 @@
-// Background sync of steps and sleep about every 15 minutes (off in Expo Go). Imported from
+// Background sync of steps and sleep about every 15 minutes, then today's steps nudge is dropped
+// if the goal has been reached (off in Expo Go). Imported from
 // app/_layout.tsx so the task exists at startup.
 import { Platform } from 'react-native';
 import { isRunningInExpoGo } from 'expo';
 import { syncHealth } from './sync';
+import { dropStepsNudgeIfMet } from './steps-nudge';
 
 type TaskManagerModule = typeof import('expo-task-manager');
 type BackgroundTaskModule = typeof import('expo-background-task');
@@ -18,6 +20,7 @@ if (TaskManager && BackgroundTask) {
   TaskManager.defineTask(STEPS_TASK, async () => {
     try {
       await syncHealth();
+      await dropStepsNudgeIfMet();
       return BackgroundTaskResult.Success;
     } catch {
       return BackgroundTaskResult.Failed;

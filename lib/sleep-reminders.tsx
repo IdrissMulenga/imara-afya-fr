@@ -1,4 +1,5 @@
-// Bedtime reminders 30 minutes before bedtime and at wake-up, using each night's schedule.
+// Bedtime reminders 30 minutes before bedtime, using each night's schedule. The good-morning
+// note is its own switch (morning-reminders.tsx).
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { Platform } from 'react-native';
 import {
@@ -49,8 +50,8 @@ async function schedule(lang: Lang, schedules: SleepSchedules): Promise<void> {
   }
   await cancel();
 
-  // For each wake-up day: the good-morning note that day, and the wind-down reminder
-  // 30 minutes before that night's bedtime (usually the evening before).
+  // For each wake-up day, the wind-down reminder 30 minutes before that night's bedtime
+  // (usually the evening before).
   for (let day = 0; day < 7; day++) {
     const night = (day === 0 || day === 6) && schedules.weekend ? schedules.weekend : schedules.weekday;
     const wake = clockMinutes(night.wakeTime);
@@ -62,11 +63,6 @@ async function schedule(lang: Lang, schedules: SleepSchedules): Promise<void> {
       identifier: `${PREFIX}wind-down-${day}`,
       content: { title: a.windDownTitle, body: a.windDownBody, data: { kind: 'sleep' } },
       trigger: weekly((day + offset + 7) % 7, windDown - offset * 1440),
-    });
-    await Notifications.scheduleNotificationAsync({
-      identifier: `${PREFIX}morning-${day}`,
-      content: { title: a.goodMorningTitle, body: a.goodMorningBody, data: { kind: 'sleep' } },
-      trigger: weekly(day, wake),
     });
   }
 }

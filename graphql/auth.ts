@@ -25,6 +25,7 @@ export const USER_FIELDS = gql`
     waterGoalGlasses
     stepGoal
     sleepGoalHours
+    weightGoalKg
     sleepBedtime
     sleepWakeTime
     sleepWeekendBedtime
@@ -185,6 +186,8 @@ export type AuthUser = {
   waterGoalGlasses: number;
   stepGoal: number;
   sleepGoalHours: number;
+  /** Target weight in kg; null when not set. */
+  weightGoalKg: number | null;
   /** Sleep schedule as HH:MM; null when not set. */
   sleepBedtime: string | null;
   sleepWakeTime: string | null;
@@ -225,6 +228,13 @@ export const SET_PREFERENCES = gql`
     setPreferences(input: $input) {
       ...UserFields
     }
+  }
+`;
+
+// Emails a file of everything the app holds about the user to their confirmed address.
+export const EMAIL_MY_DATA = gql`
+  mutation EmailMyData {
+    emailMyData
   }
 `;
 

@@ -128,6 +128,11 @@ export type AppCopy = {
   signOutEverywhere: string;
   deleteAccount: string;
   deleteAccountNote: string;
+  emailMyData: string;
+  emailMyDataNote: string;
+  emailMyDataConfirm: string;
+  emailMyDataSend: string;
+  emailMyDataSent: string;
   deleteWarning: string;
   deleteConfirmLabel: string;
   deleteCta: string;
@@ -200,6 +205,17 @@ export type AppCopy = {
   weightRemoveConfirm: string;
   weightSaved: string;
   weightHistoryTitle: string;
+  weightGoalTitle: string;
+  weightGoalLabel: string;
+  weightGoalHint: string;
+  weightGoalSaved: string;
+  weightGoalRemoved: string;
+  weightGoalRemove: string;
+  weightGoalReached: string;
+  weightTrend: string;
+  weightPerWeek: string;
+  weightToGoal: string;
+  weightTrendNote: string;
   bmiChartTitle: string;
   bmiChartSub: string;
   bmiHeightUsed: string;
@@ -233,6 +249,8 @@ export type AppCopy = {
   waterRemindersNote: string;
   waterReminderTitle: string;
   waterReminderBody: string;
+  /** {done} and {goal} are today's glasses and goal. */
+  waterReminderProgress: string;
   addGlassAction: string;
   moodReminders: string;
   moodRemindersNote: string;
@@ -283,6 +301,17 @@ export type AppCopy = {
   windDownBody: string;
   goodMorningTitle: string;
   goodMorningBody: string;
+  stepsReminders: string;
+  stepsRemindersNote: string;
+  stepsReminderTitle: string;
+  stepsReminderBody: string;
+  stepsReminderProgress: string;
+  morningReminders: string;
+  morningRemindersNote: string;
+  periodDueTitle: string;
+  periodDueBody: string;
+  periodEndTitle: string;
+  periodEndBody: string;
   sleepFromSchedule: string;
   dragToAdjust: string;
   weekdaysLabel: string;
@@ -604,6 +633,11 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     signOutEverywhere: 'Sign out',
     deleteAccount: 'Delete my account',
     deleteAccountNote: 'Permanent. Everything goes.',
+    emailMyData: 'Email me my data',
+    emailMyDataNote: 'A file with everything Imara holds about you.',
+    emailMyDataConfirm: 'We will email a file with all your data to {email}. It includes your health records.',
+    emailMyDataSend: 'Send',
+    emailMyDataSent: 'Sent. Check your email.',
     deleteWarning:
       'This erases your account and every piece of health data in it. It cannot be undone and we cannot get it back for you.',
     deleteConfirmLabel: 'YOUR PASSWORD',
@@ -659,6 +693,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterRemindersNote: 'At 9:00, 12:00, 15:00 and 18:00, with a “+1 glass” button.',
     waterReminderTitle: 'Time for a glass of water',
     waterReminderBody: 'Tap “+1 glass” once you have had one.',
+    waterReminderProgress: 'You’re at {done} of {goal} glasses today. Tap “+1 glass” after your next one.',
     addGlassAction: '+1 glass',
     moodReminders: 'Mood check reminders',
     moodRemindersNote: 'At 9:00, 14:00 and 19:00. Skipped if you checked in shortly before.',
@@ -716,6 +751,17 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     weightRemoveConfirm: 'Remove this weight?',
     weightSaved: 'Weight saved',
     weightHistoryTitle: 'LOGGED WEIGHTS',
+    weightGoalTitle: 'YOUR GOAL',
+    weightGoalLabel: 'Goal weight (kg)',
+    weightGoalHint: 'Between 20 and 400 kg. Progress is measured from your trend.',
+    weightGoalSaved: 'Goal saved',
+    weightGoalRemoved: 'Goal removed',
+    weightGoalRemove: 'Remove goal',
+    weightGoalReached: 'Reached',
+    weightTrend: 'Trend',
+    weightPerWeek: 'Per week',
+    weightToGoal: 'To goal',
+    weightTrendNote: 'The trend evens out day-to-day ups and downs (water, meals), so it shows where your weight is really heading.',
     bmiChartTitle: 'BMI chart',
     bmiChartSub: 'Worked out from your logged weights and your current height.',
     bmiHeightUsed: 'Height used: {cm} cm',
@@ -765,11 +811,22 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     scheduleSaved: 'Sleep schedule saved',
     scheduleRemoved: 'Sleep schedule removed',
     bedtimeReminders: 'Bedtime reminders',
-    bedtimeRemindersNote: 'A reminder 30 minutes before bedtime and a good-morning note at wake-up.',
+    bedtimeRemindersNote: 'A reminder 30 minutes before bedtime.',
     windDownTitle: 'Bedtime in 30 minutes',
     windDownBody: 'Time to wind down: dim the lights and put your phone away.',
     goodMorningTitle: 'Good morning!',
     goodMorningBody: 'Open Imara to see how you slept.',
+    stepsReminders: 'Step reminders',
+    stepsRemindersNote: 'At 18:00 if you are under your step goal. Skipped once you reach it.',
+    stepsReminderTitle: 'Time for a short walk?',
+    stepsReminderBody: 'A few minutes of walking gets you closer to today’s step goal.',
+    stepsReminderProgress: 'You’re at {done} of {goal} steps today. A few minutes of walking will get you closer.',
+    morningReminders: 'Good morning',
+    morningRemindersNote: 'A good-morning note at your wake-up time (or 7:00). Skipped if you have already opened the app.',
+    periodDueTitle: 'Your period may start today',
+    periodDueBody: 'Log it in Imara when it starts, so your next estimates stay accurate.',
+    periodEndTitle: 'Has your period ended?',
+    periodEndBody: 'If it has, tap to log the last day. It keeps your cycle accurate.',
     sleepFromSchedule: 'Nights your phone misses are estimated from your schedule and your movement · correct with − and +',
     dragToAdjust: 'Drag the bed or the alarm around the ring, or drag the arc to move both.',
     weekdaysLabel: 'Weekdays',
@@ -884,8 +941,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     autoEndedNote: 'Marked as over after your usual {n} days. Still bleeding? Log flow on those days or set the end day.',
     setEndDay: 'Set the end day',
     cycleReminders: 'Cycle reminders',
-    cycleRemindersNote: 'Two days before your period, and when your fertile window starts.',
-    periodSoonTitle: 'Period expected in 2 days',
+    cycleRemindersNote: 'Three days before your period, on the day it is due, when your fertile window starts, and to log the end of a long period.',
+    periodSoonTitle: 'Period expected in 3 days',
     periodSoonBody: 'Your period may start around {date}. It helps to have pads ready.',
     fertileTitle: 'Fertile window starts today',
     fertileBody: 'Estimated from your cycle. Not a method of contraception.',
@@ -1087,6 +1144,11 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     signOutEverywhere: 'Se déconnecter',
     deleteAccount: 'Supprimer mon compte',
     deleteAccountNote: 'Définitif. Tout disparaît.',
+    emailMyData: 'M’envoyer mes données',
+    emailMyDataNote: 'Un fichier avec tout ce qu’Imara conserve sur vous.',
+    emailMyDataConfirm: 'Nous enverrons un fichier avec toutes vos données à {email}. Il contient vos données de santé.',
+    emailMyDataSend: 'Envoyer',
+    emailMyDataSent: 'Envoyé. Consultez vos e-mails.',
     deleteWarning:
       'Ceci efface votre compte et toutes vos données de santé. C’est irréversible et nous ne pourrons rien récupérer pour vous.',
     deleteConfirmLabel: 'VOTRE MOT DE PASSE',
@@ -1142,6 +1204,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterRemindersNote: 'À 9 h, 12 h, 15 h et 18 h, avec un bouton « +1 verre ».',
     waterReminderTitle: 'C’est l’heure d’un verre d’eau',
     waterReminderBody: 'Touchez « +1 verre » une fois que vous en avez bu un.',
+    waterReminderProgress: 'Vous en êtes à {done} verres sur {goal} aujourd’hui. Touchez « +1 verre » après le prochain.',
     addGlassAction: '+1 verre',
     moodReminders: 'Rappels de bilan d’humeur',
     moodRemindersNote: 'À 9 h, 14 h et 19 h. Sautés si vous venez de faire votre bilan.',
@@ -1199,6 +1262,17 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     weightRemoveConfirm: 'Supprimer ce poids ?',
     weightSaved: 'Poids enregistré',
     weightHistoryTitle: 'POIDS NOTÉS',
+    weightGoalTitle: 'VOTRE OBJECTIF',
+    weightGoalLabel: 'Poids visé (kg)',
+    weightGoalHint: 'Entre 20 et 400 kg. Les progrès sont mesurés à partir de votre tendance.',
+    weightGoalSaved: 'Objectif enregistré',
+    weightGoalRemoved: 'Objectif retiré',
+    weightGoalRemove: 'Retirer l’objectif',
+    weightGoalReached: 'Atteint',
+    weightTrend: 'Tendance',
+    weightPerWeek: 'Par semaine',
+    weightToGoal: 'Jusqu’à l’objectif',
+    weightTrendNote: 'La tendance lisse les variations d’un jour à l’autre (eau, repas) : elle montre où va vraiment votre poids.',
     bmiChartTitle: 'Graphique de l’IMC',
     bmiChartSub: 'Calculé à partir de vos poids notés et de votre taille actuelle.',
     bmiHeightUsed: 'Taille utilisée : {cm} cm',
@@ -1248,11 +1322,22 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     scheduleSaved: 'Horaires de sommeil enregistrés',
     scheduleRemoved: 'Horaires de sommeil supprimés',
     bedtimeReminders: 'Rappels du coucher',
-    bedtimeRemindersNote: 'Un rappel 30 minutes avant le coucher et un petit mot au réveil.',
+    bedtimeRemindersNote: 'Un rappel 30 minutes avant le coucher.',
     windDownTitle: 'Coucher dans 30 minutes',
     windDownBody: 'C’est le moment de ralentir : baissez la lumière et posez votre téléphone.',
     goodMorningTitle: 'Bonjour !',
     goodMorningBody: 'Ouvrez Imara pour voir comment vous avez dormi.',
+    stepsReminders: 'Rappels de pas',
+    stepsRemindersNote: 'À 18 h si vous êtes sous votre objectif de pas. Annulé une fois l’objectif atteint.',
+    stepsReminderTitle: 'Une petite marche ?',
+    stepsReminderBody: 'Quelques minutes de marche vous rapprochent de votre objectif du jour.',
+    stepsReminderProgress: 'Vous en êtes à {done} pas sur {goal} aujourd’hui. Quelques minutes de marche vous en rapprocheront.',
+    morningReminders: 'Message du matin',
+    morningRemindersNote: 'Un petit mot à votre heure de réveil (ou 7 h). Pas envoyé si vous avez déjà ouvert l’application.',
+    periodDueTitle: 'Vos règles pourraient commencer aujourd’hui',
+    periodDueBody: 'Notez-les dans Imara quand elles commencent, pour garder des estimations justes.',
+    periodEndTitle: 'Vos règles sont-elles terminées ?',
+    periodEndBody: 'Si oui, touchez pour noter le dernier jour. Cela garde votre cycle exact.',
     sleepFromSchedule: 'Les nuits manquées par le téléphone sont estimées d’après vos horaires et vos mouvements · corrigez avec − et +',
     dragToAdjust: 'Faites glisser le lit ou le réveil autour du cercle, ou l’arc pour déplacer les deux.',
     weekdaysLabel: 'Semaine',
@@ -1367,8 +1452,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     autoEndedNote: 'Considérées comme finies après vos {n} jours habituels. Toujours des saignements ? Notez le flux ces jours-là ou indiquez le jour de fin.',
     setEndDay: 'Indiquer le jour de fin',
     cycleReminders: 'Rappels du cycle',
-    cycleRemindersNote: 'Deux jours avant vos règles, et au début de votre période fertile.',
-    periodSoonTitle: 'Règles attendues dans 2 jours',
+    cycleRemindersNote: 'Trois jours avant vos règles, le jour prévu, au début de votre période fertile, et pour noter la fin de règles longues.',
+    periodSoonTitle: 'Règles attendues dans 3 jours',
     periodSoonBody: 'Vos règles pourraient commencer vers le {date}. Pensez à préparer des protections.',
     fertileTitle: 'La période fertile commence aujourd’hui',
     fertileBody: 'Estimation d’après votre cycle. Pas une méthode de contraception.',
@@ -1570,6 +1655,11 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     signOutEverywhere: 'Toka',
     deleteAccount: 'Futa akaunti yangu',
     deleteAccountNote: 'Ya kudumu. Kila kitu kinaondoka.',
+    emailMyData: 'Nitumie data yangu',
+    emailMyDataNote: 'Faili lenye kila kitu Imara inachohifadhi kukuhusu.',
+    emailMyDataConfirm: 'Tutatuma faili lenye data yako yote kwa {email}. Lina kumbukumbu zako za afya.',
+    emailMyDataSend: 'Tuma',
+    emailMyDataSent: 'Imetumwa. Angalia barua pepe yako.',
     deleteWarning:
       'Hii inafuta akaunti yako na kila taarifa ya afya iliyo ndani yake. Haiwezi kurudishwa na hatuwezi kuirejesha kwako.',
     deleteConfirmLabel: 'NENOSIRI LAKO',
@@ -1625,6 +1715,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterRemindersNote: 'Saa 3:00, 6:00, 9:00 na 12:00, na kitufe cha “+1 glasi”.',
     waterReminderTitle: 'Ni wakati wa glasi ya maji',
     waterReminderBody: 'Gusa “+1 glasi” ukishakunywa moja.',
+    waterReminderProgress: 'Umekunywa glasi {done} kati ya {goal} leo. Gusa “+1 glasi” baada ya inayofuata.',
     addGlassAction: '+1 glasi',
     moodReminders: 'Vikumbusho vya hali',
     moodRemindersNote: 'Saa 3:00 asubuhi, 8:00 mchana na 1:00 usiku. Havitumwi kama umeandika hali muda mfupi kabla.',
@@ -1682,6 +1773,17 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     weightRemoveConfirm: 'Ondoa uzito huu?',
     weightSaved: 'Uzito umehifadhiwa',
     weightHistoryTitle: 'UZITO ULIOANDIKWA',
+    weightGoalTitle: 'LENGO LAKO',
+    weightGoalLabel: 'Uzito unaolenga (kg)',
+    weightGoalHint: 'Kati ya kg 20 na 400. Maendeleo hupimwa kutoka mwenendo wako.',
+    weightGoalSaved: 'Lengo limehifadhiwa',
+    weightGoalRemoved: 'Lengo limeondolewa',
+    weightGoalRemove: 'Ondoa lengo',
+    weightGoalReached: 'Limefikiwa',
+    weightTrend: 'Mwenendo',
+    weightPerWeek: 'Kwa wiki',
+    weightToGoal: 'Hadi lengo',
+    weightTrendNote: 'Mwenendo hulainisha mabadiliko ya kila siku (maji, chakula), hivyo unaonyesha uzito wako unakoelekea kweli.',
     bmiChartTitle: 'Chati ya BMI',
     bmiChartSub: 'Inahesabiwa kutoka uzito ulioandika na urefu wako wa sasa.',
     bmiHeightUsed: 'Urefu uliotumika: sentimita {cm}',
@@ -1731,11 +1833,22 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     scheduleSaved: 'Ratiba ya usingizi imehifadhiwa',
     scheduleRemoved: 'Ratiba ya usingizi imeondolewa',
     bedtimeReminders: 'Vikumbusho vya kulala',
-    bedtimeRemindersNote: 'Kikumbusho dakika 30 kabla ya kulala na salamu ya asubuhi unapoamka.',
+    bedtimeRemindersNote: 'Kikumbusho dakika 30 kabla ya kulala.',
     windDownTitle: 'Kulala baada ya dakika 30',
     windDownBody: 'Ni wakati wa kupumzika: punguza mwanga na weka simu pembeni.',
     goodMorningTitle: 'Habari za asubuhi!',
     goodMorningBody: 'Fungua Imara uone ulivyolala.',
+    stepsReminders: 'Vikumbusho vya hatua',
+    stepsRemindersNote: 'Saa 18:00 ikiwa uko chini ya lengo lako la hatua. Haitumwi ukishalifikia.',
+    stepsReminderTitle: 'Wakati wa matembezi mafupi?',
+    stepsReminderBody: 'Dakika chache za kutembea zinakukaribia lengo lako la leo.',
+    stepsReminderProgress: 'Umetembea hatua {done} kati ya {goal} leo. Dakika chache za kutembea zitakukaribia lengo.',
+    morningReminders: 'Salamu za asubuhi',
+    morningRemindersNote: 'Ujumbe wa asubuhi saa unayoamka (au 07:00). Hautumwi ikiwa tayari umefungua programu.',
+    periodDueTitle: 'Hedhi yako inaweza kuanza leo',
+    periodDueBody: 'Iandike kwenye Imara inapoanza, ili makadirio yajayo yawe sahihi.',
+    periodEndTitle: 'Je, hedhi yako imeisha?',
+    periodEndBody: 'Kama imeisha, gusa kuandika siku ya mwisho. Inasaidia mzunguko wako kuwa sahihi.',
     sleepFromSchedule: 'Usiku ambao simu haikupima unakadiriwa kutoka ratiba yako na mwendo wako · rekebisha kwa − na +',
     dragToAdjust: 'Buruta kitanda au saa ya kengele kuzunguka duara, au buruta tao kusogeza vyote viwili.',
     weekdaysLabel: 'Siku za kazi',
@@ -1850,8 +1963,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     autoEndedNote: 'Imewekwa kuwa imeisha baada ya siku {n} zako za kawaida. Bado unatoka damu? Andika mtiririko siku hizo au weka siku ya mwisho.',
     setEndDay: 'Weka siku ya mwisho',
     cycleReminders: 'Vikumbusho vya mzunguko',
-    cycleRemindersNote: 'Siku mbili kabla ya hedhi, na kipindi cha rutuba kinapoanza.',
-    periodSoonTitle: 'Hedhi inatarajiwa baada ya siku 2',
+    cycleRemindersNote: 'Siku tatu kabla ya hedhi, siku inayotarajiwa, kipindi cha rutuba kinapoanza, na kuandika mwisho wa hedhi ndefu.',
+    periodSoonTitle: 'Hedhi inatarajiwa baada ya siku 3',
     periodSoonBody: 'Hedhi yako inaweza kuanza karibu {date}. Ni vizuri kuwa na pedi tayari.',
     fertileTitle: 'Kipindi cha rutuba kinaanza leo',
     fertileBody: 'Makadirio kutoka mzunguko wako. Si njia ya kuzuia mimba.',
@@ -2053,6 +2166,11 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     signOutEverywhere: 'Sohoka',
     deleteAccount: 'Hanagura konte yanje',
     deleteAccountNote: 'Bizoba burundu. Vyose birazoshira.',
+    emailMyData: 'Ndungikira amakuru yanje',
+    emailMyDataNote: 'Idosiye irimwo ivyo Imara ibika vyose ku bikwerekeye.',
+    emailMyDataConfirm: 'Tuzorungika idosiye irimwo amakuru yawe yose kuri {email}. Irimwo amakuru y’amagara yawe.',
+    emailMyDataSend: 'Rungika',
+    emailMyDataSent: 'Vyarungitswe. Raba imeyili yawe.',
     deleteWarning:
       'Ibi bihanagura konte yawe n’amakuru yose y’amagara ari muri yo. Ntibishobora kugarukwa kandi ntidushobora kubigarukana.',
     deleteConfirmLabel: 'IJAMBO RYAWE RY’IBANGA',
@@ -2108,6 +2226,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     waterRemindersNote: 'Isaha 9:00, 12:00, 15:00 na 18:00, hamwe n’agafyondo “+1 ikirobo”.',
     waterReminderTitle: 'N’igihe c’ikirobo c’amazi',
     waterReminderBody: 'Fyonda “+1 ikirobo” umaze kunywa kimwe.',
+    waterReminderProgress: 'Umaze kunywa ibirobo {done} kuri {goal} uyu munsi. Fyonda “+1 ikirobo” umaze kunywa ikindi.',
     addGlassAction: '+1 ikirobo',
     moodReminders: 'Kwibutswa kwandika uko umerewe',
     moodRemindersNote: 'Isaha 9:00, 14:00 na 19:00. Ntibiza niwaba umaze kwandika hari hageze.',
@@ -2165,6 +2284,17 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     weightRemoveConfirm: 'Ukureho ubu buremere?',
     weightSaved: 'Uburemere bwabitswe',
     weightHistoryTitle: 'UBUREMERE WANDITSE',
+    weightGoalTitle: 'INTUMBERO YAWE',
+    weightGoalLabel: 'Uburemere ushaka (kg)',
+    weightGoalHint: 'Hagati ya kg 20 na 400. Iterambere ripimwa uhereye ku nzira y’uburemere bwawe.',
+    weightGoalSaved: 'Intumbero yabitswe',
+    weightGoalRemoved: 'Intumbero yakuweho',
+    weightGoalRemove: 'Kuraho intumbero',
+    weightGoalReached: 'Yashitse',
+    weightTrend: 'Inzira',
+    weightPerWeek: 'Ku ndwi',
+    weightToGoal: 'Gushika ku ntumbero',
+    weightTrendNote: 'Inzira iringaniza ihinduka ry’umunsi ku wundi (amazi, ibifungurwa), ikerekana aho uburemere bwawe bwerekeza vy’ukuri.',
     bmiChartTitle: 'Igishushanyo ca BMI',
     bmiChartSub: 'Giharurwa ukoresheje uburemere wanditse n’uburebure bwawe ubu.',
     bmiHeightUsed: 'Uburebure bukoreshejwe: sentimetero {cm}',
@@ -2214,11 +2344,22 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     scheduleSaved: 'Ingengabihe y’ibitotsi yabitswe',
     scheduleRemoved: 'Ingengabihe y’ibitotsi yakuweho',
     bedtimeReminders: 'Kwibutswa kuryama',
-    bedtimeRemindersNote: 'Kwibutswa iminota 30 imbere yo kuryama n’akajambo keza mu gitondo.',
+    bedtimeRemindersNote: 'Kwibutswa iminota 30 imbere yo kuryama.',
     windDownTitle: 'Kuryama mu minota 30',
     windDownBody: 'Igihe co kuruhuka: gabanya umuco kandi ushire terefone hirya.',
     goodMorningTitle: 'Mwaramutse!',
     goodMorningBody: 'Fungura Imara urabe ingene waryamye.',
+    stepsReminders: 'Ivyibutsa vy’intambwe',
+    stepsRemindersNote: 'Saa 18:00 niba utarashika intumbero y’intambwe. Ntivyoza iyo wayishitse.',
+    stepsReminderTitle: 'Igihe co gutambagira gato?',
+    stepsReminderBody: 'Iminota mike yo kugenda ikwegereza intumbero y’uyu munsi.',
+    stepsReminderProgress: 'Umaze intambwe {done} kuri {goal} uyu munsi. Iminota mike yo kugenda izokwegereza intumbero.',
+    morningReminders: 'Indamutso yo mu gitondo',
+    morningRemindersNote: 'Indamutso ku isaha ubyukirako (canke 07:00). Ntiyoherezwa niba waramaze kwugurura porogaramu.',
+    periodDueTitle: 'Imihango yawe ishobora gutangura uyu munsi',
+    periodDueBody: 'Yandike muri Imara iyo itanguye, kugira ibigereranyo bikurikira bibe ukuri.',
+    periodEndTitle: 'Imihango yawe yarahereye?',
+    periodEndBody: 'Niba yarahereye, fyonda wandike umusi wa nyuma. Bifasha ukwezi kwawe kuba ukuri.',
     sleepFromSchedule: 'Amajoro terefone itapimye aharurwa bivanye n’ingengabihe yawe n’ukwinyegeza kwawe · kosora na − na +',
     dragToAdjust: 'Kwegera uburiri canke isaha yo kuvyuka ku ruziga, canke kwegera umurongo wose ngo uhindure vyose.',
     weekdaysLabel: 'Iminsi y’akazi',
@@ -2333,8 +2474,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     autoEndedNote: 'Yafashwe nk’iyarangiye inyuma y’iminsi {n} isanzwe. Uracava amaraso? Andika amaraso kuri iyo minsi canke ushinge umunsi yaherereyeko.',
     setEndDay: 'Shinga umunsi yaherereyeko',
     cycleReminders: 'Kwibutswa ukwezi',
-    cycleRemindersNote: 'Imisi ibiri imbere y’imihango, n’igihe co kwibaruka gitanguye.',
-    periodSoonTitle: 'Imihango yitezwe mu minsi 2',
+    cycleRemindersNote: 'Imisi itatu imbere y’imihango, ku musi yitezwe, igihe co kwibaruka gitanguye, no kwandika iherezo ry’imihango miremire.',
+    periodSoonTitle: 'Imihango yitezwe mu minsi 3',
     periodSoonBody: 'Imihango yawe irashobora gutangura hafi ya {date}. Ni vyiza kwitegurira ibikoresho.',
     fertileTitle: 'Igihe co kwibaruka gitanguye uyu munsi',
     fertileBody: 'Igereranyo rivanye n’ukwezi kwawe. Si uburyo bwo kwirinda imbanyi.',

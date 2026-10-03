@@ -22,6 +22,8 @@ import { WaterReminders } from '@/lib/water-reminders';
 import { CheckInReminders } from '@/lib/checkin-reminders';
 import { SleepReminders } from '@/lib/sleep-reminders';
 import { CycleReminders } from '@/lib/cycle-reminders';
+import { StepsReminders } from '@/lib/steps-reminders';
+import { MorningReminders } from '@/lib/morning-reminders';
 // Defines the background step-sync task at startup.
 import '@/lib/steps-task';
 import { ThemeProvider, useTheme } from '@/theme/theme';
@@ -161,6 +163,8 @@ export default function RootLayout() {
                   <CheckInReminders />
                   <SleepReminders />
                   <CycleReminders />
+                  <StepsReminders />
+                  <MorningReminders />
                 </StepsProvider>
               </SessionProvider>
             </NoticeProvider>

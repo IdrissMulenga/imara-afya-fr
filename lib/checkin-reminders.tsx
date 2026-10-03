@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import { useQuery } from '@apollo/client/react';
 import {
   Notifications,
+  cancelScheduled,
   createToggle,
   ensurePermission,
   hasPermission,
@@ -47,20 +48,11 @@ async function ensureChannel(lang: Lang): Promise<void> {
   });
 }
 
-async function cancelWhere(match: (id: string) => boolean): Promise<void> {
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync().catch(() => []);
-  await Promise.all(
-    scheduled
-      .filter((n) => match(n.identifier))
-      .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier).catch(() => {})),
-  );
-}
-
 /** Replaces the scheduled mood reminders, skipping times right after `lastAt`. */
 async function scheduleMood(lang: Lang, lastAt: string | null): Promise<void> {
   const a = APP_COPY[lang];
   await ensureChannel(lang);
-  await cancelWhere((id) => id.startsWith(MOOD_PREFIX));
+  await cancelScheduled((id) => id.startsWith(MOOD_PREFIX));
 
   const now = Date.now();
   const last = lastAt ? new Date(lastAt).getTime() : 0;
@@ -97,7 +89,7 @@ async function scheduleWarm(lang: Lang, entry: CheckIn): Promise<void> {
 
 async function cancelAll(): Promise<void> {
   if (!supported) return;
-  await cancelWhere((id) => id.startsWith(MOOD_PREFIX) || id === WARM_ID);
+  await cancelScheduled((id) => id.startsWith(MOOD_PREFIX) || id === WARM_ID);
 }
 
 // A mood reminder opens a new check-in; a warm message opens the check-in page.
@@ -123,7 +115,7 @@ export function CheckInReminders() {
   useEffect(() => {
     if (!supported || !ready || !userId) return;
     if (!moodOn) {
-      void cancelWhere((id) => id.startsWith(MOOD_PREFIX));
+      void cancelScheduled((id) => id.startsWith(MOOD_PREFIX));
       return;
     }
     void hasPermission().then((granted) => {

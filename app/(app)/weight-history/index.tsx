@@ -1,6 +1,6 @@
-// Weight chart: log today's weight, see it over 30, 90 or 365 days as a line over the real dates,
-// the current weight and the change over the range, and the logged weights with remove.
-// Opened from the profile page.
+// Weight chart: log today's weight, set a goal, see the trend (daily swings evened out), its weekly
+// change and the distance to the goal, the weights over 30, 90 or 365 days as a line over the real
+// dates, and the logged weights with remove. Opened from the profile page.
 import React, { useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -24,7 +24,16 @@ import { APP_COPY } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { localDay } from '@/lib/steps';
-import { DELETE_WEIGHT, LOG_WEIGHT, WEIGHT_HISTORY, WEIGHT_LIMITS, type WeightEntry } from '@/graphql/weight';
+import {
+  DELETE_WEIGHT,
+  LOG_WEIGHT,
+  WEIGHT_HISTORY,
+  WEIGHT_LIMITS,
+  WEIGHT_SUMMARY,
+  type WeightEntry,
+  type WeightSummary,
+} from '@/graphql/weight';
+import { SET_PREFERENCES } from '@/graphql/auth';
 
 type Range = '30' | '90' | '365';
 const RANGES: Range[] = ['30', '90', '365'];
@@ -38,6 +47,9 @@ const kgChange = (diff: number): string => {
   if (rounded === 0) return '0 kg';
   return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toLocaleString()} kg`;
 };
+
+// Closer to the goal than this counts as reached.
+const GOAL_REACHED_KG = 0.5;
 
 // "70,5" or "70.5" as a number; NaN when it is not one.
 const parseKg = (raw: string): number => {
@@ -57,13 +69,27 @@ export default function WeightHistoryScreen() {
   const count = Number(range);
 
   const query = useQuery<{ weightHistory: WeightEntry[] }>(WEIGHT_HISTORY, { variables: { days: count } });
-  const refetch = { refetchQueries: ['WeightHistory'], awaitRefetchQueries: true };
+  const summaryQuery = useQuery<{ weightSummary: WeightSummary }>(WEIGHT_SUMMARY);
+  const summary = summaryQuery.data?.weightSummary;
+  const refetch = { refetchQueries: ['WeightHistory', 'WeightSummary'], awaitRefetchQueries: true };
   const [logWeight, logging] = useMutation(LOG_WEIGHT, refetch);
   const [deleteWeight] = useMutation(DELETE_WEIGHT, refetch);
+  const [setPreferences, savingGoal] = useMutation(SET_PREFERENCES, {
+    refetchQueries: ['WeightSummary'],
+    awaitRefetchQueries: true,
+  });
 
   const [text, setText] = useState(user?.weightKg != null ? String(user.weightKg) : '');
   const kg = parseKg(text);
   const invalid = text.trim() !== '' && (Number.isNaN(kg) || kg < WEIGHT_LIMITS.min || kg > WEIGHT_LIMITS.max);
+
+  // What the user has typed; until then the field shows the saved goal, which may arrive after
+  // the first render.
+  const [goalDraft, setGoalDraft] = useState<string | null>(null);
+  const goalText = goalDraft ?? (user?.weightGoalKg != null ? String(user.weightGoalKg) : '');
+  const goal = parseKg(goalText);
+  const goalInvalid =
+    goalText.trim() !== '' && (Number.isNaN(goal) || goal < WEIGHT_LIMITS.min || goal > WEIGHT_LIMITS.max);
 
   const entries = useMemo(() => [...(query.data?.weightHistory ?? [])].reverse(), [query.data]);
 
@@ -83,6 +109,26 @@ export default function WeightHistoryScreen() {
       .catch((e: unknown) => notice.failure(a.weightChartTitle, errorMessage(e, lang)));
   };
 
+  // Saves the goal, or removes it with null.
+  const saveGoal = (next: number | null) => {
+    setPreferences({ variables: { input: { weightGoalKg: next } } })
+      .then(() => {
+        setGoalDraft(null);
+        if (next == null) notice.success(a.weightGoalRemoved);
+        else notice.success(a.weightGoalSaved, kgText(next));
+        void refreshUser();
+      })
+      .catch((e: unknown) => notice.failure(a.weightGoalTitle, errorMessage(e, lang)));
+  };
+
+  const toGoal = summary?.toGoalKg;
+  const toGoalText =
+    summary?.goalKg == null || toGoal == null
+      ? '–'
+      : Math.abs(toGoal) < GOAL_REACHED_KG
+        ? a.weightGoalReached
+        : kgChange(toGoal);
+
   const remove = (day: string) =>
     Alert.alert(a.weightRemoveConfirm, dateText(day, lang, true), [
       { text: a.cancel, style: 'cancel' },
@@ -99,7 +145,7 @@ export default function WeightHistoryScreen() {
 
   return (
     <Screen
-      onRefresh={() => query.refetch()}
+      onRefresh={() => Promise.all([query.refetch(), summaryQuery.refetch()])}
       header={
         <AppHeader title={a.weightChartTitle} subtitle={a.weightChartSub} backLabel={t.back} onBack={() => router.back()} />
       }
@@ -117,6 +163,29 @@ export default function WeightHistoryScreen() {
           />
           <Text style={[T.fine, { color: c.faint }]}>{a.weightHint}</Text>
           <PrimaryButton label={a.save} onPress={save} busy={logging.loading} disabled={invalid || Number.isNaN(kg)} />
+        </Section>
+      </FadeIn>
+
+      <Gap h={18} />
+      <FadeIn delay={20}>
+        <Section title={a.weightGoalTitle}>
+          <Field
+            label={a.weightGoalLabel}
+            value={goalText}
+            onChangeText={setGoalDraft}
+            keyboardType="decimal-pad"
+            placeholder="65"
+            maxLength={6}
+            errorText={goalInvalid ? a.outOfRange : undefined}
+          />
+          <Text style={[T.fine, { color: c.faint }]}>{a.weightGoalHint}</Text>
+          <PrimaryButton
+            label={a.save}
+            onPress={() => saveGoal(goal)}
+            busy={savingGoal.loading}
+            disabled={goalInvalid || Number.isNaN(goal) || goal === user.weightGoalKg}
+          />
+          {user.weightGoalKg != null ? <QuietButton label={a.weightGoalRemove} onPress={() => saveGoal(null)} /> : null}
         </Section>
       </FadeIn>
 
@@ -159,6 +228,30 @@ export default function WeightHistoryScreen() {
                 <MiniStat icon="format-list-numbered" value={String(entries.length)} caption={a.weightEntries} tint={c.primary} />
               </Glass>
             </View>
+            {summary?.latest ? (
+              <View style={[styles.stats, { marginTop: 8 }]}>
+                <Glass style={styles.statCard}>
+                  <MiniStat
+                    icon="chart-bell-curve-cumulative"
+                    value={summary.trendKg != null ? kgText(summary.trendKg) : '–'}
+                    caption={a.weightTrend}
+                    tint={c.primary}
+                  />
+                </Glass>
+                <Glass style={styles.statCard}>
+                  <MiniStat
+                    icon="calendar-week"
+                    value={summary.weeklyChangeKg != null ? kgChange(summary.weeklyChangeKg) : '–'}
+                    caption={a.weightPerWeek}
+                    tint={c.primary}
+                  />
+                </Glass>
+                <Glass style={styles.statCard}>
+                  <MiniStat icon="flag-checkered" value={toGoalText} caption={a.weightToGoal} tint={c.primary} />
+                </Glass>
+              </View>
+            ) : null}
+            {summary?.latest ? <Text style={[T.fine, { color: c.faint, marginTop: 8 }]}>{a.weightTrendNote}</Text> : null}
           </FadeIn>
 
           <Gap h={18} />

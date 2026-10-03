@@ -38,7 +38,10 @@ export async function clearToken(): Promise<void> {
 
 // Last known profile, cached with the token so the app can start offline.
 
-// Cache version. Must change whenever USER_FIELDS in graphql/auth.ts changes.
+// Cache version. Must change when a field is added to REQUIRED below, or an existing field
+// changes meaning. A new optional field needs no change: a cached profile without it reads it as
+// missing until the next refresh, and changing the version would leave anyone who opens the
+// updated app offline at the sign-in screen.
 const PROFILE_SHAPE = 4;
 
 type StoredProfile = { v: number; user: AuthUser };

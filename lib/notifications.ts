@@ -106,6 +106,19 @@ export function useNotificationRoutes(routes: Record<string, Href>, ready: boole
   }, [ready, router]);
 }
 
+// iOS keeps at most 64 scheduled notifications per app. The most each reminder holds at once:
+// check-in 21 + warm message 1, water 16, bedtime 7, cycle 7, steps 3, good morning 3 = 58.
+
+/** Cancels every scheduled notification whose identifier matches. */
+export async function cancelScheduled(match: (id: string) => boolean): Promise<void> {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync().catch(() => []);
+  await Promise.all(
+    scheduled
+      .filter((n) => match(n.identifier))
+      .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier).catch(() => {})),
+  );
+}
+
 /** An on/off setting kept on the phone and shared by every screen that shows it. */
 export function createToggle(key: string) {
   let value = false;
