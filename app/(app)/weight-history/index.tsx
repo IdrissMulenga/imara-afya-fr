@@ -24,6 +24,8 @@ import { APP_COPY } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { localDay } from '@/lib/steps';
+import { dropQueuedWeight, enqueue, isOfflineError } from '@/lib/offline-queue';
+import { dayInZone } from '@/lib/reminder-plan';
 import {
   DELETE_WEIGHT,
   LOG_WEIGHT,
@@ -101,12 +103,22 @@ export default function WeightHistoryScreen() {
 
   const save = () => {
     if (invalid || Number.isNaN(kg)) return;
+    // Today as the server counts it, so a weight sent later lands on the day it was taken.
+    const day = dayInZone(new Date(), user.timezone);
     logWeight({ variables: { input: { kg } } })
       .then(() => {
         notice.success(a.weightSaved, kgText(kg));
+        void dropQueuedWeight(day);
         void refreshUser();
       })
-      .catch((e: unknown) => notice.failure(a.weightChartTitle, errorMessage(e, lang)));
+      .catch((e: unknown) => {
+        if (isOfflineError(e)) {
+          void enqueue({ kind: 'weight', day, kg });
+          notice.success(a.savedOfflineTitle, a.savedOffline);
+          return;
+        }
+        notice.failure(a.weightChartTitle, errorMessage(e, lang));
+      });
   };
 
   // Saves the goal, or removes it with null.

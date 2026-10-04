@@ -1,4 +1,5 @@
-// Insights: this week against last week, then patterns between the daily goals and mood or energy
+// Insights: this week against last week, recent sleep, then patterns between the daily goals (and
+// regular sleep) and mood or energy
 // over the last 30 or 90 days, with a note that they are patterns, not causes. Opened from the dashboard.
 import React, { useState } from 'react';
 import { Text } from 'react-native';
@@ -7,7 +8,7 @@ import { Screen, Gap } from '@/components/screen';
 import { AppHeader } from '@/components/header';
 import { ChoiceRow, ErrorNote, InfoNote, QuietButton } from '@/components/ui';
 import { FadeIn } from '@/components/motion';
-import { PatternCard, WeekCompare, useInsights } from '@/components/insights';
+import { PatternCard, SleepCard, WeekCompare, useInsights } from '@/components/insights';
 import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
@@ -45,6 +46,12 @@ export default function InsightsScreen() {
           <FadeIn>
             <Text style={[T.label, { color: c.faint, marginLeft: 2, marginBottom: 10 }]}>{a.insightsWeekTitle}</Text>
             <WeekCompare thisWeek={insights.thisWeek} lastWeek={insights.lastWeek} />
+          </FadeIn>
+
+          <Gap h={26} />
+          <FadeIn delay={30}>
+            <Text style={[T.label, { color: c.faint, marginLeft: 2, marginBottom: 10 }]}>{a.sleepTitle}</Text>
+            <SleepCard sleep={insights.sleep} />
           </FadeIn>
 
           <Gap h={26} />

@@ -17,6 +17,7 @@ import { useTheme } from '@/theme/theme';
 import { type as T, font, radius } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
 import { errorMessage } from '@/lib/errors';
+import { addToQueuedWater, enqueue, flushQueue, isOfflineError, queuedWater } from '@/lib/offline-queue';
 import { syncDays } from '@/lib/band';
 import { useSteps } from '@/lib/steps-provider';
 import { schedulesFrom, upcomingNight } from '@/lib/sleep-schedule';
@@ -69,10 +70,12 @@ function useCachedDay() {
   );
 }
 
-/** Adds or removes glasses on a day. The UI updates immediately; streaks refresh after. */
+/** Adds or removes glasses on a day. The UI updates immediately; streaks refresh after. Offline,
+ *  the day's total is kept on the phone and sent later; while one is waiting, later taps update it. */
 export function useAddWater() {
   const notice = useNotice();
   const { lang } = useLang();
+  const client = useApolloClient();
   const cachedDay = useCachedDay();
   const [mutate] = useMutation<{ addWater: HabitDay }>(ADD_WATER);
 
@@ -80,15 +83,39 @@ export function useAddWater() {
     (day: string, glasses: number) => {
       const base = cachedDay(day);
       const next = Math.min(HABIT_LIMITS.water, Math.max(0, base.waterGlasses + glasses));
+      // Shows the new total, and keeps it to send while offline.
+      const keepOffline = () => {
+        client.cache.writeFragment<HabitDay>({
+          id: client.cache.identify({ __typename: 'HabitDay', day }),
+          fragment: HABIT_DAY_FIELDS,
+          data: { ...base, __typename: 'HabitDay', waterGlasses: next },
+        });
+        return enqueue({ kind: 'water', day, waterGlasses: next });
+      };
+
+      // A total already waiting for this day would overwrite a "+1" sent now, so it is updated instead.
+      if (queuedWater(day) != null) {
+        void keepOffline().then(() => flushQueue());
+        return;
+      }
+
       mutate({
         variables: { input: { day, glasses } },
         optimisticResponse: { addWater: { ...base, __typename: 'HabitDay', waterGlasses: next } },
         refetchQueries: ['HabitSummary'],
-      }).catch((e: unknown) => {
-        notice.failure(APP_COPY[lang].waterLabel, errorMessage(e, lang));
-      });
+      })
+        // A total waiting from before the queue had loaded must include this glass.
+        .then(() => addToQueuedWater(day, glasses))
+        .catch((e: unknown) => {
+          if (isOfflineError(e)) {
+            void keepOffline();
+            notice.toast(APP_COPY[lang].savedOfflineShort);
+            return;
+          }
+          notice.failure(APP_COPY[lang].waterLabel, errorMessage(e, lang));
+        });
     },
-    [cachedDay, mutate, notice, lang],
+    [cachedDay, client, mutate, notice, lang],
   );
 }
 

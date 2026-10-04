@@ -25,6 +25,7 @@ import {
   type CheckInSummary,
 } from '@/graphql/checkin';
 import { onScreen } from '@/lib/apollo';
+import { enqueue, isOfflineError, newClientId } from '@/lib/offline-queue';
 
 export type ScoreKind = 'mood' | 'energy';
 
@@ -95,14 +96,26 @@ export function useCheckInSummary() {
   return useQuery<{ checkInSummary: CheckInSummary }>(CHECK_IN_SUMMARY);
 }
 
-/** Logs a new check-in now. The summary and history refresh after. */
+/** Logs a new check-in now. The summary and history refresh after. Offline, it is kept on the
+ *  phone with its time and sent later; `queued` says which happened. */
 export function useLogCheckIn() {
   const [mutate, { loading }] = useMutation<{ logCheckIn: CheckIn }>(LOG_CHECK_IN, {
     refetchQueries: REFETCH,
     awaitRefetchQueries: true,
   });
   const save = useCallback(
-    (input: { mood: number; energy: number; note: string }) => mutate({ variables: { input } }),
+    async (input: { mood: number; energy: number; note: string }): Promise<{ queued: boolean }> => {
+      const clientId = newClientId();
+      const at = new Date().toISOString();
+      try {
+        await mutate({ variables: { input: { ...input, clientId } } });
+        return { queued: false };
+      } catch (e) {
+        if (!isOfflineError(e)) throw e;
+        await enqueue({ kind: 'checkIn', input: { ...input, at, clientId } });
+        return { queued: true };
+      }
+    },
     [mutate],
   );
   return { save, saving: loading };
@@ -196,9 +209,10 @@ export function CheckInCard({ summary }: { summary?: CheckInSummary }) {
     setPick(next);
     if (next.mood == null || next.energy == null) return;
     save({ mood: next.mood, energy: next.energy, note: '' })
-      .then(() => {
+      .then(({ queued }) => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-        notice.success(a.checkInSaved);
+        if (queued) notice.success(a.savedOfflineTitle, a.savedOffline);
+        else notice.success(a.checkInSaved);
       })
       .catch((e: unknown) => notice.failure(a.checkInLabel, errorMessage(e, lang)))
       .finally(() => setPick({ mood: null, energy: null }));

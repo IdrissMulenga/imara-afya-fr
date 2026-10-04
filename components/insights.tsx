@@ -13,7 +13,16 @@ import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font, radius } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
-import { INSIGHTS, INSIGHT_LIMITS, type InsightFactor, type InsightPattern, type InsightPeriod, type Insights } from '@/graphql/insights';
+import {
+  INSIGHTS,
+  INSIGHT_LIMITS,
+  type InsightFactor,
+  type InsightPattern,
+  type InsightPeriod,
+  type Insights,
+  type SleepRegularity,
+  type SleepSummary,
+} from '@/graphql/insights';
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -21,12 +30,13 @@ const FACTOR_ICON: Record<InsightFactor, IconName> = {
   SLEEP: 'power-sleep',
   STEPS: 'walk',
   WATER: 'cup-water',
+  REGULAR_SLEEP: 'bed-clock',
 };
 
 /** The tint for a factor: water and sleep match their tiles, steps the app's primary. */
 const useFactorTint = (): Record<InsightFactor, string> => {
   const { c } = useTheme();
-  return { SLEEP: SLEEP_COLOR, STEPS: c.primary, WATER: WATER_COLOR };
+  return { SLEEP: SLEEP_COLOR, STEPS: c.primary, WATER: WATER_COLOR, REGULAR_SLEEP: SLEEP_COLOR };
 };
 
 /** "4.3" in the app's number format. */
@@ -37,12 +47,18 @@ export function useInsights(days: number = INSIGHT_LIMITS.defaultDays) {
   return useQuery<{ insights: Insights }>(INSIGHTS, { variables: { days } });
 }
 
-/** "On days you met your sleep goal, your mood averaged 4.3 / 5, compared with 2.3 / 5 on other days." */
+/** "On days you met your sleep goal, your mood averaged 4.3 / 5, compared with 2.3 / 5 on other days."
+ *  Regular sleep has its own sentence: it compares regular nights with irregular ones, not a goal. */
 export const patternText = (pattern: InsightPattern, a: AppCopy): string => {
-  const goal = { SLEEP: a.insightsGoalSleep, STEPS: a.insightsGoalSteps, WATER: a.insightsGoalWater }[pattern.factor];
   const outcome = pattern.outcome === 'MOOD' ? a.insightsOutcomeMood : a.insightsOutcomeEnergy;
-  return a.insightsPattern
-    .replace('{goal}', goal)
+  const template =
+    pattern.factor === 'REGULAR_SLEEP'
+      ? a.insightsRegularPattern
+      : a.insightsPattern.replace(
+          '{goal}',
+          { SLEEP: a.insightsGoalSleep, STEPS: a.insightsGoalSteps, WATER: a.insightsGoalWater }[pattern.factor]
+        );
+  return template
     .replace('{outcome}', outcome)
     .replace('{met}', score(pattern.goalMetAverage))
     .replace('{missed}', score(pattern.goalMissedAverage));
@@ -74,6 +90,7 @@ export function PatternCard({ pattern }: { pattern: InsightPattern }) {
   const a = APP_COPY[lang];
   const tint = useFactorTint()[pattern.factor];
   const days = (n: number) => a.daysN.replace('{n}', String(n));
+  const regular = pattern.factor === 'REGULAR_SLEEP';
 
   return (
     <Glass style={{ padding: 16, gap: 14 }}>
@@ -84,8 +101,12 @@ export function PatternCard({ pattern }: { pattern: InsightPattern }) {
         <Text style={[T.body, { color: c.text, flex: 1 }]}>{patternText(pattern, a)}</Text>
       </View>
       <View style={{ gap: 10 }}>
-        <ScoreBar label={a.insightsGoalMet} value={pattern.goalMetAverage} days={days(pattern.goalMetDays)} />
-        <ScoreBar label={a.insightsGoalMissed} value={pattern.goalMissedAverage} days={days(pattern.goalMissedDays)} />
+        <ScoreBar label={regular ? a.insightsRegularNights : a.insightsGoalMet} value={pattern.goalMetAverage} days={days(pattern.goalMetDays)} />
+        <ScoreBar
+          label={regular ? a.insightsIrregularNights : a.insightsGoalMissed}
+          value={pattern.goalMissedAverage}
+          days={days(pattern.goalMissedDays)}
+        />
       </View>
     </Glass>
   );
@@ -166,6 +187,62 @@ export function WeekCompare({ thisWeek, lastWeek }: { thisWeek: InsightPeriod; l
   );
 }
 
+const hoursText = (value: number): string => `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} h`;
+
+// The words and colour for each regularity.
+const useRegularity = (regularity: SleepRegularity): { text: string; color: string } => {
+  const { c } = useTheme();
+  const { lang } = useLang();
+  const a = APP_COPY[lang];
+  return {
+    STEADY: { text: a.sleepSteady, color: c.success },
+    VARIES: { text: a.sleepVaries, color: c.text },
+    IRREGULAR: { text: a.sleepIrregular, color: c.text },
+    UNKNOWN: { text: a.sleepUnknown, color: c.faint },
+  }[regularity];
+};
+
+/** Recent sleep: the usual night, how regular it is, and this week's hours short of the goal. */
+export function SleepCard({ sleep }: { sleep: SleepSummary }) {
+  const { c } = useTheme();
+  const { lang } = useLang();
+  const a = APP_COPY[lang];
+  const regularity = useRegularity(sleep.regularity);
+
+  if (sleep.nights === 0) {
+    return (
+      <Glass style={{ padding: 16 }}>
+        <Text style={[T.fine, { color: c.muted }]}>{a.sleepNoNights}</Text>
+      </Glass>
+    );
+  }
+
+  const cell = (label: string, value: string, color: string = c.text) => (
+    <View style={styles.sleepCell}>
+      <Text style={{ fontFamily: font.bodySemi, fontSize: 16, color }} numberOfLines={1}>
+        {value}
+      </Text>
+      <Text style={[T.fine, { color: c.faint, textAlign: 'center' }]} numberOfLines={2}>
+        {label}
+      </Text>
+    </View>
+  );
+
+  return (
+    <Glass style={{ padding: 16, gap: 12 }}>
+      <View style={styles.sleepRow}>
+        {cell(a.sleepUsual, sleep.usualHours != null ? hoursText(sleep.usualHours) : '–')}
+        {cell(a.sleepRegularity, regularity.text, regularity.color)}
+        {cell(
+          a.sleepDebt,
+          sleep.weekNights === 0 ? '–' : sleep.debtHours > 0 ? hoursText(sleep.debtHours) : a.sleepNoDebt
+        )}
+      </View>
+      <Text style={[T.fine, { color: c.faint }]}>{a.sleepRegularityNote}</Text>
+    </Glass>
+  );
+}
+
 /** The dashboard's link to the insights page, previewing the strongest pattern. */
 export function InsightsCard({ insights }: { insights?: Insights }) {
   const router = useRouter();
@@ -194,4 +271,6 @@ const styles = StyleSheet.create({
   compareRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10 },
   compareLabel: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   col: { width: 92, textAlign: 'right' },
+  sleepRow: { flexDirection: 'row', gap: 8 },
+  sleepCell: { flex: 1, alignItems: 'center', gap: 2 },
 });

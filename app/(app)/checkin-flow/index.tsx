@@ -62,9 +62,10 @@ export default function CheckInFlow() {
   };
   const submit = () => {
     save({ mood, energy, note: note.trim() })
-      .then(() => {
+      .then(({ queued }) => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-        notice.success(a.checkInSaved);
+        if (queued) notice.success(a.savedOfflineTitle, a.savedOffline);
+        else notice.success(a.checkInSaved);
         close();
       })
       .catch((e: unknown) => notice.failure(a.checkInLabel, errorMessage(e, lang)));

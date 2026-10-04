@@ -96,6 +96,7 @@ export default function ProfileOverview() {
           )}
           <NavRow label={a.weightChartTitle} hint={a.weightChartSub} onPress={() => router.push('/weight-history')} />
           <NavRow label={a.bmiChartTitle} hint={a.bmiChartSub} onPress={() => router.push('/bmi-history')} />
+          <NavRow label={a.vitalsTitle} hint={a.vitalsSub} onPress={() => router.push('/(app)/vitals')} />
 
           <Divider />
           <FactRow label={a.memberSince} value={shortDate(user.createdAt, lang) ?? '—'} tone="muted" />

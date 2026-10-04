@@ -24,6 +24,7 @@ import { SleepReminders } from '@/lib/sleep-reminders';
 import { CycleReminders } from '@/lib/cycle-reminders';
 import { StepsReminders } from '@/lib/steps-reminders';
 import { MorningReminders } from '@/lib/morning-reminders';
+import { OfflineSync } from '@/lib/offline-sync';
 // Defines the background step-sync task at startup.
 import '@/lib/steps-task';
 import { ThemeProvider, useTheme } from '@/theme/theme';
@@ -165,6 +166,7 @@ export default function RootLayout() {
                   <CycleReminders />
                   <StepsReminders />
                   <MorningReminders />
+                  <OfflineSync />
                 </StepsProvider>
               </SessionProvider>
             </NoticeProvider>

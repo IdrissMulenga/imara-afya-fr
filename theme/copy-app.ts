@@ -514,6 +514,98 @@ export type AppCopy = {
   insightsNote: string;
   insightsCardTitle: string;
   insightsCardEmpty: string;
+  savedOfflineTitle: string;
+  savedOffline: string;
+  savedOfflineShort: string;
+  offlineWaiting: string;
+  offlineSent: string;
+  offlineDroppedTitle: string;
+  offlineDropped: string;
+  vitalsTitle: string;
+  vitalsSub: string;
+  vitalsLatest: string;
+  vitalPressure: string;
+  vitalGlucose: string;
+  vitalPulse: string;
+  vitalPressureWeek: string;
+  vitalLogTitle: string;
+  vitalWhat: string;
+  vitalSystolic: string;
+  vitalDiastolic: string;
+  vitalPulseOptional: string;
+  vitalPressureHow: string;
+  vitalGlucoseLabel: string;
+  vitalWhen: string;
+  vitalFasting: string;
+  vitalAfterMeal: string;
+  vitalRandom: string;
+  vitalGlucoseHow: string;
+  vitalPulseLabel: string;
+  vitalPulseHow: string;
+  vitalOrderError: string;
+  vitalSaved: string;
+  vitalUrgentTitle: string;
+  vitalRemoveConfirm: string;
+  vitalHistoryTitle: string;
+  vitalHistoryEmpty: string;
+  vitalsDisclaimer: string;
+  vitalVeryLow: string;
+  vitalLow: string;
+  vitalNormal: string;
+  vitalHighNormal: string;
+  vitalRaised: string;
+  vitalHigh: string;
+  vitalHighGrade1: string;
+  vitalHighGrade2: string;
+  vitalSevere: string;
+  vitalVeryHigh: string;
+  vitalRecheck: string;
+  vitalSeeHealthWorker: string;
+  vitalUrgentPressure: string;
+  vitalUrgentLowSugar: string;
+  vitalUrgentHighSugar: string;
+  achievementsTitle: string;
+  achievementsSub: string;
+  achievementsEarned: string;
+  achievementsCardEmpty: string;
+  achievementsNote: string;
+  achievementsNoBest: string;
+  personalBests: string;
+  bestStepsLabel: string;
+  bestWaterLabel: string;
+  bestSleepLabel: string;
+  longestStreaks: string;
+  badgesTitle: string;
+  badgeEarned: string;
+  badgeEarnedOn: string;
+  badgeFirstCheckIn: string;
+  badgeFirstCheckInDetail: string;
+  badgeFirstWeek: string;
+  badgeFirstWeekDetail: string;
+  badgeWeightGoal: string;
+  badgeWeightGoalDetail: string;
+  badgeWaterStreak: string;
+  badgeWaterStreakDetail: string;
+  badgeStepsStreak: string;
+  badgeStepsStreakDetail: string;
+  badgeSleepStreak: string;
+  badgeSleepStreakDetail: string;
+  badgeCheckInStreak: string;
+  badgeCheckInStreakDetail: string;
+  insightsRegularPattern: string;
+  insightsRegularNights: string;
+  insightsIrregularNights: string;
+  sleepTitle: string;
+  sleepUsual: string;
+  sleepRegularity: string;
+  sleepDebt: string;
+  sleepNoDebt: string;
+  sleepSteady: string;
+  sleepVaries: string;
+  sleepIrregular: string;
+  sleepUnknown: string;
+  sleepRegularityNote: string;
+  sleepNoNights: string;
   moodWords: [string, string, string, string, string];
   energyWords: [string, string, string, string, string];
 };
@@ -1023,6 +1115,98 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'These are patterns in your own logs, not causes or medical advice.',
     insightsCardTitle: 'Your week in review',
     insightsCardEmpty: 'See how this week compares with last week.',
+    savedOfflineTitle: 'Saved on your phone',
+    savedOffline: 'No connection right now. It will be sent when you are back online.',
+    savedOfflineShort: 'Saved on your phone; sent when back online',
+    offlineWaiting: '{n} saved on your phone, waiting to be sent',
+    offlineSent: '{n} saved entries sent',
+    offlineDroppedTitle: 'Some entries were not saved',
+    offlineDropped: '{n} entries saved offline were refused, for example because a day’s limit was reached.',
+    vitalsTitle: 'Blood pressure, sugar & pulse',
+    vitalsSub: 'Log your readings and see what they mean.',
+    vitalsLatest: 'LATEST',
+    vitalPressure: 'Blood pressure',
+    vitalGlucose: 'Blood sugar',
+    vitalPulse: 'Pulse',
+    vitalPressureWeek: 'Average, last 7 days ({n} readings)',
+    vitalLogTitle: 'LOG A READING',
+    vitalWhat: 'WHAT DID YOU MEASURE?',
+    vitalSystolic: 'Top number',
+    vitalDiastolic: 'Bottom number',
+    vitalPulseOptional: 'Pulse (optional, bpm)',
+    vitalPressureHow: 'Sit quietly for 5 minutes with your arm resting at heart level, then measure. Many machines also show your pulse.',
+    vitalGlucoseLabel: 'Blood sugar (mmol/L)',
+    vitalWhen: 'WHEN?',
+    vitalFasting: 'Fasting',
+    vitalAfterMeal: 'After a meal',
+    vitalRandom: 'Other time',
+    vitalGlucoseHow: 'Fasting: in the morning before eating. After a meal: about 2 hours after you start eating.',
+    vitalPulseLabel: 'Pulse (beats per minute)',
+    vitalPulseHow: 'At rest, count the beats at your wrist for 60 seconds, or copy it from a blood pressure machine.',
+    vitalOrderError: 'Must be lower than the top number',
+    vitalSaved: 'Reading saved',
+    vitalUrgentTitle: 'This reading needs care now',
+    vitalRemoveConfirm: 'Remove this reading?',
+    vitalHistoryTitle: 'LAST 30 DAYS',
+    vitalHistoryEmpty: 'No readings yet. Log your first one above.',
+    vitalsDisclaimer: 'One reading is not a diagnosis. These ranges are for adults and do not replace a health worker. If you are pregnant or being treated, ask your health worker which ranges apply to you.',
+    vitalVeryLow: 'Very low',
+    vitalLow: 'Low',
+    vitalNormal: 'Normal',
+    vitalHighNormal: 'High-normal',
+    vitalRaised: 'Raised',
+    vitalHigh: 'High',
+    vitalHighGrade1: 'High (grade 1)',
+    vitalHighGrade2: 'High (grade 2)',
+    vitalSevere: 'Very high (severe)',
+    vitalVeryHigh: 'Very high',
+    vitalRecheck: 'Measure again on another day, after resting. If it stays like this, see a health worker.',
+    vitalSeeHealthWorker: 'This reading is outside the usual range. See a health worker soon, and bring your readings.',
+    vitalUrgentPressure: 'Very high blood pressure. Sit quietly for 5 minutes and measure again. If it is still 180/110 or higher, or you have chest pain, shortness of breath, a severe headache, weakness or numbness, or trouble speaking or seeing, go to a health facility now.',
+    vitalUrgentLowSugar: 'Very low blood sugar. Eat or drink something sugary now, such as juice, sugar or sweets, and measure again in 15 minutes. If you feel confused or faint, or it is still low, get help now.',
+    vitalUrgentHighSugar: 'Very high blood sugar. Contact a health worker today. Go to a health facility now if you are vomiting, very thirsty, confused, very drowsy or breathing fast.',
+    achievementsTitle: 'Achievements',
+    achievementsSub: 'Badges you have earned, your best days and your longest streaks.',
+    achievementsEarned: '{n} of {total} badges earned',
+    achievementsCardEmpty: 'Badges for streaks and milestones',
+    achievementsNote: 'Streaks count against your current goals.',
+    achievementsNoBest: 'Not yet',
+    personalBests: 'PERSONAL BESTS',
+    bestStepsLabel: 'Most steps',
+    bestWaterLabel: 'Most water',
+    bestSleepLabel: 'Longest sleep',
+    longestStreaks: 'LONGEST STREAKS',
+    badgesTitle: 'BADGES',
+    badgeEarned: 'Earned',
+    badgeEarnedOn: 'Earned {date}',
+    badgeFirstCheckIn: 'First check-in',
+    badgeFirstCheckInDetail: 'Log how you feel for the first time.',
+    badgeFirstWeek: 'First week',
+    badgeFirstWeekDetail: 'Log something on 7 different days.',
+    badgeWeightGoal: 'Weight goal reached',
+    badgeWeightGoalDetail: 'Get within 0.5 kg of your weight goal.',
+    badgeWaterStreak: '{n} days of water',
+    badgeWaterStreakDetail: 'Meet your water goal {n} days in a row.',
+    badgeStepsStreak: '{n} days of steps',
+    badgeStepsStreakDetail: 'Meet your step goal {n} days in a row.',
+    badgeSleepStreak: '{n} nights of good sleep',
+    badgeSleepStreakDetail: 'Meet your sleep goal {n} nights in a row.',
+    badgeCheckInStreak: '{n}-day check-in streak',
+    badgeCheckInStreakDetail: 'Check in {n} days in a row.',
+    insightsRegularPattern: 'After nights close to your usual sleep, {outcome} averaged {met} / 5, compared with {missed} / 5 after irregular nights.',
+    insightsRegularNights: 'Regular nights',
+    insightsIrregularNights: 'Irregular nights',
+    sleepTitle: 'SLEEP',
+    sleepUsual: 'Usual night',
+    sleepRegularity: 'Regularity',
+    sleepDebt: 'Short of goal this week',
+    sleepNoDebt: 'On track',
+    sleepSteady: 'Steady',
+    sleepVaries: 'Varies',
+    sleepIrregular: 'Irregular',
+    sleepUnknown: 'Not enough nights',
+    sleepRegularityNote: 'Regularity compares how long you slept over the last 2 weeks. Similar nights help you feel rested.',
+    sleepNoNights: 'No sleep recorded in the last 2 weeks.',
     moodWords: ['Very low', 'Low', 'Okay', 'Good', 'Very good'],
     energyWords: ['Exhausted', 'Tired', 'Okay', 'Energetic', 'Full of energy'],
   },
@@ -1534,6 +1718,98 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'Ce sont des tendances dans vos propres données, pas des causes ni un avis médical.',
     insightsCardTitle: 'Votre semaine en bref',
     insightsCardEmpty: 'Comparez cette semaine à la précédente.',
+    savedOfflineTitle: 'Enregistré sur votre téléphone',
+    savedOffline: 'Pas de connexion pour le moment. Ce sera envoyé dès votre retour en ligne.',
+    savedOfflineShort: 'Enregistré sur le téléphone ; envoyé dès le retour en ligne',
+    offlineWaiting: '{n} enregistrés sur le téléphone, en attente d’envoi',
+    offlineSent: '{n} entrées envoyées',
+    offlineDroppedTitle: 'Certaines entrées n’ont pas été enregistrées',
+    offlineDropped: '{n} entrées enregistrées hors ligne ont été refusées, par exemple parce que la limite du jour était atteinte.',
+    vitalsTitle: 'Tension, glycémie et pouls',
+    vitalsSub: 'Notez vos mesures et voyez ce qu’elles signifient.',
+    vitalsLatest: 'DERNIÈRES MESURES',
+    vitalPressure: 'Tension',
+    vitalGlucose: 'Glycémie',
+    vitalPulse: 'Pouls',
+    vitalPressureWeek: 'Moyenne des 7 derniers jours ({n} mesures)',
+    vitalLogTitle: 'NOTER UNE MESURE',
+    vitalWhat: 'QU’AVEZ-VOUS MESURÉ ?',
+    vitalSystolic: 'Chiffre du haut',
+    vitalDiastolic: 'Chiffre du bas',
+    vitalPulseOptional: 'Pouls (facultatif, bpm)',
+    vitalPressureHow: 'Restez assis au calme 5 minutes, le bras posé à hauteur du cœur, puis mesurez. Beaucoup d’appareils affichent aussi le pouls.',
+    vitalGlucoseLabel: 'Glycémie (mmol/L)',
+    vitalWhen: 'QUAND ?',
+    vitalFasting: 'À jeun',
+    vitalAfterMeal: 'Après un repas',
+    vitalRandom: 'Autre moment',
+    vitalGlucoseHow: 'À jeun : le matin avant de manger. Après un repas : environ 2 heures après le début du repas.',
+    vitalPulseLabel: 'Pouls (battements par minute)',
+    vitalPulseHow: 'Au repos, comptez les battements au poignet pendant 60 secondes, ou reprenez le chiffre du tensiomètre.',
+    vitalOrderError: 'Doit être inférieur au chiffre du haut',
+    vitalSaved: 'Mesure enregistrée',
+    vitalUrgentTitle: 'Cette mesure demande des soins maintenant',
+    vitalRemoveConfirm: 'Retirer cette mesure ?',
+    vitalHistoryTitle: '30 DERNIERS JOURS',
+    vitalHistoryEmpty: 'Aucune mesure pour l’instant. Notez la première ci-dessus.',
+    vitalsDisclaimer: 'Une seule mesure n’est pas un diagnostic. Ces valeurs concernent les adultes et ne remplacent pas un agent de santé. Si vous êtes enceinte ou sous traitement, demandez à votre agent de santé quelles valeurs s’appliquent à vous.',
+    vitalVeryLow: 'Très basse',
+    vitalLow: 'Basse',
+    vitalNormal: 'Normale',
+    vitalHighNormal: 'Normale haute',
+    vitalRaised: 'Élevée',
+    vitalHigh: 'Haute',
+    vitalHighGrade1: 'Haute (grade 1)',
+    vitalHighGrade2: 'Haute (grade 2)',
+    vitalSevere: 'Très haute (sévère)',
+    vitalVeryHigh: 'Très haute',
+    vitalRecheck: 'Mesurez de nouveau un autre jour, au repos. Si cela persiste, consultez un agent de santé.',
+    vitalSeeHealthWorker: 'Cette mesure sort des valeurs habituelles. Consultez bientôt un agent de santé et apportez vos mesures.',
+    vitalUrgentPressure: 'Tension très élevée. Restez assis au calme 5 minutes et mesurez de nouveau. Si elle est encore à 180/110 ou plus, ou si vous avez une douleur à la poitrine, du mal à respirer, un mal de tête violent, une faiblesse ou un engourdissement, ou du mal à parler ou à voir, allez tout de suite dans un centre de santé.',
+    vitalUrgentLowSugar: 'Glycémie très basse. Mangez ou buvez tout de suite quelque chose de sucré (jus, sucre, bonbons) et mesurez de nouveau dans 15 minutes. Si vous vous sentez confus ou sur le point de vous évanouir, ou si elle reste basse, demandez de l’aide tout de suite.',
+    vitalUrgentHighSugar: 'Glycémie très élevée. Contactez un agent de santé aujourd’hui. Allez tout de suite dans un centre de santé si vous vomissez, avez très soif, êtes confus, très somnolent ou respirez vite.',
+    achievementsTitle: 'Réussites',
+    achievementsSub: 'Vos badges, vos meilleurs jours et vos plus longues séries.',
+    achievementsEarned: '{n} badges sur {total} obtenus',
+    achievementsCardEmpty: 'Badges pour vos séries et étapes',
+    achievementsNote: 'Les séries sont comptées selon vos objectifs actuels.',
+    achievementsNoBest: 'Pas encore',
+    personalBests: 'RECORDS',
+    bestStepsLabel: 'Plus de pas',
+    bestWaterLabel: 'Plus d’eau',
+    bestSleepLabel: 'Plus long sommeil',
+    longestStreaks: 'PLUS LONGUES SÉRIES',
+    badgesTitle: 'BADGES',
+    badgeEarned: 'Obtenu',
+    badgeEarnedOn: 'Obtenu le {date}',
+    badgeFirstCheckIn: 'Premier bilan',
+    badgeFirstCheckInDetail: 'Notez votre humeur pour la première fois.',
+    badgeFirstWeek: 'Première semaine',
+    badgeFirstWeekDetail: 'Notez quelque chose sur 7 jours différents.',
+    badgeWeightGoal: 'Objectif de poids atteint',
+    badgeWeightGoalDetail: 'Arrivez à moins de 0,5 kg de votre objectif de poids.',
+    badgeWaterStreak: '{n} jours d’eau',
+    badgeWaterStreakDetail: 'Atteignez votre objectif d’eau {n} jours d’affilée.',
+    badgeStepsStreak: '{n} jours de pas',
+    badgeStepsStreakDetail: 'Atteignez votre objectif de pas {n} jours d’affilée.',
+    badgeSleepStreak: '{n} nuits de bon sommeil',
+    badgeSleepStreakDetail: 'Atteignez votre objectif de sommeil {n} nuits d’affilée.',
+    badgeCheckInStreak: 'Série de {n} bilans',
+    badgeCheckInStreakDetail: 'Faites votre bilan {n} jours d’affilée.',
+    insightsRegularPattern: 'Après des nuits proches de votre sommeil habituel, {outcome} était en moyenne de {met} / 5, contre {missed} / 5 après des nuits irrégulières.',
+    insightsRegularNights: 'Nuits régulières',
+    insightsIrregularNights: 'Nuits irrégulières',
+    sleepTitle: 'SOMMEIL',
+    sleepUsual: 'Nuit habituelle',
+    sleepRegularity: 'Régularité',
+    sleepDebt: 'Manque cette semaine',
+    sleepNoDebt: 'Dans l’objectif',
+    sleepSteady: 'Stable',
+    sleepVaries: 'Variable',
+    sleepIrregular: 'Irrégulier',
+    sleepUnknown: 'Pas assez de nuits',
+    sleepRegularityNote: 'La régularité compare la durée de vos nuits sur les 2 dernières semaines. Des nuits semblables aident à se sentir reposé.',
+    sleepNoNights: 'Aucun sommeil enregistré ces 2 dernières semaines.',
     moodWords: ['Très bas', 'Bas', 'Correct', 'Bien', 'Très bien'],
     energyWords: ['Épuisé', 'Fatigué', 'Correct', 'En forme', 'Plein d’énergie'],
   },
@@ -2045,6 +2321,98 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'Hii ni mifumo katika kumbukumbu zako mwenyewe, si visababishi wala ushauri wa kitabibu.',
     insightsCardTitle: 'Muhtasari wa wiki yako',
     insightsCardEmpty: 'Linganisha wiki hii na wiki iliyopita.',
+    savedOfflineTitle: 'Imehifadhiwa kwenye simu yako',
+    savedOffline: 'Hakuna mtandao sasa. Itatumwa utakaporudi mtandaoni.',
+    savedOfflineShort: 'Imehifadhiwa kwenye simu; itatumwa ukirudi mtandaoni',
+    offlineWaiting: '{n} zimehifadhiwa kwenye simu, zinasubiri kutumwa',
+    offlineSent: 'Kumbukumbu {n} zimetumwa',
+    offlineDroppedTitle: 'Baadhi ya kumbukumbu hazikuhifadhiwa',
+    offlineDropped: 'Kumbukumbu {n} zilizohifadhiwa bila mtandao zimekataliwa, kwa mfano kwa sababu kikomo cha siku kilifikiwa.',
+    vitalsTitle: 'Shinikizo la damu, sukari na mapigo',
+    vitalsSub: 'Andika vipimo vyako na uone maana yake.',
+    vitalsLatest: 'VIPIMO VYA KARIBUNI',
+    vitalPressure: 'Shinikizo la damu',
+    vitalGlucose: 'Sukari ya damu',
+    vitalPulse: 'Mapigo ya moyo',
+    vitalPressureWeek: 'Wastani wa siku 7 zilizopita (vipimo {n})',
+    vitalLogTitle: 'ANDIKA KIPIMO',
+    vitalWhat: 'ULIPIMA NINI?',
+    vitalSystolic: 'Namba ya juu',
+    vitalDiastolic: 'Namba ya chini',
+    vitalPulseOptional: 'Mapigo ya moyo (si lazima, kwa dakika)',
+    vitalPressureHow: 'Kaa kimya kwa dakika 5, mkono ukiwa umepumzika usawa wa moyo, kisha upime. Mashine nyingi huonyesha pia mapigo ya moyo.',
+    vitalGlucoseLabel: 'Sukari ya damu (mmol/L)',
+    vitalWhen: 'LINI?',
+    vitalFasting: 'Kabla ya kula',
+    vitalAfterMeal: 'Baada ya kula',
+    vitalRandom: 'Wakati mwingine',
+    vitalGlucoseHow: 'Kabla ya kula: asubuhi kabla ya kula chochote. Baada ya kula: takriban saa 2 baada ya kuanza kula.',
+    vitalPulseLabel: 'Mapigo ya moyo (kwa dakika)',
+    vitalPulseHow: 'Ukiwa umepumzika, hesabu mapigo kwenye kiwiko cha mkono kwa sekunde 60, au chukua namba kutoka kwenye mashine ya shinikizo.',
+    vitalOrderError: 'Lazima iwe chini ya namba ya juu',
+    vitalSaved: 'Kipimo kimehifadhiwa',
+    vitalUrgentTitle: 'Kipimo hiki kinahitaji huduma sasa',
+    vitalRemoveConfirm: 'Ondoa kipimo hiki?',
+    vitalHistoryTitle: 'SIKU 30 ZILIZOPITA',
+    vitalHistoryEmpty: 'Bado hakuna vipimo. Andika cha kwanza hapo juu.',
+    vitalsDisclaimer: 'Kipimo kimoja si uchunguzi wa ugonjwa. Viwango hivi ni vya watu wazima na havichukui nafasi ya mhudumu wa afya. Ikiwa una mimba au unatibiwa, muulize mhudumu wako wa afya viwango vinavyokuhusu.',
+    vitalVeryLow: 'Chini sana',
+    vitalLow: 'Chini',
+    vitalNormal: 'Kawaida',
+    vitalHighNormal: 'Juu kidogo',
+    vitalRaised: 'Imepanda',
+    vitalHigh: 'Juu',
+    vitalHighGrade1: 'Juu (daraja 1)',
+    vitalHighGrade2: 'Juu (daraja 2)',
+    vitalSevere: 'Juu sana (hatari)',
+    vitalVeryHigh: 'Juu sana',
+    vitalRecheck: 'Pima tena siku nyingine, baada ya kupumzika. Ikibaki hivi, muone mhudumu wa afya.',
+    vitalSeeHealthWorker: 'Kipimo hiki kiko nje ya kiwango cha kawaida. Muone mhudumu wa afya hivi karibuni, ukiwa na vipimo vyako.',
+    vitalUrgentPressure: 'Shinikizo la damu liko juu sana. Kaa kimya kwa dakika 5 kisha upime tena. Likiwa bado 180/110 au zaidi, au una maumivu ya kifua, kushindwa kupumua, maumivu makali ya kichwa, udhaifu au ganzi, au shida ya kuongea au kuona, nenda kwenye kituo cha afya sasa hivi.',
+    vitalUrgentLowSugar: 'Sukari ya damu iko chini sana. Kula au kunywa kitu chenye sukari sasa hivi, kama juisi, sukari au pipi, kisha upime tena baada ya dakika 15. Ukihisi kuchanganyikiwa au kuzimia, au ikibaki chini, tafuta msaada sasa hivi.',
+    vitalUrgentHighSugar: 'Sukari ya damu iko juu sana. Wasiliana na mhudumu wa afya leo. Nenda kwenye kituo cha afya sasa hivi ikiwa unatapika, una kiu kali, umechanganyikiwa, una usingizi mzito sana au unapumua haraka.',
+    achievementsTitle: 'Mafanikio',
+    achievementsSub: 'Beji ulizopata, siku zako bora na mfululizo wako mrefu zaidi.',
+    achievementsEarned: 'Beji {n} kati ya {total} zimepatikana',
+    achievementsCardEmpty: 'Beji za mfululizo na hatua muhimu',
+    achievementsNote: 'Mfululizo unahesabiwa kwa malengo yako ya sasa.',
+    achievementsNoBest: 'Bado',
+    personalBests: 'REKODI ZAKO',
+    bestStepsLabel: 'Hatua nyingi zaidi',
+    bestWaterLabel: 'Maji mengi zaidi',
+    bestSleepLabel: 'Usingizi mrefu zaidi',
+    longestStreaks: 'MFULULIZO MREFU ZAIDI',
+    badgesTitle: 'BEJI',
+    badgeEarned: 'Imepatikana',
+    badgeEarnedOn: 'Imepatikana {date}',
+    badgeFirstCheckIn: 'Kujiandika kwa mara ya kwanza',
+    badgeFirstCheckInDetail: 'Andika hali yako kwa mara ya kwanza.',
+    badgeFirstWeek: 'Wiki ya kwanza',
+    badgeFirstWeekDetail: 'Andika kitu katika siku 7 tofauti.',
+    badgeWeightGoal: 'Lengo la uzito limefikiwa',
+    badgeWeightGoalDetail: 'Fika ndani ya kg 0.5 ya lengo lako la uzito.',
+    badgeWaterStreak: 'Siku {n} za maji',
+    badgeWaterStreakDetail: 'Fikia lengo lako la maji siku {n} mfululizo.',
+    badgeStepsStreak: 'Siku {n} za hatua',
+    badgeStepsStreakDetail: 'Fikia lengo lako la hatua siku {n} mfululizo.',
+    badgeSleepStreak: 'Usiku {n} wa usingizi mzuri',
+    badgeSleepStreakDetail: 'Fikia lengo lako la usingizi usiku {n} mfululizo.',
+    badgeCheckInStreak: 'Mfululizo wa siku {n} wa kujiandika',
+    badgeCheckInStreakDetail: 'Jiandike siku {n} mfululizo.',
+    insightsRegularPattern: 'Baada ya usiku unaokaribia usingizi wako wa kawaida, wastani wa {outcome} ulikuwa {met} / 5, ikilinganishwa na {missed} / 5 baada ya usiku usio wa kawaida.',
+    insightsRegularNights: 'Usiku wa kawaida',
+    insightsIrregularNights: 'Usiku usio wa kawaida',
+    sleepTitle: 'USINGIZI',
+    sleepUsual: 'Usiku wa kawaida',
+    sleepRegularity: 'Utaratibu',
+    sleepDebt: 'Upungufu wiki hii',
+    sleepNoDebt: 'Uko sawa',
+    sleepSteady: 'Thabiti',
+    sleepVaries: 'Hubadilika',
+    sleepIrregular: 'Hauna utaratibu',
+    sleepUnknown: 'Usiku hautoshi',
+    sleepRegularityNote: 'Utaratibu unalinganisha muda uliolala katika wiki 2 zilizopita. Usiku unaofanana hukusaidia kujisikia umepumzika.',
+    sleepNoNights: 'Hakuna usingizi ulioandikwa katika wiki 2 zilizopita.',
     moodWords: ['Mbaya sana', 'Mbaya', 'Sawa', 'Nzuri', 'Nzuri sana'],
     energyWords: ['Nimechoka sana', 'Nimechoka', 'Sawa', 'Nina nguvu', 'Nguvu tele'],
   },
@@ -2556,6 +2924,98 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'Ibi ni ibisubiramwo mu vyo wanditse, si ivyabiteye canke impanuro z’abaganga.',
     insightsCardTitle: 'Indwi yawe mu ncamake',
     insightsCardEmpty: 'Gereranya iyi ndwi n’iheze.',
+    savedOfflineTitle: 'Vyabitswe kuri telefone yawe',
+    savedOffline: 'Nta muhora uriho ubu. Bizorungikwa niwagaruka ku muhora.',
+    savedOfflineShort: 'Vyabitswe kuri telefone; bizorungikwa niwagaruka ku muhora',
+    offlineWaiting: '{n} vyabitswe kuri telefone, birindiriye kurungikwa',
+    offlineSent: 'Ivyanditswe {n} vyarungitswe',
+    offlineDroppedTitle: 'Bimwe mu vyanditswe ntivyabitswe',
+    offlineDropped: 'Ivyanditswe {n} vyabitswe utari ku muhora vyanswe, nk’akarorero kubera urugero rw’umunsi rwashitse.',
+    vitalsTitle: 'Umuvuduko w’amaraso, isukari n’itera ry’umutima',
+    vitalsSub: 'Andika ibipimo vyawe ubone ico bisobanura.',
+    vitalsLatest: 'IBIPIMO VYA VUBA',
+    vitalPressure: 'Umuvuduko w’amaraso',
+    vitalGlucose: 'Isukari mu maraso',
+    vitalPulse: 'Itera ry’umutima',
+    vitalPressureWeek: 'Impuzandengo y’imisi 7 iheze (ibipimo {n})',
+    vitalLogTitle: 'ANDIKA IGIPIMO',
+    vitalWhat: 'WAPIMYE IKI?',
+    vitalSystolic: 'Igiharuro co hejuru',
+    vitalDiastolic: 'Igiharuro co hasi',
+    vitalPulseOptional: 'Itera ry’umutima (si itegeko, ku munota)',
+    vitalPressureHow: 'Icara utekanye iminota 5, ukuboko kuruhukiye ku rugero rw’umutima, hanyuma upime. Imashini nyinshi zerekana n’itera ry’umutima.',
+    vitalGlucoseLabel: 'Isukari mu maraso (mmol/L)',
+    vitalWhen: 'RYARI?',
+    vitalFasting: 'Utarafungura',
+    vitalAfterMeal: 'Umaze gufungura',
+    vitalRandom: 'Ikindi gihe',
+    vitalGlucoseHow: 'Utarafungura: mu gitondo imbere yo gufungura. Umaze gufungura: nk’amasaha 2 umaze gutangura gufungura.',
+    vitalPulseLabel: 'Itera ry’umutima (ku munota)',
+    vitalPulseHow: 'Uruhutse, harura itera ku kuboko mu masegonda 60, canke ufate igiharuro ku mashini y’umuvuduko w’amaraso.',
+    vitalOrderError: 'Gitegerezwa kuba munsi y’igiharuro co hejuru',
+    vitalSaved: 'Igipimo cabitswe',
+    vitalUrgentTitle: 'Iki gipimo gisaba kwivuza ubu nyene',
+    vitalRemoveConfirm: 'Gukuraho iki gipimo?',
+    vitalHistoryTitle: 'IMISI 30 IHERUKA',
+    vitalHistoryEmpty: 'Nta bipimo biriho. Andika ica mbere hejuru.',
+    vitalsDisclaimer: 'Igipimo kimwe si ukumenya indwara. Ibi biharuro ni ivy’abakuze kandi ntibisubirira umukozi w’amagara. Niba ufise imbanyi canke uriko uravurwa, baza umukozi w’amagara ibiharuro bikureba.',
+    vitalVeryLow: 'Hasi cane',
+    vitalLow: 'Hasi',
+    vitalNormal: 'Bisanzwe',
+    vitalHighNormal: 'Hejuru gato',
+    vitalRaised: 'Vyaduze',
+    vitalHigh: 'Hejuru',
+    vitalHighGrade1: 'Hejuru (urwego 1)',
+    vitalHighGrade2: 'Hejuru (urwego 2)',
+    vitalSevere: 'Hejuru cane (bikomeye)',
+    vitalVeryHigh: 'Hejuru cane',
+    vitalRecheck: 'Subira upime ku wundi musi, uruhutse. Nivyagumaho, raba umukozi w’amagara.',
+    vitalSeeHealthWorker: 'Iki gipimo kiri hanze y’ibisanzwe. Raba umukozi w’amagara vuba, witwaje ibipimo vyawe.',
+    vitalUrgentPressure: 'Umuvuduko w’amaraso uri hejuru cane. Icara utekanye iminota 5 hanyuma upime kandi. Nimba ukiri 180/110 canke birenga, canke ufise ububabare mu gikiriza, ingorane zo guhema, umutwe ukomeye, ubunebwe canke ibinya, canke ingorane zo kuvuga canke kubona, ja ku kigo c’amagara ubu nyene.',
+    vitalUrgentLowSugar: 'Isukari mu maraso iri hasi cane. Fungura canke unywe ikintu kirimwo isukari ubu nyene, nk’umutobe, isukari canke ibonbo, hanyuma upime kandi haciye iminota 15. Niwiyumva uhuzagurika canke ushaka guta ubwenge, canke ikaguma hasi, rondera imfashanyo ubu nyene.',
+    vitalUrgentHighSugar: 'Isukari mu maraso iri hejuru cane. Vugana n’umukozi w’amagara uyu munsi. Ja ku kigo c’amagara ubu nyene niba uriko uraruka, ufise inyota nyinshi, uhuzagurika, ufise ibitotsi vyinshi cane canke uhema vuba.',
+    achievementsTitle: 'Intsinzi',
+    achievementsSub: 'Utumenyetso waronse, imisi yawe myiza n’urukurikirane rwawe rurerure.',
+    achievementsEarned: 'Utumenyetso {n} kuri {total} waronse',
+    achievementsCardEmpty: 'Utumenyetso tw’urukurikirane n’intambwe',
+    achievementsNote: 'Urukurikirane ruharurwa hakurikijwe intumbero zawe z’ubu.',
+    achievementsNoBest: 'Ntarashika',
+    personalBests: 'IVYO WASHIKIJE VYIZA',
+    bestStepsLabel: 'Intambwe nyinshi',
+    bestWaterLabel: 'Amazi menshi',
+    bestSleepLabel: 'Ibitotsi birebire',
+    longestStreaks: 'URUKURIKIRANE RUREBURE',
+    badgesTitle: 'UTUMENYETSO',
+    badgeEarned: 'Waronse',
+    badgeEarnedOn: 'Waronse {date}',
+    badgeFirstCheckIn: 'Kwiyandika ubwa mbere',
+    badgeFirstCheckInDetail: 'Andika ingene wiyumva ubwa mbere.',
+    badgeFirstWeek: 'Indwi ya mbere',
+    badgeFirstWeekDetail: 'Andika ikintu mu misi 7 itandukanye.',
+    badgeWeightGoal: 'Intumbero y’uburemere yashitse',
+    badgeWeightGoalDetail: 'Shika munsi ya kg 0.5 y’intumbero yawe y’uburemere.',
+    badgeWaterStreak: 'Imisi {n} y’amazi',
+    badgeWaterStreakDetail: 'Shika intumbero y’amazi imisi {n} ikurikirana.',
+    badgeStepsStreak: 'Imisi {n} y’intambwe',
+    badgeStepsStreakDetail: 'Shika intumbero y’intambwe imisi {n} ikurikirana.',
+    badgeSleepStreak: 'Amajoro {n} y’ibitotsi vyiza',
+    badgeSleepStreakDetail: 'Shika intumbero y’ibitotsi amajoro {n} akurikirana.',
+    badgeCheckInStreak: 'Imisi {n} ikurikirana wiyandika',
+    badgeCheckInStreakDetail: 'Iyandike imisi {n} ikurikirana.',
+    insightsRegularPattern: 'Inyuma y’amajoro asa n’ibitotsi vyawe bisanzwe, ugereranije {outcome} vyari {met} / 5, mu gihe inyuma y’amajoro adasanzwe vyari {missed} / 5.',
+    insightsRegularNights: 'Amajoro asanzwe',
+    insightsIrregularNights: 'Amajoro adasanzwe',
+    sleepTitle: 'IBITOTSI',
+    sleepUsual: 'Ijoro risanzwe',
+    sleepRegularity: 'Ugusubiramwo',
+    sleepDebt: 'Ibibura iyi ndwi',
+    sleepNoDebt: 'Biri ku murongo',
+    sleepSteady: 'Bihamye',
+    sleepVaries: 'Birahinduka',
+    sleepIrregular: 'Ntibisanzwe',
+    sleepUnknown: 'Amajoro ntarakwira',
+    sleepRegularityNote: 'Ugusubiramwo kugereranya igihe waryamye mu ndwi 2 ziheze. Amajoro asa agufasha kwiyumva waruhuse.',
+    sleepNoNights: 'Nta bitotsi vyanditswe mu ndwi 2 ziheze.',
     moodWords: ['Nabi cane', 'Nabi', 'Ni sawa', 'Neza', 'Neza cane'],
     energyWords: ['Naruhijwe cane', 'Naruhijwe', 'Ni sawa', 'Mfise inguvu', 'Inguvu nyinshi'],
   },

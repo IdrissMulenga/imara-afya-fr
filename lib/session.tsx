@@ -14,6 +14,7 @@ import {
   shouldRefresh,
   onSessionEnded,
 } from './tokens';
+import { clearQueue } from './offline-queue';
 import { isDeadSession } from './apollo';
 import { useLang } from '@/theme/i18n';
 import { ME, REFRESH_SESSION, LOGOUT, type AuthUser, type AuthPayload } from '@/graphql/auth';
@@ -86,7 +87,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, [client]);
 
   const signOut = useCallback(async () => {
-    // Logs out on the server (signing out every device), then clears locally.
+    // Logs out on the server (signing out every device), then clears locally, including entries
+    // saved offline and not yet sent.
+    await clearQueue();
     try {
       await client.mutate({ mutation: LOGOUT });
     } catch {

@@ -1,5 +1,6 @@
 // Dashboard: the date, today at a glance (steps, water, sleep and mood rings), then
-// sections for how you feel (check-in), activity (steps), water and sleep, and insights.
+// sections for how you feel (check-in), activity (steps), water and sleep, and insights and
+// achievements.
 import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -11,6 +12,7 @@ import { SleepTile, StepsPrompt, WaterTile, useHabitSummary } from '@/components
 import { StepsHero } from '@/components/steps-ring';
 import { CheckInCard, useCheckInSummary } from '@/components/checkin';
 import { InsightsCard, useInsights } from '@/components/insights';
+import { AchievementsCard, useAchievements } from '@/components/achievements';
 import { TodayGlance } from '@/components/today-glance';
 import { ProfileHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
@@ -22,6 +24,7 @@ import { APP_COPY, greetingFor } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
 import { useSteps, useTodaySteps } from '@/lib/steps-provider';
 import { syncHealth } from '@/lib/sync';
+import { useQueuedCount } from '@/lib/offline-queue';
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -55,12 +58,14 @@ export default function Dashboard() {
   const { c } = useTheme();
   const { user, refreshUser } = useSession();
   const { today: localDay } = useSteps();
+  const waiting = useQueuedCount();
 
   const a = APP_COPY[lang];
 
   const { data: habits, refetch: refetchHabits } = useHabitSummary();
   const { data: checkIn, refetch: refetchCheckIn } = useCheckInSummary();
   const { data: insights, refetch: refetchInsights } = useInsights();
+  const { data: achievements, refetch: refetchAchievements } = useAchievements();
   const summary = habits?.habitSummary;
   const steps = useTodaySteps(summary?.today);
 
@@ -73,9 +78,10 @@ export default function Dashboard() {
         void refetchHabits();
         void refetchCheckIn();
         void refetchInsights();
+        void refetchAchievements();
       }
       focusedOnce.current = true;
-    }, [refetchHabits, refetchCheckIn, refetchInsights]),
+    }, [refetchHabits, refetchCheckIn, refetchInsights, refetchAchievements]),
   );
 
   // The user can be null briefly while signing out.
@@ -87,7 +93,7 @@ export default function Dashboard() {
 
   return (
     <Screen
-      onRefresh={() => Promise.all([refetchHabits(), refetchCheckIn(), refetchInsights(), syncHealth(), refreshUser()])}
+      onRefresh={() => Promise.all([refetchHabits(), refetchCheckIn(), refetchInsights(), refetchAchievements(), syncHealth(), refreshUser()])}
       header={
         <ProfileHeader
           greeting={`${greetingFor(a)}${firstName ? ',' : ''}`}
@@ -104,6 +110,12 @@ export default function Dashboard() {
       <FadeIn>
         <Text style={[styles.date, { color: c.text }]}>{todayLabel(lang)}</Text>
         <Text style={[T.fine, { color: c.muted, marginTop: 2 }]}>{a.dashSub}</Text>
+        {waiting > 0 ? (
+          <View style={styles.waiting}>
+            <MaterialCommunityIcons name="cloud-upload-outline" size={15} color={c.faint} />
+            <Text style={[T.fine, { color: c.faint }]}>{a.offlineWaiting.replace('{n}', String(waiting))}</Text>
+          </View>
+        ) : null}
       </FadeIn>
 
       {!user.emailVerified ? (
@@ -166,6 +178,8 @@ export default function Dashboard() {
       <FadeIn delay={290}>
         <SectionTitle icon="chart-timeline-variant" title={a.sectionInsights} />
         <InsightsCard insights={insights?.insights} />
+        <Gap h={12} />
+        <AchievementsCard achievements={achievements?.achievements} />
       </FadeIn>
     </Screen>
   );
@@ -174,5 +188,6 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   date: { fontFamily: font.displayBold, fontSize: 22, textTransform: 'capitalize' },
   verify: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  waiting: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 26, marginBottom: 10, marginLeft: 2 },
 });
