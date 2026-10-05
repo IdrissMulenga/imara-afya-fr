@@ -138,7 +138,7 @@ export function useAdjustSleep() {
       client.cache.writeFragment<HabitDay>({
         id: client.cache.identify({ __typename: 'HabitDay', day }),
         fragment: HABIT_DAY_FIELDS,
-        data: { ...base, __typename: 'HabitDay', sleepHours: next },
+        data: { ...base, __typename: 'HabitDay', sleepHours: next, sleepEstimated: false },
       });
 
       clearTimeout(sleepTimers.get(day));
@@ -147,7 +147,8 @@ export function useAdjustSleep() {
         setTimeout(() => {
           sleepTimers.delete(day);
           const sleepHours = cachedDay(day).sleepHours ?? 0;
-          syncDays([{ day, sleepHours }])
+          // Set by hand: kept over any phone, band or estimate for the night.
+          syncDays([{ day, sleepHours, sleepSource: 'MANUAL' }])
             .catch((e: unknown) => notice.failure(APP_COPY[lang].sleepLabel, errorMessage(e, lang)))
             .finally(() => {
               client.refetchQueries({ include: ['HabitSummary', 'HabitHistory'] }).catch(() => {});
@@ -352,7 +353,8 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
   const a = APP_COPY[lang];
   const goal = user.sleepGoalHours;
   const slept = today.sleepHours ?? 0;
-  const met = goal > 0 && slept >= goal;
+  const met = goal > 0 && slept >= goal && !today.sleepEstimated;
+  const noData = today.sleepHours == null;
   const schedules = schedulesFrom(user);
   const night = schedules ? upcomingNight(schedules) : null;
 
@@ -367,7 +369,7 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
         <View style={{ gap: 2 }}>
           <Text style={[T.fine, { color: c.muted }]}>{a.lastNight}</Text>
           <Text style={{ fontFamily: font.displayBold, fontSize: 26, color: met ? c.success : c.text }}>
-            {fmt(slept)} h
+            {noData ? a.sleepNoData : `${fmt(slept)} h`}
             <Text style={[T.fine, { color: c.muted }]}> / {fmt(goal)} {a.hours}</Text>
           </Text>
           {night ? (

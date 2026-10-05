@@ -514,6 +514,8 @@ export type AppCopy = {
   insightsNote: string;
   insightsCardTitle: string;
   insightsCardEmpty: string;
+  sleepNoData: string;
+  sleepNoDataNote: string;
   savedOfflineTitle: string;
   savedOffline: string;
   savedOfflineShort: string;
@@ -1115,6 +1117,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'These are patterns in your own logs, not causes or medical advice.',
     insightsCardTitle: 'Your week in review',
     insightsCardEmpty: 'See how this week compares with last week.',
+    sleepNoData: 'No data',
+    sleepNoDataNote: 'No sleep was detected last night. Sleep comes from Apple Health on iPhone and from Google’s sleep detection on Android. You can add it yourself with − / +.',
     savedOfflineTitle: 'Saved on your phone',
     savedOffline: 'No connection right now. It will be sent when you are back online.',
     savedOfflineShort: 'Saved on your phone; sent when back online',
@@ -1718,6 +1722,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'Ce sont des tendances dans vos propres données, pas des causes ni un avis médical.',
     insightsCardTitle: 'Votre semaine en bref',
     insightsCardEmpty: 'Comparez cette semaine à la précédente.',
+    sleepNoData: 'Pas de données',
+    sleepNoDataNote: 'Aucun sommeil détecté cette nuit. Le sommeil vient de Santé (Apple Health) sur iPhone et de la détection du sommeil de Google sur Android. Vous pouvez l’ajouter vous-même avec − / +.',
     savedOfflineTitle: 'Enregistré sur votre téléphone',
     savedOffline: 'Pas de connexion pour le moment. Ce sera envoyé dès votre retour en ligne.',
     savedOfflineShort: 'Enregistré sur le téléphone ; envoyé dès le retour en ligne',
@@ -2321,6 +2327,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'Hii ni mifumo katika kumbukumbu zako mwenyewe, si visababishi wala ushauri wa kitabibu.',
     insightsCardTitle: 'Muhtasari wa wiki yako',
     insightsCardEmpty: 'Linganisha wiki hii na wiki iliyopita.',
+    sleepNoData: 'Hakuna data',
+    sleepNoDataNote: 'Hakuna usingizi uliogunduliwa usiku uliopita. Usingizi hutoka Apple Health kwenye iPhone na kwa ugunduzi wa usingizi wa Google kwenye Android. Unaweza kuuongeza mwenyewe kwa − / +.',
     savedOfflineTitle: 'Imehifadhiwa kwenye simu yako',
     savedOffline: 'Hakuna mtandao sasa. Itatumwa utakaporudi mtandaoni.',
     savedOfflineShort: 'Imehifadhiwa kwenye simu; itatumwa ukirudi mtandaoni',
@@ -2924,6 +2932,8 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     insightsNote: 'Ibi ni ibisubiramwo mu vyo wanditse, si ivyabiteye canke impanuro z’abaganga.',
     insightsCardTitle: 'Indwi yawe mu ncamake',
     insightsCardEmpty: 'Gereranya iyi ndwi n’iheze.',
+    sleepNoData: 'Nta makuru',
+    sleepNoDataNote: 'Nta bitotsi vyabonetse iri joro riheze. Ibitotsi bivuye kuri Apple Health kuri iPhone no ku kumenya ibitotsi kwa Google kuri Android. Ushobora kubyongerako ubwawe na − / +.',
     savedOfflineTitle: 'Vyabitswe kuri telefone yawe',
     savedOffline: 'Nta muhora uriho ubu. Bizorungikwa niwagaruka ku muhora.',
     savedOfflineShort: 'Vyabitswe kuri telefone; bizorungikwa niwagaruka ku muhora',

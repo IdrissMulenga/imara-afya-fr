@@ -201,12 +201,12 @@ function cachedServerSteps(day: string): number {
 // Sends every day whose total changed, in one sync. Never lowers a value the server already has.
 // Days the server skips (future, or too old) count as sent.
 async function push(s: StepState): Promise<boolean> {
-  const changed: { day: string; steps: number }[] = [];
+  const changed: { day: string; steps: number; stepsSource: 'PHONE' }[] = [];
   for (const day of Object.keys(s.totals).sort()) {
     const value = Math.min(HABIT_LIMITS.steps, Math.max(s.totals[day], cachedServerSteps(day)));
     s.totals[day] = value;
     if (value === 0 || s.synced[day] === value) continue;
-    changed.push({ day, steps: value });
+    changed.push({ day, steps: value, stepsSource: 'PHONE' });
   }
   if (changed.length === 0) return false;
 

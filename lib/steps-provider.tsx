@@ -18,8 +18,7 @@ import {
   type StepPermission,
 } from './steps';
 import { registerStepsTask, unregisterStepsTask } from './steps-task';
-import { clearSleep, enableSleep, isSleepEnabled, setSleepSchedule, sleepSupported } from './sleep';
-import { schedulesFrom } from './sleep-schedule';
+import { clearSleep, enableSleep, isSleepEnabled, sleepSupported } from './sleep';
 import { syncHealth } from './sync';
 
 // How often to sync while the app is open.
@@ -82,17 +81,8 @@ export function StepsProvider({ children }: { children: React.ReactNode }) {
     void isSleepEnabled().then(setSleepEnabled);
   }, [ready, userId]);
 
-  // The sleep schedule from the profile, kept where background syncs can read it.
-  const schedules = user ? schedulesFrom(user) : null;
-  const scheduleKey = JSON.stringify(schedules);
-  const hasSchedule = Boolean(schedules);
-  useEffect(() => {
-    if (!ready || !userId) return;
-    void setSleepSchedule(JSON.parse(scheduleKey));
-  }, [ready, userId, scheduleKey]);
-
   const active = Boolean(userId) && permission === 'granted' && mode !== 'none';
-  const syncing = active || (Boolean(userId) && (sleepEnabled || hasSchedule));
+  const syncing = active || (Boolean(userId) && sleepEnabled);
 
   // A sync resets the live count: its reading already includes those steps.
   useEffect(

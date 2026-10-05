@@ -1,5 +1,5 @@
-// Automatic sleep from the phone (Sleep API / Apple Health), or from the sleep schedule on
-// nights with nothing detected; saved on the day the user woke up.
+// Automatic sleep from the phone (Google's sleep detection / Apple Health), saved on the day the
+// user woke up. A night with nothing detected stays empty.
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { Pedometer } from 'expo-sensors';
@@ -14,23 +14,16 @@ import {
   stopSleepTracking,
   type SleepInterval,
 } from '@/modules/sleep';
-import { HABIT_DAY_FIELDS, HABIT_LIMITS, type HabitDay } from '@/graphql/habits';
-import { estimateNight, nightWindow, scheduleFor, type SleepSchedules } from './sleep-schedule';
+import { HABIT_LIMITS } from '@/graphql/habits';
 
 const STATE_KEY = 'imara.sleep';
 // How far back detected sleep is read and sent.
 const LOOKBACK_DAYS = 7;
-// How many recent nights are estimated from the schedule.
-const SCHEDULE_NIGHTS = 3;
-// A night is estimated once this long has passed since the scheduled wake-up.
-const AFTER_WAKE = 30 * 60_000;
 
 type SleepState = {
   enabled: boolean;
   /** Last hours sent to the server, by day. */
   synced: Record<string, number>;
-  /** The sleep schedule, and when it was set (nights before that are not estimated). */
-  schedule?: SleepSchedules & { since: number };
 };
 
 let state: SleepState | null = null;
@@ -90,57 +83,6 @@ export function sleepByDay(intervals: SleepInterval[]): Record<string, number> {
   return hours;
 }
 
-/** Stores the user's sleep schedule (null clears it) and syncs. */
-export async function setSleepSchedule(schedules: SleepSchedules | null): Promise<void> {
-  const s = await load();
-  const current = s.schedule;
-  if (!schedules) {
-    if (!current) return;
-    delete s.schedule;
-  } else {
-    const same = (x: unknown, y: unknown) => JSON.stringify(x) === JSON.stringify(y);
-    if (current && same(current.weekday, schedules.weekday) && same(current.weekend, schedules.weekend)) return;
-    s.schedule = { ...schedules, since: current?.since ?? Date.now() };
-  }
-  await save(s);
-  void syncSleep();
-}
-
-// Sleep hours the server has for a day, if it is in the Apollo cache.
-function cachedServerSleep(day: string): number {
-  try {
-    const cached = client.cache.readFragment<HabitDay>({
-      id: client.cache.identify({ __typename: 'HabitDay', day }),
-      fragment: HABIT_DAY_FIELDS,
-    });
-    return cached?.sleepHours ?? 0;
-  } catch {
-    return 0;
-  }
-}
-
-const roundHours = (ms: number): number => Math.min(HABIT_LIMITS.sleep, Math.round((ms / 3_600_000) * 4) / 4);
-
-// Schedule estimates for recent nights the phone has nothing for, not yet sent, and not
-// entered by hand.
-async function scheduleNights(s: SleepState, phone: Record<string, number>): Promise<Record<string, number>> {
-  const result: Record<string, number> = {};
-  const schedule = s.schedule;
-  if (!schedule) return result;
-  const now = Date.now();
-  for (let d = 0; d < SCHEDULE_NIGHTS; d++) {
-    const day = localDay(now - d * 86_400_000);
-    if (phone[day] || s.synced[day] != null || cachedServerSleep(day) > 0) continue;
-    const night = scheduleFor(day, schedule);
-    const window = nightWindow(day, night);
-    if (now < window.end + AFTER_WAKE || schedule.since > window.end) continue;
-    const intervals = await estimateNight(day, night);
-    const hours = roundHours(intervals.reduce((total, i) => total + (i.end - i.start), 0));
-    if (hours > 0) result[day] = hours;
-  }
-  return result;
-}
-
 /** Asks for the permission (Android: physical activity; iOS: Health) and starts tracking. */
 export async function enableSleep(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -161,20 +103,16 @@ export function syncSleep(): Promise<void> {
   running = (async () => {
     try {
       const s = await load();
-      if ((!s.enabled && !s.schedule) || !(await getToken())) return;
+      if (!s.enabled || !(await getToken())) return;
 
-      let phone: Record<string, number> = {};
-      if (s.enabled) {
-        // Android subscriptions end on reboot or app update; renewing is harmless.
-        if (Platform.OS === 'android') await startSleepTracking();
-        phone = sleepByDay(await readSleep(Date.now() - LOOKBACK_DAYS * 86_400_000));
-      }
-      const byDay = { ...(await scheduleNights(s, phone)), ...phone };
+      // Android subscriptions end on reboot or app update; renewing is harmless.
+      if (Platform.OS === 'android') await startSleepTracking();
+      const byDay = sleepByDay(await readSleep(Date.now() - LOOKBACK_DAYS * 86_400_000));
       // One sync for every night that is new or changed; nights the server skips count as sent.
       const changed = Object.keys(byDay)
         .sort()
         .filter((day) => byDay[day] > 0 && s.synced[day] !== byDay[day])
-        .map((day) => ({ day, sleepHours: byDay[day] }));
+        .map((day) => ({ day, sleepHours: byDay[day], sleepSource: 'PHONE' as const }));
       let sent = false;
       if (changed.length > 0) {
         try {

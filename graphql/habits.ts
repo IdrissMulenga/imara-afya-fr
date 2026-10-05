@@ -7,6 +7,7 @@ export const HABIT_DAY_FIELDS = gql`
     waterGlasses
     steps
     sleepHours
+    sleepEstimated
   }
 `;
 
@@ -62,6 +63,8 @@ export type HabitDay = {
   /** null until synced. */
   steps: number | null;
   sleepHours: number | null;
+  /** True when sleepHours is an estimate from the sleep schedule, not detected sleep. */
+  sleepEstimated?: boolean;
 };
 
 export type HabitStreaks = { water: number; steps: number; sleep: number };

@@ -46,7 +46,7 @@ export default function SleepScreen() {
   const slept = today.sleepHours ?? 0;
   const history = historyQuery.data?.habitHistory ?? [];
   const goal = user.sleepGoalHours;
-  const met = goal > 0 && slept >= goal;
+  const met = goal > 0 && slept >= goal && !today.sleepEstimated;
   const streak = summary?.streaks.sleep ?? 0;
 
   return (
@@ -60,6 +60,9 @@ export default function SleepScreen() {
           <View style={{ alignItems: 'center', gap: 14 }}>
             <Text style={[T.label, { color: c.faint }]}>{a.lastNight.toUpperCase()}</Text>
             <SleepRing hours={slept} goal={goal} size={220} stroke={16} />
+            {today.sleepHours == null ? (
+              <Text style={[T.fine, { color: c.faint, textAlign: 'center' }]}>{a.sleepNoDataNote}</Text>
+            ) : null}
             {met ? <Text style={[T.fine, { color: c.success }]}>{a.goalMet}</Text> : null}
             <SleepButtons day={today.day} hours={slept} />
             <View style={styles.statsRow}>

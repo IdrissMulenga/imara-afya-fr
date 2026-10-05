@@ -63,7 +63,17 @@ export type Band = {
 };
 
 /** One day of totals. A missing value leaves the stored one unchanged. */
-export type BandDay = { day: string; steps?: number; sleepHours?: number };
+/** Where a value came from. The server keeps the value from the most trusted source: steps
+ *  BAND > PHONE; sleep MANUAL > BAND > PHONE > ESTIMATE (a guess from the sleep schedule). */
+export type DataSource = 'BAND' | 'PHONE' | 'MANUAL' | 'ESTIMATE';
+
+export type BandDay = {
+  day: string;
+  steps?: number;
+  stepsSource?: 'BAND' | 'PHONE';
+  sleepHours?: number;
+  sleepSource?: DataSource;
+};
 
 export type BandSyncResult = { syncedDays: number; skippedDays: number; band: Band };
 
