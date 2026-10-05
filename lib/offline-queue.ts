@@ -138,8 +138,9 @@ export function queuedWater(day: string): number | null {
 }
 
 /** Adds glasses to a water total still waiting for `day`, after they were added online: the
- *  waiting total is sent as the day's total, so it must include them. */
-export async function addToQueuedWater(day: string, glasses: number): Promise<void> {
+ *  waiting total is sent as the day's total, so it must include them. Resolves whether a total
+ *  was waiting. */
+export async function addToQueuedWater(day: string, glasses: number): Promise<boolean> {
   await load();
   const user = await currentUser();
   let changed = false;
@@ -149,13 +150,15 @@ export async function addToQueuedWater(day: string, glasses: number): Promise<vo
     return { ...item, op: { ...item.op, waterGlasses: Math.max(0, item.op.waterGlasses + glasses) } };
   });
   if (changed) await save();
+  return changed;
 }
 
-/** Forgets a weight waiting for `day`, once a newer one has been saved online. */
+/** Forgets the signed-in user's weight waiting for `day`, once a newer one has been saved online. */
 export async function dropQueuedWeight(day: string): Promise<void> {
   await load();
+  const user = await currentUser();
   const before = items.length;
-  items = items.filter((i) => !(i.op.kind === 'weight' && i.op.day === day));
+  items = items.filter((i) => !(i.user === user && i.op.kind === 'weight' && i.op.day === day));
   if (items.length !== before) await save();
 }
 

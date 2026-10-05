@@ -26,7 +26,15 @@ import { useSession } from '@/lib/session';
 import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
 import { openLegal } from '@/lib/legal';
-import { SIGNUP, UPDATE_PROFILE, type AuthPayload, type AuthUser, type Gender } from '@/graphql/auth';
+import { detectedZone } from '@/lib/reminder-plan';
+import {
+  SET_PREFERENCES,
+  SIGNUP,
+  UPDATE_PROFILE,
+  type AuthPayload,
+  type AuthUser,
+  type Gender,
+} from '@/graphql/auth';
 
 const MIN_PASSWORD = 8;
 
@@ -57,6 +65,7 @@ export default function Signup() {
 
   const [signup, { loading }] = useMutation<{ signup: AuthPayload }>(SIGNUP);
   const [updateProfile] = useMutation<{ updateProfile: AuthUser }>(UPDATE_PROFILE);
+  const [setPreferences] = useMutation<{ setPreferences: AuthUser }>(SET_PREFERENCES);
 
   const score = useMemo(() => strengthOf(password), [password]);
   const longEnough = password.length >= MIN_PASSWORD;
@@ -96,6 +105,18 @@ export default function Signup() {
           if (profile.data?.updateProfile) setUser(profile.data.updateProfile);
         } catch {
           // ignore
+        }
+      }
+
+      // Days are counted in the phone's time zone, not the server's default; it can be changed
+      // later in Preferences.
+      const zone = detectedZone();
+      if (zone && zone !== data.signup.user.timezone) {
+        try {
+          const prefs = await setPreferences({ variables: { input: { timezone: zone } } });
+          if (prefs.data?.setPreferences) setUser(prefs.data.setPreferences);
+        } catch {
+          // ignore: the default zone stays until it is changed in Preferences
         }
       }
 

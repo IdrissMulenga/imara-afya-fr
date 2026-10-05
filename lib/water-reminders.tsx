@@ -12,7 +12,15 @@ import { useSession } from './session';
 import { Notifications, cancelScheduled, createToggle, ensurePermission, hasPermission, supported } from './notifications';
 import { planWater, type WaterProgress } from './water-plan';
 import { dayInZone } from './reminder-plan';
-import { ADD_WATER, HABIT_SUMMARY, type HabitDay, type HabitSummary } from '@/graphql/habits';
+import { addToQueuedWater, enqueue as queueEntry, flushQueue, isOfflineError } from './offline-queue';
+import {
+  ADD_WATER,
+  HABIT_DAY_FIELDS,
+  HABIT_LIMITS,
+  HABIT_SUMMARY,
+  type HabitDay,
+  type HabitSummary,
+} from '@/graphql/habits';
 import { APP_COPY } from '@/theme/copy-app';
 import { LANGS, useLang, type Lang } from '@/theme/i18n';
 
@@ -69,6 +77,46 @@ async function loadPlan(): Promise<SavedPlan | null> {
   }
 }
 
+// The day's water as cached on the phone, or null when it is not in the cache.
+function cachedGlasses(day: string): number | null {
+  try {
+    const cached = client.cache.readFragment<HabitDay>({
+      id: client.cache.identify({ __typename: 'HabitDay', day }),
+      fragment: HABIT_DAY_FIELDS,
+    });
+    return cached?.waterGlasses ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Adds one glass to `day` and resolves the new total when the server gave it. A total already
+ *  waiting to be sent takes the glass, since it is sent as the day's total; offline, the glass is
+ *  kept with the cached total. Throws when it could be neither sent nor kept. */
+async function logGlass(day: string): Promise<number | null> {
+  if (await addToQueuedWater(day, 1)) {
+    void flushQueue();
+    return null;
+  }
+  try {
+    const result = await client.mutate<{ addWater: HabitDay }>({
+      mutation: ADD_WATER,
+      variables: { input: { day, glasses: 1 } },
+    });
+    return result.data?.addWater.waterGlasses ?? null;
+  } catch (error) {
+    const cached = cachedGlasses(day);
+    if (!isOfflineError(error) || cached == null) throw error;
+    const next = Math.min(HABIT_LIMITS.water, cached + 1);
+    client.cache.modify({
+      id: client.cache.identify({ __typename: 'HabitDay', day }),
+      fields: { waterGlasses: () => next },
+    });
+    await queueEntry({ kind: 'water', day, waterGlasses: next });
+    return null;
+  }
+}
+
 /** Logs one glass if the response is a "+1 glass" tap not already logged, then re-plans today. */
 export async function handleWaterResponse(response: NotificationResponse): Promise<void> {
   if (!supported || response.actionIdentifier !== ACTION) return;
@@ -82,14 +130,10 @@ export async function handleWaterResponse(response: NotificationResponse): Promi
     const plan = await loadPlan();
     // The day in the profile's time zone, as the server and the dashboard count it.
     const day = dayInZone(new Date(), plan?.timeZone);
-    const result = await client.mutate<{ addWater: HabitDay }>({
-      mutation: ADD_WATER,
-      variables: { input: { day, glasses: 1 } },
-    });
+    const glasses = await logGlass(day);
     await SecureStore.setItemAsync(HANDLED_KEY, JSON.stringify([...done, key].slice(-20))).catch(() => {});
     await Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
 
-    const glasses = result.data?.addWater.waterGlasses;
     if (glasses != null && plan && (await enabledStore.load())) {
       await schedule(plan.lang, { glasses, goal: plan.goal }, plan.timeZone).catch(() => {});
     }

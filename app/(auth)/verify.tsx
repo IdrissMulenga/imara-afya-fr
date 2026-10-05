@@ -1,6 +1,6 @@
 // Six-digit code screen for LOGIN, SIGNUP and RESET codes; resend after 60 seconds.
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AppState, View, Text } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import { Screen, Spacer, Gap } from '@/components/screen';
@@ -48,12 +48,15 @@ export default function Verify() {
 
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
-  const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
-  const [expiresIn, setExpiresIn] = useState(() => {
-    if (!params.expiresAt) return 600;
-    const left = Math.floor((Date.parse(params.expiresAt) - Date.now()) / 1000);
-    return Number.isFinite(left) && left > 0 ? left : 600;
+  // Both countdowns run to fixed times, so time spent in the email app is counted.
+  const [now, setNow] = useState(() => Date.now());
+  const [cooldownUntil, setCooldownUntil] = useState(() => Date.now() + RESEND_COOLDOWN * 1000);
+  const [expiresAt, setExpiresAt] = useState(() => {
+    const at = params.expiresAt ? Date.parse(params.expiresAt) : NaN;
+    return Number.isFinite(at) && at > Date.now() ? at : Date.now() + 600_000;
   });
+  const cooldown = Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
+  const expiresIn = Math.max(0, Math.ceil((expiresAt - now) / 1000));
 
   const [verifyLogin, loginState] = useMutation<{ verifyLoginOtp: AuthPayload }>(VERIFY_LOGIN_OTP);
   const [verifyEmail, emailState] = useMutation<{ verifyEmailOtp: AuthUser }>(VERIFY_EMAIL_OTP);
@@ -67,15 +70,15 @@ export default function Verify() {
 
   const busy = loginState.loading || emailState.loading || resetState.loading;
 
-  // One interval drives both countdowns.
-  const tick = useRef<ReturnType<typeof setInterval> | null>(null);
+  // One interval drives both countdowns, and returning to the app updates them at once.
   useEffect(() => {
-    tick.current = setInterval(() => {
-      setCooldown((s) => (s > 0 ? s - 1 : 0));
-      setExpiresIn((s) => (s > 0 ? s - 1 : 0));
-    }, 1000);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setNow(Date.now());
+    });
     return () => {
-      if (tick.current) clearInterval(tick.current);
+      clearInterval(timer);
+      sub.remove();
     };
   }, []);
 
@@ -132,8 +135,10 @@ export default function Verify() {
       } else {
         await resendReset({ variables: { email } });
       }
-      setCooldown(RESEND_COOLDOWN);
-      setExpiresIn(600);
+      const sentAt = Date.now();
+      setNow(sentAt);
+      setCooldownUntil(sentAt + RESEND_COOLDOWN * 1000);
+      setExpiresAt(sentAt + 600_000);
     } catch (e) {
       setError(errorWithWait(e, lang));
     }

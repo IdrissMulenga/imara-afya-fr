@@ -28,6 +28,16 @@ export const dayInZone = (date: Date, timeZone?: string | null): string => {
   }
 };
 
+/** The time zone the phone reports, or null if unavailable. */
+export const detectedZone = (): string | null => {
+  try {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return zone && zone !== 'UTC' ? zone : null;
+  } catch {
+    return null;
+  }
+};
+
 /** A local date at `hour`:`minute` on a YYYY-MM-DD day, moved by `offset` days. */
 export const atDay = (day: string, hour: number, minute = 0, offset = 0): Date => {
   const [y, m, d] = day.split('-').map(Number);

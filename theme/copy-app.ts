@@ -715,7 +715,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     changePasswordCta: 'Change my password',
     passwordChanged: 'Your password has been changed.',
     trustedDevices: 'Trusted phones',
-    trustedDevicesNote: 'These can sign in without an emailed code. Remove any you do not recognise.',
+    trustedDevicesNote: 'These can sign in without an emailed code. Removing one signs it out at once, so remove any you do not recognise or have lost.',
     thisPhone: 'This phone',
     lastSeen: 'Last used',
     trustEnds: 'Trust ends',
@@ -1320,7 +1320,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     passwordChanged: 'Votre mot de passe a été changé.',
     trustedDevices: 'Téléphones de confiance',
     trustedDevicesNote:
-      'Ceux-ci peuvent se connecter sans code par e-mail. Retirez ceux que vous ne reconnaissez pas.',
+      'Ceux-ci peuvent se connecter sans code par e-mail. En retirer un le déconnecte aussitôt : retirez ceux que vous ne reconnaissez pas ou avez perdus.',
     thisPhone: 'Ce téléphone',
     lastSeen: 'Dernière utilisation',
     trustEnds: 'Confiance jusqu’au',
@@ -1925,7 +1925,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     passwordChanged: 'Nenosiri lako limebadilishwa.',
     trustedDevices: 'Simu zinazoaminika',
     trustedDevicesNote:
-      'Hizi zinaweza kuingia bila msimbo wa barua pepe. Ondoa yoyote usiyoitambua.',
+      'Hizi zinaweza kuingia bila msimbo wa barua pepe. Kuondoa kimoja kinakitoa mara moja, hivyo ondoa yoyote usiyoitambua au uliyoipoteza.',
     thisPhone: 'Simu hii',
     lastSeen: 'Mara ya mwisho',
     trustEnds: 'Uaminifu unaisha',
@@ -2530,7 +2530,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     passwordChanged: 'Ijambo ryawe ry’ibanga ryahinduwe.',
     trustedDevices: 'Terefone zizewe',
     trustedDevicesNote:
-      'Izi zirashobora kwinjira ata code yoherejwe kuri imeyili. Kura izo utazi.',
+      'Izi zirashobora kwinjira ata code yoherejwe kuri imeyili. Gukura kimwe kigisohora ako kanya, rero kura izo utazi canke wataye.',
     thisPhone: 'Iyi terefone',
     lastSeen: 'Iheruka gukoreshwa',
     trustEnds: 'Icizere kirangira',

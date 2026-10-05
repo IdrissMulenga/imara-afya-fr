@@ -160,7 +160,7 @@ export const COPY: Record<Lang, Copy> = {
     signsOut: 'This signs you out on every other device.',
 
     nameLabel: 'YOUR NAME',
-    nameHint: 'Aline',
+    nameHint: 'Your name',
     genderLabel: 'GENDER',
     genderFemale: 'Female',
     genderMale: 'Male',
@@ -239,7 +239,7 @@ export const COPY: Record<Lang, Copy> = {
     signsOut: 'Cela vous déconnecte sur tous les autres appareils.',
 
     nameLabel: 'VOTRE NOM',
-    nameHint: 'Aline',
+    nameHint: 'Votre nom',
     genderLabel: 'GENRE',
     genderFemale: 'Femme',
     genderMale: 'Homme',
@@ -318,7 +318,7 @@ export const COPY: Record<Lang, Copy> = {
     signsOut: 'Hii itakutoa kwenye vifaa vingine vyote.',
 
     nameLabel: 'JINA LAKO',
-    nameHint: 'Aline',
+    nameHint: 'Jina lako',
     genderLabel: 'JINSIA',
     genderFemale: 'Mwanamke',
     genderMale: 'Mwanaume',
@@ -397,7 +397,7 @@ export const COPY: Record<Lang, Copy> = {
     signsOut: 'Ivyo bizogusohora ku bindi bikoresho vyose.',
 
     nameLabel: 'IZINA RYAWE',
-    nameHint: 'Aline',
+    nameHint: 'Izina ryawe',
     genderLabel: 'IGITSINA',
     genderFemale: 'Umugore',
     genderMale: 'Umugabo',

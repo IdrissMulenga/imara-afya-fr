@@ -15,6 +15,7 @@ import { type as T, font, radius } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
+import { clearQueue } from '@/lib/offline-queue';
 import { DELETE_ACCOUNT } from '@/graphql/auth';
 
 export default function DeleteAccount() {
@@ -42,7 +43,9 @@ export default function DeleteAccount() {
       const { data } = await remove({ variables: { input: { password } } });
       if (!data?.deleteAccount) return;
 
-      // Clear locally only; logout would fail because the account no longer exists.
+      // Clear locally only; logout would fail because the account no longer exists. Entries saved
+      // offline for this account are dropped with it.
+      await clearQueue();
       await forgetSession();
       router.replace('/(auth)/welcome');
     } catch (e) {

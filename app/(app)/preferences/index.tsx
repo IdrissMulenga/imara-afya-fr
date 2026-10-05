@@ -16,16 +16,7 @@ import { APP_COPY } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { SET_PREFERENCES, type AuthUser, type Units } from '@/graphql/auth';
-
-/** The time zone the phone reports, or null if unavailable. */
-const detectedZone = (): string | null => {
-  try {
-    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return zone && zone !== 'UTC' ? zone : null;
-  } catch {
-    return null;
-  }
-};
+import { detectedZone } from '@/lib/reminder-plan';
 
 // Time zones offered in the list.
 const REGION_ZONES = [
