@@ -10,7 +10,7 @@ import { getLocalSteps, localDay } from './steps';
 import { dayInZone, planSteps } from './reminder-plan';
 import { HABIT_SUMMARY, type HabitSummary } from '@/graphql/habits';
 import { APP_COPY } from '@/theme/copy-app';
-import { LANGS, type Lang } from '@/theme/i18n';
+import { LANGS, type Lang, numberLocale } from '@/theme/i18n';
 
 const CHANNEL = 'steps';
 const PREFIX = 'steps-';
@@ -26,7 +26,7 @@ export const stepsStore = createToggle('imara.stepsReminders');
 export type StepsProgress = { steps: number; goal: number } | null;
 type SavedPlan = { lang: Lang; goal: number; timeZone: string | null };
 
-const stepText = (value: number): string => Math.round(value).toLocaleString();
+const stepText = (value: number): string => Math.round(value).toLocaleString(numberLocale());
 
 // Plans and cancels run one after another, so an older plan cannot leave a reminder behind.
 let queue: Promise<void> = Promise.resolve();

@@ -16,7 +16,7 @@ import { useNotice } from '@/components/notice';
 import { StepsRing, MiniStat, stepsToKm } from '@/components/steps-ring';
 import { StepsPrompt, useHabitSummary } from '@/components/habits';
 import { HabitChart, HabitHistoryList, HabitStats } from '@/components/habit-history';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -31,7 +31,7 @@ const HISTORY_DAYS = 30;
 const CHART_DAYS = 14;
 
 const stepsOf = (day: HabitDay) => day.steps ?? 0;
-const formatSteps = (n: number) => Math.round(n).toLocaleString();
+const formatSteps = (n: number) => Math.round(n).toLocaleString(numberLocale());
 
 // Steps typed with or without thousands separators; NaN when not a whole number.
 const parseSteps = (raw: string): number => {

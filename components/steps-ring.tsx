@@ -16,7 +16,7 @@ import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Stop } from 'react
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Glass } from '@/components/glass';
 import { useReducedMotion } from '@/components/motion';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -27,7 +27,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const useSvgId = (prefix: string) => `${prefix}${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
 
 /** Approximate distance in km for a step count (0.75 m per step). */
-export const stepsToKm = (steps: number): string => (steps * 0.00075).toFixed(1);
+export const stepsToKm = (steps: number): string => Number((steps * 0.00075).toFixed(1)).toLocaleString(numberLocale());
 
 /** An animated progress ring (0..1) with a gradient arc, a knob at its tip and
  *  content in the middle. */
@@ -159,7 +159,7 @@ export function StepsRing({
       stroke={stroke}
       from={c.primary}
       to={c.successMark}
-      label={`${steps.toLocaleString()} ${a.of} ${goal.toLocaleString()} ${a.steps}`}
+      label={`${steps.toLocaleString(numberLocale())} ${a.of} ${goal.toLocaleString(numberLocale())} ${a.steps}`}
     >
       <Animated.View style={iconStyle}>
         <MaterialCommunityIcons
@@ -169,10 +169,10 @@ export function StepsRing({
         />
       </Animated.View>
       <Text style={{ fontFamily: font.displayBold, fontSize: Math.round(size * 0.17), color: c.text }}>
-        {steps.toLocaleString()}
+        {steps.toLocaleString(numberLocale())}
       </Text>
       <Text style={[T.fine, { color: c.muted }]}>
-        {a.of} {goal.toLocaleString()} {a.steps}
+        {a.of} {goal.toLocaleString(numberLocale())} {a.steps}
       </Text>
     </ProgressRing>
   );

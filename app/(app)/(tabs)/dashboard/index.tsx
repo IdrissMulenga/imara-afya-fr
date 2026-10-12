@@ -13,6 +13,7 @@ import { StepsHero } from '@/components/steps-ring';
 import { CheckInCard, useCheckInSummary } from '@/components/checkin';
 import { InsightsCard, useInsights } from '@/components/insights';
 import { AchievementsCard, useAchievements } from '@/components/achievements';
+import { VitalsCard, useVitalSummary } from '@/components/vitals';
 import { TodayGlance } from '@/components/today-glance';
 import { ProfileHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
@@ -31,11 +32,12 @@ type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 // "Friday 25 September" in the app's language.
 const todayLabel = (lang: Lang): string => {
   try {
-    return new Date().toLocaleDateString(lang === 'rn' ? 'fr' : lang, {
+    const label = new Date().toLocaleDateString(lang === 'rn' ? 'fr' : lang, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
     });
+    return label.charAt(0).toUpperCase() + label.slice(1);
   } catch {
     return '';
   }
@@ -66,6 +68,7 @@ export default function Dashboard() {
   const { data: checkIn, refetch: refetchCheckIn } = useCheckInSummary();
   const { data: insights, refetch: refetchInsights } = useInsights();
   const { data: achievements, refetch: refetchAchievements } = useAchievements();
+  const { data: vitals, refetch: refetchVitals } = useVitalSummary();
   const summary = habits?.habitSummary;
   const steps = useTodaySteps(summary?.today);
 
@@ -79,9 +82,10 @@ export default function Dashboard() {
         void refetchCheckIn();
         void refetchInsights();
         void refetchAchievements();
+        void refetchVitals();
       }
       focusedOnce.current = true;
-    }, [refetchHabits, refetchCheckIn, refetchInsights, refetchAchievements]),
+    }, [refetchHabits, refetchCheckIn, refetchInsights, refetchAchievements, refetchVitals]),
   );
 
   // The user can be null briefly while signing out.
@@ -93,7 +97,17 @@ export default function Dashboard() {
 
   return (
     <Screen
-      onRefresh={() => Promise.all([refetchHabits(), refetchCheckIn(), refetchInsights(), refetchAchievements(), syncHealth(), refreshUser()])}
+      onRefresh={() =>
+        Promise.all([
+          refetchHabits(),
+          refetchCheckIn(),
+          refetchInsights(),
+          refetchAchievements(),
+          refetchVitals(),
+          syncHealth(),
+          refreshUser(),
+        ])
+      }
       header={
         <ProfileHeader
           greeting={`${greetingFor(a)}${firstName ? ',' : ''}`}
@@ -146,7 +160,7 @@ export default function Dashboard() {
           user={user}
           steps={steps}
           water={today.waterGlasses}
-          sleep={today.sleepHours ?? 0}
+          sleep={today.sleepHours ?? null}
           mood={latest}
         />
       </FadeIn>
@@ -175,6 +189,11 @@ export default function Dashboard() {
         </View>
       </FadeIn>
 
+      <FadeIn delay={265}>
+        <SectionTitle icon="heart-pulse" title={a.sectionHeart} />
+        <VitalsCard summary={vitals?.vitalSummary} />
+      </FadeIn>
+
       <FadeIn delay={290}>
         <SectionTitle icon="chart-timeline-variant" title={a.sectionInsights} />
         <InsightsCard insights={insights?.insights} />
@@ -186,7 +205,7 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-  date: { fontFamily: font.displayBold, fontSize: 22, textTransform: 'capitalize' },
+  date: { fontFamily: font.displayBold, fontSize: 22 },
   verify: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   waiting: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 26, marginBottom: 10, marginLeft: 2 },

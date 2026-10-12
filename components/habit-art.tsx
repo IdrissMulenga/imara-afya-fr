@@ -16,7 +16,7 @@ import Svg, { Path } from 'react-native-svg';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ProgressRing } from '@/components/steps-ring';
 import { useReducedMotion } from '@/components/motion';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -160,7 +160,8 @@ export function SleepRing({
   showGoal = true,
   moonOnly = false,
 }: {
-  hours: number;
+  /** null when no sleep was recorded. */
+  hours: number | null;
   goal: number;
   size: number;
   stroke: number;
@@ -173,22 +174,22 @@ export function SleepRing({
   const a = APP_COPY[lang];
   return (
     <ProgressRing
-      progress={goal > 0 ? hours / goal : 0}
+      progress={hours != null && goal > 0 ? hours / goal : 0}
       size={size}
       stroke={stroke}
       from={SLEEP_COLOR}
       to={SLEEP_COLOR_TO}
-      label={`${hours} ${a.of} ${goal} ${a.hours}`}
+      label={hours == null ? a.sleepNoData : `${hours} ${a.of} ${goal} ${a.hours}`}
     >
       <Moon size={Math.round(size * (moonOnly ? 0.3 : 0.2))} />
       {moonOnly ? null : (
         <Text style={{ fontFamily: font.displayBold, fontSize: Math.round(size * 0.16), color: c.text }}>
-          {hours.toLocaleString()} h
+          {hours == null ? '–' : `${hours.toLocaleString(numberLocale())} h`}
         </Text>
       )}
       {showGoal && !moonOnly ? (
         <Text style={[T.fine, { color: c.muted }]}>
-          {a.of} {goal.toLocaleString()} {a.hours}
+          {hours == null ? a.sleepNoData : `${a.of} ${goal.toLocaleString(numberLocale())} ${a.hours}`}
         </Text>
       ) : null}
     </ProgressRing>

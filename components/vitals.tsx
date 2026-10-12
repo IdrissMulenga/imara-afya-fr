@@ -1,15 +1,25 @@
 // Vitals UI: a reading's value as text, the words and colour for its category, and what to do
 // about it, including the urgent messages for readings that need care now.
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useQuery } from '@apollo/client/react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLang } from '@/theme/i18n';
+import { Glass } from '@/components/glass';
+import { QuietButton } from '@/components/ui';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
-import { type as T } from '@/theme/tokens';
+import { type as T, font } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
-import type { VitalAdvice, VitalCategory, VitalReading } from '@/graphql/vitals';
+import {
+  VITAL_SUMMARY,
+  type VitalAdvice,
+  type VitalCategory,
+  type VitalReading,
+  type VitalSummary,
+} from '@/graphql/vitals';
 
-const num = (value: number): string => value.toLocaleString(undefined, { maximumFractionDigits: 1 });
+const num = (value: number): string => value.toLocaleString(numberLocale(), { maximumFractionDigits: 1 });
 
 /** "148/92 mmHg", "6.2 mmol/L" or "72 bpm". */
 export const readingValue = (reading: VitalReading): string => {
@@ -73,6 +83,86 @@ export function AdviceBox({ reading }: { reading: VitalReading }) {
   );
 }
 
+/** The newest blood pressure, sugar and pulse readings. */
+export function useVitalSummary() {
+  return useQuery<{ vitalSummary: VitalSummary }>(VITAL_SUMMARY);
+}
+
+// One value on the dashboard card: label, number with its unit, and its status in colour.
+function Metric({
+  label,
+  value,
+  unit,
+  status,
+  color,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+  status: string | null;
+  color: string;
+}) {
+  const { c } = useTheme();
+  return (
+    <View style={styles.metric}>
+      <Text style={[T.fine, { color: c.muted }]}>{label}</Text>
+      <Text style={{ fontFamily: font.displayBold, fontSize: 24, color: c.text }}>
+        {value}
+        <Text style={[T.fine, { color: c.muted }]}> {unit}</Text>
+      </Text>
+      {status ? <Text style={[T.fine, { color, fontFamily: font.bodySemi }]}>{status}</Text> : null}
+    </View>
+  );
+}
+
+/** The dashboard card: the newest blood pressure and pulse with their status. Opens the vitals page. */
+export function VitalsCard({ summary }: { summary?: VitalSummary }) {
+  const router = useRouter();
+  const { c } = useTheme();
+  const { lang } = useLang();
+  const a = APP_COPY[lang];
+  const colorOf = useCategoryColor();
+  const pressure = summary?.latestPressure ?? null;
+  const pulse = summary?.latestPulse ?? null;
+  // A pulse read on a blood pressure machine has its own category beside the pressure's.
+  const pulseCategory = pulse ? (pulse.kind === 'PULSE' ? pulse.category : pulse.pulseCategory) : null;
+  const open = () => router.push('/(app)/vitals');
+
+  return (
+    <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={a.vitalsTitle}>
+      <Glass style={{ padding: 16, gap: 14 }}>
+        {pressure || pulse ? (
+          <View style={styles.metrics}>
+            <Metric
+              label={a.vitalPressure}
+              value={pressure ? `${pressure.systolic}/${pressure.diastolic}` : '–'}
+              unit="mmHg"
+              status={pressure ? categoryText(pressure.category, a) : null}
+              color={colorOf(pressure?.category ?? null)}
+            />
+            <Metric
+              label={a.vitalPulse}
+              value={pulse?.pulse != null ? String(pulse.pulse) : '–'}
+              unit="bpm"
+              status={pulseCategory ? categoryText(pulseCategory, a) : null}
+              color={colorOf(pulseCategory)}
+            />
+          </View>
+        ) : (
+          <View style={styles.empty}>
+            <MaterialCommunityIcons name="heart-pulse" size={22} color={c.danger} />
+            <Text style={[T.body, { color: c.muted, flex: 1 }]}>{a.vitalsCardEmpty}</Text>
+          </View>
+        )}
+        <QuietButton label={a.vitalsLogReading} onPress={open} />
+      </Glass>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   box: { flexDirection: 'row', gap: 8, borderWidth: 1, borderRadius: 12, padding: 12 },
+  metrics: { flexDirection: 'row', gap: 12 },
+  metric: { flex: 1, gap: 2 },
+  empty: { flexDirection: 'row', alignItems: 'center', gap: 10 },
 });

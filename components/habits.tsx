@@ -12,7 +12,7 @@ import { QuietButton, LinkText } from '@/components/ui';
 import { useNotice } from '@/components/notice';
 import { WaterGlass, SleepRing, WATER_COLOR, SLEEP_COLOR } from '@/components/habit-art';
 import { usePressScale } from '@/components/motion';
-import { useLang, type Lang } from '@/theme/i18n';
+import { useLang, type Lang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font, radius } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
@@ -46,7 +46,7 @@ export const dayLabel = (day: string, lang: Lang): string => {
   }
 };
 
-const fmt = (value: number): string => value.toLocaleString();
+const fmt = (value: number): string => value.toLocaleString(numberLocale());
 
 /** The streak line under a habit, e.g. "3-day streak". */
 export const streakText = (days: number, a: AppCopy): string =>
@@ -370,7 +370,7 @@ export function SleepTile({ user, today, streak }: { user: AuthUser; today: Habi
           <Text style={[T.fine, { color: c.muted }]}>{a.lastNight}</Text>
           <Text style={{ fontFamily: font.displayBold, fontSize: 26, color: met ? c.success : c.text }}>
             {noData ? a.sleepNoData : `${fmt(slept)} h`}
-            <Text style={[T.fine, { color: c.muted }]}> / {fmt(goal)} {a.hours}</Text>
+            {noData ? null : <Text style={[T.fine, { color: c.muted }]}> / {fmt(goal)} {a.hours}</Text>}
           </Text>
           {night ? (
             <View style={styles.tonight}>

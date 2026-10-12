@@ -16,7 +16,7 @@ import { SleepRing, SLEEP_COLOR } from '@/components/habit-art';
 import { HabitChart, HabitHistoryList, HabitStats } from '@/components/habit-history';
 import { SleepButtons, SleepPrompt, useHabitSummary } from '@/components/habits';
 import { SleepScheduleCard } from '@/components/sleep-schedule';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -26,7 +26,7 @@ import { syncSleep } from '@/lib/sleep';
 import { HABIT_HISTORY, type HabitDay } from '@/graphql/habits';
 
 const hours = (day: HabitDay) => day.sleepHours ?? 0;
-const formatHours = (n: number) => `${(Math.round(n * 4) / 4).toLocaleString()} h`;
+const formatHours = (n: number) => `${(Math.round(n * 4) / 4).toLocaleString(numberLocale())} h`;
 
 export default function SleepScreen() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function SleepScreen() {
         <Glass style={{ padding: 20 }}>
           <View style={{ alignItems: 'center', gap: 14 }}>
             <Text style={[T.label, { color: c.faint }]}>{a.lastNight.toUpperCase()}</Text>
-            <SleepRing hours={slept} goal={goal} size={220} stroke={16} />
+            <SleepRing hours={today.sleepHours ?? null} goal={goal} size={220} stroke={16} />
             {today.sleepHours == null ? (
               <Text style={[T.fine, { color: c.faint, textAlign: 'center' }]}>{a.sleepNoDataNote}</Text>
             ) : null}
@@ -74,7 +74,11 @@ export default function SleepScreen() {
               />
               <MiniStat
                 icon="power-sleep"
-                value={`${goal > 0 ? Math.min(999, Math.round((slept / goal) * 100)) : 0}%`}
+                value={
+                  today.sleepHours == null
+                    ? '–'
+                    : `${goal > 0 ? Math.min(999, Math.round((slept / goal) * 100)) : 0}%`
+                }
                 caption={a.ofGoal}
                 tint={SLEEP_COLOR}
               />

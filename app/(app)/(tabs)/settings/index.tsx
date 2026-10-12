@@ -17,7 +17,7 @@ import { useStepsReminders } from '@/lib/steps-reminders';
 import { useMorningReminders } from '@/lib/morning-reminders';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
-import { useLang, COPY, LANGS, type Lang } from '@/theme/i18n';
+import { useLang, COPY, LANGS, type Lang, numberLocale } from '@/theme/i18n';
 import { useTheme, THEME_MODES, type ThemeMode } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY, ageFrom } from '@/theme/copy-app';
@@ -94,13 +94,13 @@ export default function Settings() {
     [
       user.name || null,
       age != null ? `${age} ${a.years}` : null,
-      user.heightCm != null ? `${user.heightCm}cm` : null,
-      user.weightKg != null ? `${user.weightKg}kg` : null,
+      user.heightCm != null ? `${user.heightCm.toLocaleString(numberLocale())} cm` : null,
+      user.weightKg != null ? `${user.weightKg.toLocaleString(numberLocale())} kg` : null,
     ]
       .filter(Boolean)
       .join(' · ') || a.notSet;
 
-  const goals = `${user.stepGoal.toLocaleString()} ${a.steps} · ${user.waterGoalGlasses} ${a.glasses} · ${user.sleepGoalHours}${a.hours.slice(0, 1)}`;
+  const goals = `${user.stepGoal.toLocaleString(numberLocale())} ${a.steps} · ${user.waterGoalGlasses} ${a.glasses} · ${user.sleepGoalHours}${a.hours.slice(0, 1)}`;
 
   const units = user.units === 'metric' ? a.unitsMetric : a.unitsImperial;
 

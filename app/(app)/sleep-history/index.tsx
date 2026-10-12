@@ -14,7 +14,7 @@ import { MiniStat } from '@/components/steps-ring';
 import { SLEEP_COLOR } from '@/components/habit-art';
 import { HabitHistoryList } from '@/components/habit-history';
 import { HabitTrendChart } from '@/components/habit-trend';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { APP_COPY } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
@@ -23,7 +23,7 @@ import { HABIT_HISTORY, type HabitDay } from '@/graphql/habits';
 type Range = '14' | '30' | '90';
 const RANGES: Range[] = ['14', '30', '90'];
 const hours = (day: HabitDay) => day.sleepHours ?? 0;
-const formatHours = (n: number) => `${(Math.round(n * 4) / 4).toLocaleString()} h`;
+const formatHours = (n: number) => `${(Math.round(n * 4) / 4).toLocaleString(numberLocale())} h`;
 
 export default function SleepHistoryScreen() {
   const router = useRouter();
@@ -78,7 +78,7 @@ export default function SleepHistoryScreen() {
           <FadeIn delay={40}>
             <View style={styles.stats}>
               <Glass style={styles.statCard}>
-                <MiniStat icon="chart-bar" value={formatHours(average)} caption={a.averageNight} tint={SLEEP_COLOR} />
+                <MiniStat icon="chart-bar" value={logged.length ? formatHours(average) : '–'} caption={a.averageNight} tint={SLEEP_COLOR} />
               </Glass>
               <Glass style={styles.statCard}>
                 <MiniStat icon="check-circle-outline" value={`${atGoal} / ${logged.length}`} caption={a.nightsAtGoal} tint={c.successMark} />

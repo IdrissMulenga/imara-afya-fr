@@ -10,7 +10,7 @@ import { AppHeader } from '@/components/header';
 import { Section, Stepper } from '@/components/panel';
 import { FadeIn } from '@/components/motion';
 import { useNotice } from '@/components/notice';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -46,7 +46,7 @@ export default function Goals() {
   const changed = useMemo((): string[] => {
     if (!user) return [];
     const list: string[] = [];
-    if (steps !== user.stepGoal) list.push(`${steps.toLocaleString()} ${a.steps}`);
+    if (steps !== user.stepGoal) list.push(`${steps.toLocaleString(numberLocale())} ${a.steps}`);
     if (water !== user.waterGoalGlasses) list.push(`${water} ${a.glasses}`);
     if (sleep !== user.sleepGoalHours) list.push(`${sleep} ${a.hours}`);
     return list;

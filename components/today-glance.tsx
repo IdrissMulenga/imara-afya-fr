@@ -9,7 +9,7 @@ import { Glass } from '@/components/glass';
 import { ProgressRing } from '@/components/steps-ring';
 import { WATER_COLOR, SLEEP_COLOR } from '@/components/habit-art';
 import { MoodFace, scoreTone } from '@/components/mood-art';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -19,7 +19,7 @@ import type { CheckIn } from '@/graphql/checkin';
 const RING = 64;
 const STROKE = 7;
 
-const short = (n: number): string => (n >= 10_000 ? `${Math.round(n / 1000)}k` : n.toLocaleString());
+const short = (n: number): string => (n >= 10_000 ? `${Math.round(n / 1000)}k` : n.toLocaleString(numberLocale()));
 
 function GlanceRing({
   label,
@@ -70,7 +70,8 @@ export function TodayGlance({
   user: AuthUser;
   steps: number;
   water: number;
-  sleep: number;
+  /** null when no sleep was recorded. */
+  sleep: number | null;
   mood: CheckIn | null;
 }) {
   const { c } = useTheme();
@@ -80,7 +81,7 @@ export function TodayGlance({
   const met = [
     user.stepGoal > 0 && steps >= user.stepGoal,
     user.waterGoalGlasses > 0 && water >= user.waterGoalGlasses,
-    user.sleepGoalHours > 0 && sleep >= user.sleepGoalHours,
+    sleep != null && user.sleepGoalHours > 0 && sleep >= user.sleepGoalHours,
   ].filter(Boolean).length;
   const summary = met === 3 ? a.goalsAllMet : met === 0 ? a.goalsNone : a.goalsMet.replace('{n}', String(met));
   const tone = mood ? scoreTone(mood.mood) : c.faint;
@@ -114,7 +115,7 @@ export function TodayGlance({
         </GlanceRing>
         <GlanceRing
           label={a.waterLabel}
-          value={`${water.toLocaleString()}/${user.waterGoalGlasses}`}
+          value={`${water.toLocaleString(numberLocale())}/${user.waterGoalGlasses}`}
           progress={user.waterGoalGlasses > 0 ? water / user.waterGoalGlasses : 0}
           from={WATER_COLOR}
           to="#5CC8F5"
@@ -124,8 +125,8 @@ export function TodayGlance({
         </GlanceRing>
         <GlanceRing
           label={a.sleepLabel}
-          value={`${sleep.toLocaleString()} h`}
-          progress={user.sleepGoalHours > 0 ? sleep / user.sleepGoalHours : 0}
+          value={sleep == null ? '–' : `${sleep.toLocaleString(numberLocale())} h`}
+          progress={sleep != null && user.sleepGoalHours > 0 ? sleep / user.sleepGoalHours : 0}
           from={SLEEP_COLOR}
           to="#4C8DF6"
           href="/sleep"

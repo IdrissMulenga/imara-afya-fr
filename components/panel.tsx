@@ -17,6 +17,7 @@ import { useFade, usePop, usePressScale } from '@/components/motion';
 import { resolveMedia } from '@/lib/media';
 import { useTheme } from '@/theme/theme';
 import { radius, size, type as T, font } from '@/theme/tokens';
+import { numberLocale } from '@/theme/i18n';
 
 /** A titled group of rows. */
 export function Section({
@@ -367,7 +368,7 @@ export function Stepper({
 
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Text style={{ fontFamily: font.displayBold, fontSize: 28, color: c.text }}>
-            {value.toLocaleString()}
+            {value.toLocaleString(numberLocale())}
           </Text>
           {suffix ? <Text style={[T.fine, { color: c.faint }]}>{suffix}</Text> : null}
         </View>

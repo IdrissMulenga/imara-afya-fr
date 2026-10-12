@@ -11,7 +11,7 @@ import { Glass } from '@/components/glass';
 import { EnergyBattery, MoodFace, scoreTone } from '@/components/mood-art';
 import { useNotice } from '@/components/notice';
 import { streakText } from '@/components/habits';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY, type AppCopy, type MoodBand } from '@/theme/copy-app';
@@ -87,7 +87,7 @@ export function WarmMessage({ mood, energy, summary }: { mood: number; energy: n
 }
 
 /** An average such as 3.4 shown as "3.4 / 5", or a dash when there is none. */
-export const formatAverage = (value: number | null): string => (value == null ? '–' : `${value.toLocaleString()} / 5`);
+export const formatAverage = (value: number | null): string => (value == null ? '–' : `${value.toLocaleString(numberLocale())} / 5`);
 
 const REFETCH = onScreen(['CheckInSummary', 'CheckInHistory']);
 

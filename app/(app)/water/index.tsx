@@ -16,7 +16,7 @@ import { MiniStat } from '@/components/steps-ring';
 import { WaterGlass, WATER_COLOR } from '@/components/habit-art';
 import { HabitChart, HabitHistoryList, HabitStats } from '@/components/habit-history';
 import { WaterButtons, useHabitSummary } from '@/components/habits';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -26,7 +26,7 @@ import { useWaterReminders } from '@/lib/water-reminders';
 import { HABIT_HISTORY, type HabitDay } from '@/graphql/habits';
 
 const glasses = (day: HabitDay) => day.waterGlasses;
-const formatGlasses = (n: number) => (Math.round(n * 10) / 10).toLocaleString();
+const formatGlasses = (n: number) => (Math.round(n * 10) / 10).toLocaleString(numberLocale());
 
 export default function WaterScreen() {
   const router = useRouter();

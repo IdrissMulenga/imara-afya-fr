@@ -11,6 +11,9 @@ const STORE_KEY = 'imara.lang';
 let current: Lang = 'en';
 export const currentLang = (): Lang => current;
 
+/** Locale for numbers in the app's language; Kirundi uses French conventions (8 000, 68,4). */
+export const numberLocale = (): string => (current === 'rn' ? 'fr' : current);
+
 type Copy = {
   label: string;
   tagline: string;
@@ -104,7 +107,7 @@ export const COPY: Record<Lang, Copy> = {
     tagline: 'Strong health, daily',
     headA: 'Small moves,',
     headB: 'every day.',
-    sub: 'Steps, sleep, meals and recovery in one calm place. We’ll start wherever you are today.',
+    sub: 'Steps, sleep, mood and your cycle in one calm place. We’ll start wherever you are today.',
     primary: 'Create your account',
     secondary: 'I already have an account',
     legal: 'By continuing you agree to our Terms and Privacy Policy. Your health data is stored securely on our servers so you can use it on any phone, and it is never sold.',
@@ -183,7 +186,7 @@ export const COPY: Record<Lang, Copy> = {
     tagline: 'Une santé solide',
     headA: 'De petits pas,',
     headB: 'chaque jour.',
-    sub: 'Pas, sommeil, repas et récupération au même endroit, en toute sérénité. Nous commençons là où vous en êtes aujourd’hui.',
+    sub: 'Pas, sommeil, humeur et cycle au même endroit, en toute sérénité. Nous commençons là où vous en êtes aujourd’hui.',
     primary: 'Créer un compte',
     secondary: 'J’ai déjà un compte',
     legal: 'En continuant, vous acceptez nos Conditions et notre Politique de confidentialité. Vos données de santé sont conservées en sécurité sur nos serveurs pour que vous les retrouviez sur n’importe quel téléphone, et ne sont jamais vendues.',
@@ -262,7 +265,7 @@ export const COPY: Record<Lang, Copy> = {
     tagline: 'Afya imara, kila siku',
     headA: 'Hatua ndogo,',
     headB: 'kila siku.',
-    sub: 'Hatua, usingizi, chakula na uponyaji katika sehemu moja tulivu. Tutaanza pale ulipo leo.',
+    sub: 'Hatua, usingizi, hisia na mzunguko wako katika sehemu moja tulivu. Tutaanza pale ulipo leo.',
     primary: 'Fungua akaunti',
     secondary: 'Nina akaunti tayari',
     legal: 'Kwa kuendelea unakubali Masharti na Sera yetu ya Faragha. Data yako ya afya inahifadhiwa salama kwenye seva zetu ili uweze kuitumia kwenye simu yoyote, na haiuzwi kamwe.',
@@ -341,7 +344,7 @@ export const COPY: Record<Lang, Copy> = {
     tagline: 'Amagara akomeye',
     headA: 'Intambwe nto,',
     headB: 'imisi yose.',
-    sub: 'Intambwe, itiro, imfungurwa n’ukuruhuka ahantu hamwe hatekanye. Tuzotangurira aho uri uyu musi.',
+    sub: 'Intambwe, itiro, uko wiyumva n’ukwezi kwawe ahantu hamwe hatekanye. Tuzotangurira aho uri uyu musi.',
     primary: 'Iyandikishe',
     secondary: 'Mfise konte',
     legal: 'Mu kubandanya, wemera Amabwirizwa n’Ingingo z’ibanga. Amakuru y’amagara yawe abikwa neza ku maseruveri yacu kugira uyakoreshe kuri telefone iyo ari yo yose, kandi ntiyigera agurishwa.',

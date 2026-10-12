@@ -11,7 +11,7 @@ import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
 import { BadgeRow, useAchievements } from '@/components/achievements';
 import { dateText } from '@/components/cycle';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { type as T, font } from '@/theme/tokens';
@@ -74,7 +74,7 @@ export default function AchievementsScreen() {
                 <Glass key={key} style={styles.statCard}>
                   <MaterialCommunityIcons name={icon} size={18} color={c.primary} />
                   <Text style={{ fontFamily: font.bodySemi, fontSize: 15, color: c.text }} numberOfLines={1}>
-                    {record ? `${record.value.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${unit}` : '–'}
+                    {record ? `${record.value.toLocaleString(numberLocale(), { maximumFractionDigits: 1 })} ${unit}` : '–'}
                   </Text>
                   <Text style={[T.fine, { color: c.muted, textAlign: 'center' }]} numberOfLines={1}>
                     {label}

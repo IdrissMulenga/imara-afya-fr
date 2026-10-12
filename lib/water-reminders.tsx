@@ -22,7 +22,7 @@ import {
   type HabitSummary,
 } from '@/graphql/habits';
 import { APP_COPY } from '@/theme/copy-app';
-import { LANGS, useLang, type Lang } from '@/theme/i18n';
+import { LANGS, useLang, type Lang, numberLocale } from '@/theme/i18n';
 
 export { REMINDER_HOURS } from './water-plan';
 
@@ -163,7 +163,7 @@ async function prepare(lang: Lang): Promise<void> {
   }
 }
 
-const glassText = (value: number): string => value.toLocaleString(undefined, { maximumFractionDigits: 1 });
+const glassText = (value: number): string => value.toLocaleString(numberLocale(), { maximumFractionDigits: 1 });
 
 // Plans and cancels run one after another, so two close together cannot interleave and leave a
 // reminder from an older plan behind, or reminders scheduled after they were turned off.

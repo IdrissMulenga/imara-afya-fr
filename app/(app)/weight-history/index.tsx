@@ -17,7 +17,7 @@ import { MiniStat } from '@/components/steps-ring';
 import { useNotice } from '@/components/notice';
 import { addDays, dateText } from '@/components/cycle';
 import { TrendLineChart } from '@/components/trend-line';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -41,13 +41,13 @@ type Range = '30' | '90' | '365';
 const RANGES: Range[] = ['30', '90', '365'];
 
 /** "70.5 kg" */
-const kgText = (kg: number): string => `${(Math.round(kg * 10) / 10).toLocaleString()} kg`;
+const kgText = (kg: number): string => `${(Math.round(kg * 10) / 10).toLocaleString(numberLocale())} kg`;
 
 /** "+1.2 kg" / "−0.8 kg" / "0 kg" */
 const kgChange = (diff: number): string => {
   const rounded = Math.round(diff * 10) / 10;
   if (rounded === 0) return '0 kg';
-  return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toLocaleString()} kg`;
+  return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toLocaleString(numberLocale())} kg`;
 };
 
 // Closer to the goal than this counts as reached.

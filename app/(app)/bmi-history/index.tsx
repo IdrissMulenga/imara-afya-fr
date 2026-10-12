@@ -15,7 +15,7 @@ import { FadeIn } from '@/components/motion';
 import { MiniStat } from '@/components/steps-ring';
 import { addDays, dateText } from '@/components/cycle';
 import { TrendLineChart, type TrendBand } from '@/components/trend-line';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY, bmiBand } from '@/theme/copy-app';
@@ -27,11 +27,11 @@ type Range = '30' | '90' | '365';
 const RANGES: Range[] = ['30', '90', '365'];
 const AMBER = '#D9892B';
 
-const bmiText = (bmi: number): string => (Math.round(bmi * 10) / 10).toLocaleString();
+const bmiText = (bmi: number): string => (Math.round(bmi * 10) / 10).toLocaleString(numberLocale());
 const bmiChange = (diff: number): string => {
   const rounded = Math.round(diff * 10) / 10;
   if (rounded === 0) return '0';
-  return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toLocaleString()}`;
+  return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toLocaleString(numberLocale())}`;
 };
 
 export default function BmiHistoryScreen() {

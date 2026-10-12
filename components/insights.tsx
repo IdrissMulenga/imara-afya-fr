@@ -9,7 +9,7 @@ import { Glass } from '@/components/glass';
 import { Divider, NavRow } from '@/components/panel';
 import { WATER_COLOR, SLEEP_COLOR } from '@/components/habit-art';
 import { scoreTone } from '@/components/mood-art';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font, radius } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
@@ -40,7 +40,7 @@ const useFactorTint = (): Record<InsightFactor, string> => {
 };
 
 /** "4.3" in the app's number format. */
-const score = (value: number): string => value.toLocaleString(undefined, { maximumFractionDigits: 1 });
+const score = (value: number): string => value.toLocaleString(numberLocale(), { maximumFractionDigits: 1 });
 
 /** Insights over the last `days` days (patterns) plus this week and last week. */
 export function useInsights(days: number = INSIGHT_LIMITS.defaultDays) {
@@ -139,12 +139,12 @@ export function WeekCompare({ thisWeek, lastWeek }: { thisWeek: InsightPeriod; l
   const a = APP_COPY[lang];
   const tint = useFactorTint();
   const dash = '–';
-  const num = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  const num = (value: number) => value.toLocaleString(numberLocale(), { maximumFractionDigits: 1 });
   const goalText = (n: number) => a.insightsGoalDays.replace('{n}', String(n));
 
   const metrics: Metric[] = [
     { key: 'water', icon: 'cup-water', tint: tint.WATER, label: a.waterLabel, now: thisWeek.waterGlasses, before: lastWeek.waterGlasses, format: (v) => `${num(v)} ${a.glasses}`, goalDays: thisWeek.waterGoalDays },
-    { key: 'steps', icon: 'walk', tint: tint.STEPS, label: a.stepsLabel, now: thisWeek.steps, before: lastWeek.steps, format: (v) => `${Math.round(v).toLocaleString()} ${a.steps}`, goalDays: thisWeek.stepGoalDays },
+    { key: 'steps', icon: 'walk', tint: tint.STEPS, label: a.stepsLabel, now: thisWeek.steps, before: lastWeek.steps, format: (v) => `${Math.round(v).toLocaleString(numberLocale())} ${a.steps}`, goalDays: thisWeek.stepGoalDays },
     { key: 'sleep', icon: 'power-sleep', tint: tint.SLEEP, label: a.sleepLabel, now: thisWeek.sleepHours, before: lastWeek.sleepHours, format: (v) => `${num(v)} h`, goalDays: thisWeek.sleepGoalDays },
     { key: 'mood', icon: 'emoticon-outline', tint: c.primary, label: a.moodName, now: thisWeek.mood, before: lastWeek.mood, format: (v) => `${num(v)} / 5` },
     { key: 'energy', icon: 'lightning-bolt-outline', tint: c.primary, label: a.energyName, now: thisWeek.energy, before: lastWeek.energy, format: (v) => `${num(v)} / 5` },
@@ -187,7 +187,7 @@ export function WeekCompare({ thisWeek, lastWeek }: { thisWeek: InsightPeriod; l
   );
 }
 
-const hoursText = (value: number): string => `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} h`;
+const hoursText = (value: number): string => `${value.toLocaleString(numberLocale(), { maximumFractionDigits: 1 })} h`;
 
 // The words and colour for each regularity.
 const useRegularity = (regularity: SleepRegularity): { text: string; color: string } => {

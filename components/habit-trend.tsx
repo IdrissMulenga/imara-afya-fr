@@ -6,7 +6,7 @@ import { View, Text, ScrollView, StyleSheet, type LayoutChangeEvent } from 'reac
 import Svg, { Line, Rect } from 'react-native-svg';
 import { Pressable } from '@/components/pressable';
 import { dayLabel } from '@/components/habits';
-import { useLang, type Lang } from '@/theme/i18n';
+import { useLang, type Lang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import type { HabitDay } from '@/graphql/habits';
@@ -42,7 +42,7 @@ function scale(max: number): { top: number; step: number } {
 
 // Axis labels short enough for the axis: 2500 -> 2.5k.
 const tickText = (n: number): string =>
-  n >= 1000 ? `${Number((n / 1000).toFixed(1)).toLocaleString()}k` : n.toLocaleString();
+  n >= 1000 ? `${Number((n / 1000).toFixed(1)).toLocaleString(numberLocale())}k` : n.toLocaleString(numberLocale());
 
 export function HabitTrendChart({
   days,

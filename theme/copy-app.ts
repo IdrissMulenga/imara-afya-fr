@@ -525,6 +525,9 @@ export type AppCopy = {
   offlineDropped: string;
   vitalsTitle: string;
   vitalsSub: string;
+  sectionHeart: string;
+  vitalsCardEmpty: string;
+  vitalsLogReading: string;
   vitalsLatest: string;
   vitalPressure: string;
   vitalGlucose: string;
@@ -1128,6 +1131,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     offlineDropped: '{n} entries saved offline were refused, for example because a day’s limit was reached.',
     vitalsTitle: 'Blood pressure, sugar & pulse',
     vitalsSub: 'Log your readings and see what they mean.',
+    sectionHeart: 'HEART & BLOOD PRESSURE',
+    vitalsCardEmpty: 'No readings yet. Log your blood pressure or pulse to see them here.',
+    vitalsLogReading: 'Log a reading',
     vitalsLatest: 'LATEST',
     vitalPressure: 'Blood pressure',
     vitalGlucose: 'Blood sugar',
@@ -1542,7 +1548,7 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     sectionFeel: 'VOTRE HUMEUR',
     sectionActivity: 'ACTIVITÉ',
     sectionWaterSleep: 'EAU ET SOMMEIL',
-    goalsMet: '{n} objectifs sur 3 atteints aujourd’hui',
+    goalsMet: 'Objectifs atteints aujourd’hui : {n} sur 3',
     goalsAllMet: 'Les 3 objectifs atteints aujourd’hui. Bravo !',
     goalsNone: 'Vos objectifs du jour vous attendent',
     menuCycle: 'Cycle',
@@ -1733,6 +1739,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     offlineDropped: '{n} entrées enregistrées hors ligne ont été refusées, par exemple parce que la limite du jour était atteinte.',
     vitalsTitle: 'Tension, glycémie et pouls',
     vitalsSub: 'Notez vos mesures et voyez ce qu’elles signifient.',
+    sectionHeart: 'CŒUR ET TENSION',
+    vitalsCardEmpty: 'Aucune mesure pour l’instant. Notez votre tension ou votre pouls pour les voir ici.',
+    vitalsLogReading: 'Noter une mesure',
     vitalsLatest: 'DERNIÈRES MESURES',
     vitalPressure: 'Tension',
     vitalGlucose: 'Glycémie',
@@ -2338,6 +2347,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     offlineDropped: 'Kumbukumbu {n} zilizohifadhiwa bila mtandao zimekataliwa, kwa mfano kwa sababu kikomo cha siku kilifikiwa.',
     vitalsTitle: 'Shinikizo la damu, sukari na mapigo',
     vitalsSub: 'Andika vipimo vyako na uone maana yake.',
+    sectionHeart: 'MOYO NA SHINIKIZO LA DAMU',
+    vitalsCardEmpty: 'Bado hakuna vipimo. Andika shinikizo la damu au mapigo ya moyo ili uyaone hapa.',
+    vitalsLogReading: 'Andika kipimo',
     vitalsLatest: 'VIPIMO VYA KARIBUNI',
     vitalPressure: 'Shinikizo la damu',
     vitalGlucose: 'Sukari ya damu',
@@ -2943,6 +2955,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     offlineDropped: 'Ivyanditswe {n} vyabitswe utari ku muhora vyanswe, nk’akarorero kubera urugero rw’umunsi rwashitse.',
     vitalsTitle: 'Umuvuduko w’amaraso, isukari n’itera ry’umutima',
     vitalsSub: 'Andika ibipimo vyawe ubone ico bisobanura.',
+    sectionHeart: 'UMUTIMA N’UMUVUDUKO W’AMARASO',
+    vitalsCardEmpty: 'Nta bipimo biraboneka. Andika umuvuduko w’amaraso canke ingene umutima utera kugira ubibone ngaha.',
+    vitalsLogReading: 'Andika igipimo',
     vitalsLatest: 'IBIPIMO VYA VUBA',
     vitalPressure: 'Umuvuduko w’amaraso',
     vitalGlucose: 'Isukari mu maraso',

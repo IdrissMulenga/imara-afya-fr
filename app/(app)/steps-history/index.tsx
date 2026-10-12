@@ -13,7 +13,7 @@ import { FadeIn } from '@/components/motion';
 import { MiniStat } from '@/components/steps-ring';
 import { HabitHistoryList } from '@/components/habit-history';
 import { HabitTrendChart } from '@/components/habit-trend';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { APP_COPY } from '@/theme/copy-app';
 import { useSession } from '@/lib/session';
@@ -25,7 +25,7 @@ type Range = '14' | '30' | '90';
 const RANGES: Range[] = ['14', '30', '90'];
 
 const stepsOf = (day: HabitDay) => day.steps ?? 0;
-const formatSteps = (n: number) => Math.round(n).toLocaleString();
+const formatSteps = (n: number) => Math.round(n).toLocaleString(numberLocale());
 
 export default function StepsHistoryScreen() {
   const router = useRouter();

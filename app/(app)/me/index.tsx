@@ -7,7 +7,7 @@ import { Screen } from '@/components/screen';
 import { AppHeader } from '@/components/header';
 import { Section, FactRow, NavRow, Badge, Divider, IdentityCard } from '@/components/panel';
 import { FadeIn } from '@/components/motion';
-import { useLang } from '@/theme/i18n';
+import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY, ageFrom, bmiBand, shortDate } from '@/theme/copy-app';
@@ -72,12 +72,12 @@ export default function ProfileOverview() {
           <Divider />
           <FactRow
             label={a.height}
-            value={user.heightCm != null ? `${user.heightCm}` : a.notSet}
+            value={user.heightCm != null ? user.heightCm.toLocaleString(numberLocale()) : a.notSet}
             tone={user.heightCm != null ? 'normal' : 'muted'}
           />
           <FactRow
             label={a.weight}
-            value={user.weightKg != null ? `${user.weightKg}` : a.notSet}
+            value={user.weightKg != null ? user.weightKg.toLocaleString(numberLocale()) : a.notSet}
             tone={user.weightKg != null ? 'normal' : 'muted'}
           />
           <FactRow
