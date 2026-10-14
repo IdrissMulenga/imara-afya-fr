@@ -25,7 +25,7 @@ import {
   useCheckInSummary,
   useDeleteCheckIn,
 } from '@/components/checkin';
-import { useLang, type Lang } from '@/theme/i18n';
+import { useLang, type Lang, keyedByLanguage } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -42,7 +42,7 @@ const timeLabel = (at: string, lang: Lang): string => {
   }
 };
 
-export default function CheckInScreen() {
+function CheckInScreen() {
   const router = useRouter();
   const { lang } = useLang();
   const { c } = useTheme();
@@ -337,3 +337,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   art: { flexDirection: 'row', alignItems: 'center', gap: 10 },
 });
+
+export default keyedByLanguage(CheckInScreen);

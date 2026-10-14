@@ -16,7 +16,7 @@ import { SleepRing, SLEEP_COLOR } from '@/components/habit-art';
 import { HabitChart, HabitHistoryList, HabitStats } from '@/components/habit-history';
 import { SleepButtons, SleepPrompt, useHabitSummary } from '@/components/habits';
 import { SleepScheduleCard } from '@/components/sleep-schedule';
-import { useLang, numberLocale } from '@/theme/i18n';
+import { useLang, numberLocale, keyedByLanguage } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY } from '@/theme/copy-app';
@@ -28,7 +28,7 @@ import { HABIT_HISTORY, type HabitDay } from '@/graphql/habits';
 const hours = (day: HabitDay) => day.sleepHours ?? 0;
 const formatHours = (n: number) => `${(Math.round(n * 4) / 4).toLocaleString(numberLocale())} h`;
 
-export default function SleepScreen() {
+function SleepScreen() {
   const router = useRouter();
   const { lang } = useLang();
   const { c } = useTheme();
@@ -147,3 +147,5 @@ export default function SleepScreen() {
 const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', alignSelf: 'stretch', justifyContent: 'space-around' },
 });
+
+export default keyedByLanguage(SleepScreen);

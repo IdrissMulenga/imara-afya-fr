@@ -1,7 +1,7 @@
 // Welcome screen. Always deep blue, in both themes.
 // The language rotates every 3.8s until the user picks one or moves on to a form.
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Easing, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, StatusBar, Platform } from 'react-native';
 import { Pressable } from '@/components/pressable';
 import * as Haptics from 'expo-haptics';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -10,6 +10,7 @@ import { LANGS, useLang, COPY, type Lang } from '@/theme/i18n';
 import { welcome as W, font, radius, size } from '@/theme/tokens';
 import { Wordmark } from '@/components/wordmark';
 import { Glass } from '@/components/glass';
+import { IosSegmented } from '@/components/native-form';
 
 const CYCLE_MS = 3800;
 const OUT_MS = 200;
@@ -103,58 +104,72 @@ export default function Welcome() {
 
       <View style={styles.top}>
 
-        <View style={styles.langRow}>
-          {LANGS.map((code, i) => {
-            const on = code === lang;
-            return (
-              <Pressable
-                key={code}
-                onPress={() => {
-                  Haptics.selectionAsync().catch(() => {});
-                  pin();
-                  if (code !== lang) swapTo(code, true);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={COPY[code].label}
-                accessibilityState={{ selected: on }}
-                hitSlop={{ top: 6, bottom: 6, left: 3, right: 3 }}
-                ripple="light"
-                style={styles.langPress}
-              >
-                <Animated.View
-                  style={[
-                    styles.langPill,
-                    {
-                      backgroundColor: fills[i].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['rgba(247,245,240,0.06)', W.ink],
-                      }),
-                      borderColor: fills[i].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['rgba(247,245,240,0.28)', W.ink],
-                      }),
-                    },
-                  ]}
+        {/* iOS: a segmented control. Android: Material filter chips. */}
+        {Platform.OS === 'ios' ? (
+          <IosSegmented
+            options={LANGS.map((code) => ({ value: code, label: COPY[code].label }))}
+            value={lang}
+            onChange={(code) => {
+              pin();
+              swapTo(code, true);
+            }}
+            colours={{ track: 'rgba(247,245,240,0.12)', thumb: W.ink, text: W.inkSoft, textOn: W.onWhite }}
+            fontSize={12}
+          />
+        ) : (
+          <View style={styles.langRow}>
+            {LANGS.map((code, i) => {
+              const on = code === lang;
+              return (
+                <Pressable
+                  key={code}
+                  onPress={() => {
+                    Haptics.selectionAsync().catch(() => {});
+                    pin();
+                    if (code !== lang) swapTo(code, true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={COPY[code].label}
+                  accessibilityState={{ selected: on }}
+                  hitSlop={{ top: 6, bottom: 6, left: 3, right: 3 }}
+                  ripple="light"
+                  style={styles.langPress}
                 >
-                  <Animated.Text
-                    numberOfLines={1}
+                  <Animated.View
                     style={[
-                      styles.langLabel,
+                      styles.langPill,
                       {
-                        color: fills[i].interpolate({
+                        backgroundColor: fills[i].interpolate({
                           inputRange: [0, 1],
-                          outputRange: [W.inkSoft, W.onWhite],
+                          outputRange: ['rgba(247,245,240,0.06)', W.ink],
+                        }),
+                        borderColor: fills[i].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['rgba(247,245,240,0.28)', W.ink],
                         }),
                       },
                     ]}
                   >
-                    {COPY[code].label}
-                  </Animated.Text>
-                </Animated.View>
-              </Pressable>
-            );
-          })}
-        </View>
+                    <Animated.Text
+                      numberOfLines={1}
+                      style={[
+                        styles.langLabel,
+                        {
+                          color: fills[i].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [W.inkSoft, W.onWhite],
+                          }),
+                        },
+                      ]}
+                    >
+                      {COPY[code].label}
+                    </Animated.Text>
+                  </Animated.View>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
 
         <View style={{ height: 26 }} />
 
@@ -260,7 +275,7 @@ const styles = StyleSheet.create({
   langPress: { flex: 1 },
   langPill: {
     height: 40,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',

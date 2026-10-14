@@ -2,21 +2,18 @@
 // with updateProfile; terms acceptance is not stored on the server.
 import React, { useMemo, useState } from 'react';
 import { View, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import { Screen, Spacer, Gap } from '@/components/screen';
+import { Heading, PrimaryButton, ErrorNote, Footnote, type Choice } from '@/components/ui';
 import {
-  Heading,
-  Field,
-  PrimaryButton,
-  BackButton,
-  ErrorNote,
-  Footnote,
-  ChoiceRow,
-  CheckRow,
-  type Choice,
-} from '@/components/ui';
-import { Glass } from '@/components/glass';
+  AgreeRow,
+  ChoiceTiles,
+  FormField,
+  FormGroup,
+  NavBack,
+  type TileIcon,
+} from '@/components/native-form';
 import { Wordmark } from '@/components/wordmark';
 import { FadeIn } from '@/components/motion';
 import { useLang } from '@/theme/i18n';
@@ -27,6 +24,7 @@ import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
 import { openLegal } from '@/lib/legal';
 import { detectedZone } from '@/lib/reminder-plan';
+import { useErrorBanner } from '@/components/notice';
 import {
   SET_PREFERENCES,
   SIGNUP,
@@ -56,11 +54,13 @@ export default function Signup() {
   const { signIn, setUser } = useSession();
 
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const params = useLocalSearchParams<{ email?: string }>();
+  const [email, setEmail] = useState(params.email ?? '');
   const [password, setPassword] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState('');
+  useErrorBanner(error);
   const [field, setField] = useState<FieldKey>(null);
 
   const [signup, { loading }] = useMutation<{ signup: AuthPayload }>(SIGNUP);
@@ -73,10 +73,10 @@ export default function Signup() {
   // Only the terms box gates the button; everything else is validated by the backend.
   const ready = accepted;
 
-  const genders: readonly Choice<Gender>[] = [
-    { value: 'female', label: t.genderFemale },
-    { value: 'male', label: t.genderMale },
-    { value: 'unspecified', label: t.genderUnspecified },
+  const genders: readonly (Choice<Gender> & { icon: TileIcon })[] = [
+    { value: 'female', label: t.genderFemale, icon: 'female' },
+    { value: 'male', label: t.genderMale, icon: 'male' },
+    { value: 'unspecified', label: t.genderUnspecified, icon: 'person' },
   ];
 
   const submit = async () => {
@@ -131,14 +131,14 @@ export default function Signup() {
   return (
     <Screen>
       <FadeIn>
-        <BackButton onPress={() => router.replace('/(auth)/welcome')} label={t.back} />
+        <NavBack onPress={() => router.replace('/(auth)/welcome')} label={t.back} />
       </FadeIn>
 
-      <Gap h={24} />
+      <Gap h={12} />
       <FadeIn delay={60}>
-        <Wordmark />
+        <Wordmark hero tagline={t.tagline} />
       </FadeIn>
-      <Gap h={22} />
+      <Gap h={30} />
 
       <FadeIn delay={110}>
         <Heading title={t.signupTitle} sub={t.signupSub} />
@@ -147,81 +147,81 @@ export default function Signup() {
       <Gap h={22} />
 
       <FadeIn delay={170}>
-        <Glass style={{ padding: 18 }}>
-          <View style={{ gap: 16 }}>
-            <Field
-              label={t.nameLabel}
-              value={name}
-              onChangeText={setName}
-              placeholder={t.nameHint}
-              autoCapitalize="words"
-              autoComplete="name"
-              textContentType="name"
-              maxLength={80}
-              returnKeyType="next"
-            />
+        <FormGroup>
+          <FormField
+            label={t.nameLabel}
+            value={name}
+            onChangeText={setName}
+            placeholder={t.nameHint}
+            autoCapitalize="words"
+            autoComplete="name"
+            textContentType="name"
+            maxLength={80}
+            returnKeyType="next"
+          />
 
-            <Field
-              label={t.email}
-              value={email}
-              onChangeText={setEmail}
-              errorText={field === 'email' ? error : undefined}
-              placeholder={t.emailHint}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-              textContentType="emailAddress"
-              returnKeyType="next"
-            />
+          <FormField
+            label={t.email}
+            value={email}
+            onChangeText={setEmail}
+            errorText={field === 'email' ? error : undefined}
+            placeholder={t.emailHint}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            returnKeyType="next"
+          />
 
-            <Field
-              label={t.choosePassword}
-              value={password}
-              onChangeText={setPassword}
-              errorText={field === 'password' ? error : undefined}
-              secure
-              autoCapitalize="none"
-              autoComplete="new-password"
-              textContentType="newPassword"
-              returnKeyType="next"
-            />
+          <FormField
+            label={t.choosePassword}
+            value={password}
+            onChangeText={setPassword}
+            errorText={field === 'password' ? error : undefined}
+            secure
+            autoCapitalize="none"
+            autoComplete="new-password"
+            textContentType="newPassword"
+            returnKeyType="next"
+          />
+        </FormGroup>
 
-            {/* Password strength meter. */}
-            <View style={{ gap: 8, marginTop: -4 }}>
-              <View style={{ flexDirection: 'row', gap: 5 }}>
-                {[0, 1, 2, 3].map((i) => (
-                  <View
-                    key={i}
-                    style={{
-                      flex: 1,
-                      height: 5,
-                      borderRadius: 3,
-                      backgroundColor: i < score ? c.successMark : c.track,
-                    }}
-                  />
-                ))}
-              </View>
-              <Text style={[T.fine, { color: longEnough ? c.success : c.faint }]}>
-                {t.passwordRule}
-              </Text>
-            </View>
-
-            <ChoiceRow<Gender>
-              label={t.genderLabel}
-              options={genders}
-              value={gender}
-              onChange={setGender}
-              hint={t.genderWhy}
-            />
+        {/* Password strength meter. */}
+        <View style={{ gap: 8, marginTop: 12, paddingHorizontal: 4 }}>
+          <View style={{ flexDirection: 'row', gap: 5 }}>
+            {[0, 1, 2, 3].map((i) => (
+              <View
+                key={i}
+                style={{
+                  flex: 1,
+                  height: 5,
+                  borderRadius: 3,
+                  backgroundColor: i < score ? c.successMark : c.track,
+                }}
+              />
+            ))}
           </View>
-        </Glass>
+          <Text style={[T.fine, { color: longEnough ? c.success : c.faint }]}>
+            {t.passwordRule}
+          </Text>
+        </View>
+
+        <View style={{ marginTop: 22 }}>
+          <ChoiceTiles<Gender>
+            label={t.genderLabel}
+            options={genders}
+            value={gender}
+            onChange={setGender}
+            hint={t.genderWhy}
+          />
+        </View>
       </FadeIn>
 
       <Gap h={18} />
 
       <FadeIn delay={220}>
-        <CheckRow
+        <AgreeRow
           checked={accepted}
           onToggle={() => setAccepted((v) => !v)}
           accessibilityLabel={`${t.termsPrefix} ${t.termsLink} ${t.termsMiddle} ${t.privacyLink}`}
@@ -242,7 +242,7 @@ export default function Signup() {
               {t.privacyLink}
             </Text>
           </Text>
-        </CheckRow>
+        </AgreeRow>
       </FadeIn>
 
       {error && !field ? (

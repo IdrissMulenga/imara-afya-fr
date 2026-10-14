@@ -17,7 +17,7 @@ import { useStepsReminders } from '@/lib/steps-reminders';
 import { useMorningReminders } from '@/lib/morning-reminders';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
-import { useLang, COPY, LANGS, type Lang, numberLocale } from '@/theme/i18n';
+import { useLang, COPY, LANGS, type Lang, numberLocale, keyedByLanguage } from '@/theme/i18n';
 import { useTheme, THEME_MODES, type ThemeMode } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
 import { APP_COPY, ageFrom } from '@/theme/copy-app';
@@ -51,7 +51,7 @@ function Group({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function Settings() {
+function Settings() {
   const router = useRouter();
   const { t, lang, setLang } = useLang();
   const { c, mode, setMode } = useTheme();
@@ -391,3 +391,5 @@ export default function Settings() {
     </Screen>
   );
 }
+
+export default keyedByLanguage(Settings);

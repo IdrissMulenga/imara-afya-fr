@@ -14,6 +14,14 @@ export const currentLang = (): Lang => current;
 /** Locale for numbers in the app's language; Kirundi uses French conventions (8 000, 68,4). */
 export const numberLocale = (): string => (current === 'rn' ? 'fr' : current);
 
+/** The screen, remounted when the language changes so values it formatted follow the language. */
+export function keyedByLanguage<P extends object>(Page: React.ComponentType<P>) {
+  return function KeyedByLanguage(props: P) {
+    const { lang } = useLang();
+    return <Page key={lang} {...props} />;
+  };
+}
+
 type Copy = {
   label: string;
   tagline: string;
@@ -39,6 +47,8 @@ type Copy = {
   loginSub: string;
   forgot: string;
   loginCta: string;
+  /** Sign-in failed: wrong password or no account (the server does not say which). */
+  loginNoMatch: string;
   noAccount: string;
   createOne: string;
 
@@ -125,6 +135,7 @@ export const COPY: Record<Lang, Copy> = {
     loginSub: 'Sign in to pick up exactly where you left off.',
     forgot: 'Forgot password?',
     loginCta: 'Log in',
+    loginNoMatch: 'We couldn’t sign you in with that email and password. Check them, or create an account if you’re new.',
     noAccount: 'New to Imara Afya?',
     createOne: 'Create an account',
 
@@ -204,6 +215,7 @@ export const COPY: Record<Lang, Copy> = {
     loginSub: 'Connectez-vous pour reprendre là où vous vous êtes arrêté.',
     forgot: 'Mot de passe oublié ?',
     loginCta: 'Se connecter',
+    loginNoMatch: 'Connexion impossible avec cet e-mail et ce mot de passe. Vérifiez-les, ou créez un compte si vous êtes nouveau.',
     noAccount: 'Nouveau sur Imara Afya ?',
     createOne: 'Créer un compte',
 
@@ -283,6 +295,7 @@ export const COPY: Record<Lang, Copy> = {
     loginSub: 'Ingia uendelee pale ulipoishia.',
     forgot: 'Umesahau nywila?',
     loginCta: 'Ingia',
+    loginNoMatch: 'Hatukuweza kukuingiza kwa barua pepe na nywila hii. Ziangalie, au fungua akaunti kama wewe ni mpya.',
     noAccount: 'Mgeni kwenye Imara Afya?',
     createOne: 'Fungua akaunti',
 
@@ -362,6 +375,7 @@ export const COPY: Record<Lang, Copy> = {
     loginSub: 'Injira ubandanye aho wari uhagaze.',
     forgot: 'Wibagiye ijambo ryibanga?',
     loginCta: 'Injira',
+    loginNoMatch: 'Ntitwashoboye kukwinjiza n’iyo imeyili n’iryo jambo ryibanga. Bisuzume, canke ufungure konti nimba uri mushasha.',
     noAccount: 'Uri mushasha kuri Imara Afya?',
     createOne: 'Iyandikishe',
 

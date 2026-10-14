@@ -15,6 +15,7 @@ import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
 import { RESET_PASSWORD, type AuthPayload } from '@/graphql/auth';
+import { useErrorBanner } from '@/components/notice';
 
 const MIN_PASSWORD = 8;
 
@@ -29,6 +30,7 @@ export default function Reset() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  useErrorBanner(error);
 
   const [reset, { loading }] = useMutation<{ resetPassword: AuthPayload }>(RESET_PASSWORD);
 

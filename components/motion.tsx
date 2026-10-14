@@ -26,7 +26,10 @@ export function useReducedMotion(): boolean {
   return reduced;
 }
 
-// Fades content in with a small upward drift.
+// Liquid Glass and blur stay blank while a parent is translucent, so iOS skips the fade.
+const FADES = Platform.OS !== 'ios';
+
+// Fades content in with a small upward drift; on iOS it only drifts.
 export function FadeIn({
   children,
   delay = 0,
@@ -66,7 +69,7 @@ export function FadeIn({
     <Animated.View
       style={[
         {
-          opacity: progress,
+          opacity: FADES ? progress : 1,
           transform: [
             { translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [from, 0] }) },
           ],

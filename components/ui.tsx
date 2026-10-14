@@ -18,6 +18,8 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme/theme';
 import { radius, size, type as T, font } from '@/theme/tokens';
 import { Glass } from '@/components/glass';
+import { GlassView } from 'expo-glass-effect';
+import { LIQUID_GLASS } from '@/components/liquid-glass';
 import { useLang } from '@/theme/i18n';
 import { FadeIn, useFade, usePop, usePressScale, useShake } from '@/components/motion';
 
@@ -286,6 +288,29 @@ export function PrimaryButton({
   const spinner = useFade(!!busy, 140);
   const word = useFade(!busy, 140);
 
+  if (LIQUID_GLASS) {
+    return (
+      <View style={[{ opacity: off ? 0.55 : 1 }, style]}>
+        <GlassView isInteractive tintColor={c.primary} style={[styles.control, styles.clip]}>
+          <Pressable
+            onPress={onPress}
+            disabled={off}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            accessibilityState={{ disabled: !!off, busy: !!busy }}
+            style={[StyleSheet.absoluteFill, styles.centre]}
+          >
+            {busy ? (
+              <ActivityIndicator color={c.onPrimary} />
+            ) : (
+              <Text style={[T.button, { color: c.onPrimary }]}>{label}</Text>
+            )}
+          </Pressable>
+        </GlassView>
+      </View>
+    );
+  }
+
   return (
     <Animated.View
       style={[
@@ -337,6 +362,21 @@ export function QuietButton({ label, onPress }: { label: string; onPress: () => 
   const press = usePressScale(0.97);
   const [down, setDown] = useState(false);
   const lit = useFade(down, 110);
+
+  if (LIQUID_GLASS) {
+    return (
+      <GlassView isInteractive style={[styles.control, styles.clip]}>
+        <Pressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={label}
+          style={[StyleSheet.absoluteFill, styles.centre]}
+        >
+          <Text style={[T.button, { color: c.text }]}>{label}</Text>
+        </Pressable>
+      </GlassView>
+    );
+  }
 
   return (
     <Animated.View style={press.style}>

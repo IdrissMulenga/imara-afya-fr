@@ -138,6 +138,14 @@ export function NoticeProvider({ children }: { children: React.ReactNode }) {
 /** Shows success and failure notices, and toasts. */
 export const useNotice = () => useContext(NoticeContext);
 
+/** Shows `error` in the failure banner each time it becomes a new, non-empty message. */
+export function useErrorBanner(error: string) {
+  const { failure } = useNotice();
+  useEffect(() => {
+    if (error) failure(error);
+  }, [error, failure]);
+}
+
 function Banner({ notice, onDone }: { notice: Notice; onDone: () => void }) {
   const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();

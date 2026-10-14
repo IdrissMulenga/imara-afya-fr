@@ -8,7 +8,7 @@ import { Field, PrimaryButton, ErrorNote, LinkText } from '@/components/ui';
 import { AppHeader } from '@/components/header';
 import { Section, OptionList, SwitchRow, Divider } from '@/components/panel';
 import { FadeIn } from '@/components/motion';
-import { useNotice } from '@/components/notice';
+import { useNotice, useErrorBanner } from '@/components/notice';
 import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
@@ -48,6 +48,7 @@ export default function Preferences() {
   const [typing, setTyping] = useState(false);
 
   const [error, setError] = useState('');
+  useErrorBanner(error);
 
   const [setPreferences, { loading }] = useMutation<{ setPreferences: AuthUser }>(SET_PREFERENCES);
 

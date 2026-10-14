@@ -9,7 +9,7 @@ import { Field, PrimaryButton, ErrorNote, InfoNote } from '@/components/ui';
 import { AppHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
-import { useNotice } from '@/components/notice';
+import { useNotice, useErrorBanner } from '@/components/notice';
 import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
@@ -33,6 +33,7 @@ export default function ChangePassword() {
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  useErrorBanner(error);
 
   const [change, { loading }] = useMutation<{ changePassword: AuthPayload }>(CHANGE_PASSWORD);
 

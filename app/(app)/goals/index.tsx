@@ -9,7 +9,7 @@ import { PrimaryButton, ErrorNote, LinkText } from '@/components/ui';
 import { AppHeader } from '@/components/header';
 import { Section, Stepper } from '@/components/panel';
 import { FadeIn } from '@/components/motion';
-import { useNotice } from '@/components/notice';
+import { useNotice, useErrorBanner } from '@/components/notice';
 import { useLang, numberLocale } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
@@ -32,6 +32,7 @@ export default function Goals() {
   const [sleep, setSleep] = useState(user?.sleepGoalHours ?? 8);
 
   const [error, setError] = useState('');
+  useErrorBanner(error);
 
   const [setPreferences, { loading }] = useMutation<{ setPreferences: AuthUser }>(SET_PREFERENCES);
 

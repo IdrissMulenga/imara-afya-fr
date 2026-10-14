@@ -12,7 +12,7 @@ import { Section } from '@/components/panel';
 import { Glass } from '@/components/glass';
 import { Pressable } from '@/components/pressable';
 import { FadeIn } from '@/components/motion';
-import { useNotice } from '@/components/notice';
+import { useNotice, useErrorBanner } from '@/components/notice';
 import { StepsRing, MiniStat, stepsToKm } from '@/components/steps-ring';
 import { StepsPrompt, useHabitSummary } from '@/components/habits';
 import { HabitChart, HabitHistoryList, HabitStats } from '@/components/habit-history';
@@ -153,6 +153,7 @@ function ManualSteps({ day, current }: { day?: string; current: number }) {
   const client = useApolloClient();
   const [text, setText] = useState(current ? String(current) : '');
   const [error, setError] = useState('');
+  useErrorBanner(error);
   const [loading, setLoading] = useState(false);
 
   const steps = parseSteps(text);

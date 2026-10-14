@@ -12,7 +12,7 @@ export const font = {
 // The welcome screen uses this blue in both themes.
 export const welcome = {
   bg: '#0F3A72',
-  glow: 'rgba(46,163,76,0.6)',
+  glow: '#2ea34c99',
   ring: 'rgba(227,239,239,0.22)',
   ink: '#F6F7F9',
   inkSoft: 'rgba(247,245,240,0.72)',

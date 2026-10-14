@@ -10,6 +10,7 @@ import { FadeIn } from '@/components/motion';
 import { useLang } from '@/theme/i18n';
 import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
 import { REQUEST_PASSWORD_RESET } from '@/graphql/auth';
+import { useErrorBanner } from '@/components/notice';
 
 export default function Forgot() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function Forgot() {
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  useErrorBanner(error);
   const [field, setField] = useState<FieldKey>(null);
 
   const [request, { loading }] = useMutation<{ requestPasswordReset: boolean }>(REQUEST_PASSWORD_RESET);

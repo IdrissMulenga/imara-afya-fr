@@ -1,8 +1,10 @@
-// Frosted panel: real blur on iOS, a translucent fill with a hairline edge on Android
-// (blur is too slow on low-end phones).
+// Frosted panel: Apple's Liquid Glass on iOS 26 and later, real blur on older iOS, a translucent
+// fill with a hairline edge on Android (blur is too slow on low-end phones).
 import React from 'react';
 import { View, Platform, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { GlassView } from 'expo-glass-effect';
+import { LIQUID_GLASS } from '@/components/liquid-glass';
 import { useTheme } from '@/theme/theme';
 import { radius } from '@/theme/tokens';
 
@@ -47,6 +49,14 @@ export function Glass({
 
   // Shadow in light mode on iOS only, on a wrapper because the panel clips its children.
   const lift = !flat && !onDark && Platform.OS === 'ios';
+
+  if (LIQUID_GLASS) {
+    return (
+      <GlassView glassEffectStyle="regular" colorScheme={onDark ? 'dark' : 'light'} style={[skin, style]}>
+        {children}
+      </GlassView>
+    );
+  }
 
   const useRealBlur = Platform.OS === 'ios' || force;
 

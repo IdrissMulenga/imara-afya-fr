@@ -20,7 +20,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_GRAPHQL_URL": "https://REPLACE-WITH-YOUR-STAGING-HOST/graphql"
+        "EXPO_PUBLIC_GRAPHQL_URL": "https://afya-api.imaracompany.com/graphql"
       }
     },
     "production": {
@@ -29,7 +29,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_GRAPHQL_URL": "https://REPLACE-WITH-YOUR-PRODUCTION-HOST/graphql"
+        "EXPO_PUBLIC_GRAPHQL_URL": "https://afya-api.imaracompany.com/graphql"
       }
     }
   },

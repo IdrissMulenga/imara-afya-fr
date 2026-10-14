@@ -48,6 +48,8 @@ const ITEM_HEIGHT = 58;
 const PILL = 999;
 // Material 3 navigation bar: bar height and the indicator behind the active icon.
 const NAV_HEIGHT = 80;
+// The native iOS tab bar's height above the home indicator.
+const IOS_TAB_BAR = 62;
 const INDICATOR_WIDTH = 64;
 const INDICATOR_HEIGHT = 32;
 
@@ -56,9 +58,8 @@ export function useMenuSpace(): { bottom: number; height: number } {
   const insets = useSafeAreaInsets();
   // Android's bar sits on the bottom edge and covers the gesture-bar inset.
   if (Platform.OS === 'android') return { bottom: 0, height: NAV_HEIGHT + insets.bottom };
-  // Just above the home indicator / gesture bar, overlapping part of its empty inset,
-  // with a small margin on phones that have none.
-  return { bottom: Math.max(insets.bottom - 10, 10), height: ITEM_HEIGHT + DOCK_PADDING * 2 + 2 };
+  // The native iOS tab bar sits on the bottom edge, above the home indicator.
+  return { bottom: 0, height: insets.bottom + IOS_TAB_BAR };
 }
 
 // Whether the keyboard is on screen; the menu hides while typing.

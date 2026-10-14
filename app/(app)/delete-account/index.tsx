@@ -17,6 +17,7 @@ import { useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { clearQueue } from '@/lib/offline-queue';
 import { DELETE_ACCOUNT } from '@/graphql/auth';
+import { useErrorBanner } from '@/components/notice';
 
 export default function DeleteAccount() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function DeleteAccount() {
   const [password, setPassword] = useState('');
   const [typed, setTyped] = useState('');
   const [error, setError] = useState('');
+  useErrorBanner(error);
 
   const [remove, { loading }] = useMutation<{ deleteAccount: boolean }>(DELETE_ACCOUNT);
 

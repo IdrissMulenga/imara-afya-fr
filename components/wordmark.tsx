@@ -1,4 +1,5 @@
-// The logo. onDark puts it on a white rounded plate for the welcome screen.
+// The logo. onDark puts it on a white rounded plate for the welcome screen; hero stacks a large
+// logo over the name for the sign-in forms.
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { useTheme } from '@/theme/theme';
@@ -7,9 +8,32 @@ import { font, welcome } from '@/theme/tokens';
 const LOGO = require('@/assets/images/imara-afya-logo.png');
 
 /** The Imara Afya name as a logo, with an optional tagline. */
-export function Wordmark({ onDark = false, tagline }: { onDark?: boolean; tagline?: string }) {
-  const { c } = useTheme();
+export function Wordmark({
+  onDark = false,
+  tagline,
+  hero = false,
+}: {
+  onDark?: boolean;
+  tagline?: string;
+  /** Large and centred: the logo on its plate, the name and tagline beneath. */
+  hero?: boolean;
+}) {
+  const { c, isDark } = useTheme();
   const ink = onDark ? welcome.ink : c.text;
+
+  if (hero) {
+    return (
+      <View style={styles.hero}>
+        <View style={[styles.plate, styles.heroPlate, isDark ? null : styles.softShadow]}>
+          <Image source={LOGO} style={{ width: 54, height: 54 }} resizeMode="contain" />
+        </View>
+        <View style={{ alignItems: 'center', gap: 5 }}>
+          <Text style={[styles.heroName, { color: ink }]}>Imara Afya</Text>
+          {tagline ? <Text style={[styles.tagline, { color: c.faint }]}>{tagline}</Text> : null}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.row}>
@@ -53,7 +77,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 6,
   },
+  hero: { alignItems: 'center', gap: 16 },
+  heroPlate: { width: 84, height: 84, borderRadius: 24 },
+  softShadow: { shadowOpacity: 0.12, elevation: 3 },
   name: { fontFamily: font.display, fontSize: 19, letterSpacing: -0.2 },
+  heroName: { fontFamily: font.display, fontSize: 28, letterSpacing: -0.4 },
   tagline: {
     fontFamily: font.bodyMedium,
     fontSize: 10.5,

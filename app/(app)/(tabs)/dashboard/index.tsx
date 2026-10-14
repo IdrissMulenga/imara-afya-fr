@@ -18,7 +18,7 @@ import { TodayGlance } from '@/components/today-glance';
 import { ProfileHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
-import { useLang, type Lang } from '@/theme/i18n';
+import { useLang, type Lang, keyedByLanguage } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY, greetingFor } from '@/theme/copy-app';
@@ -54,7 +54,7 @@ function SectionTitle({ icon, title }: { icon: IconName; title: string }) {
   );
 }
 
-export default function Dashboard() {
+function Dashboard() {
   const router = useRouter();
   const { t, lang } = useLang();
   const { c } = useTheme();
@@ -210,3 +210,5 @@ const styles = StyleSheet.create({
   waiting: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 26, marginBottom: 10, marginLeft: 2 },
 });
+
+export default keyedByLanguage(Dashboard);

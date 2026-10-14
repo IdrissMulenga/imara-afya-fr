@@ -14,6 +14,7 @@ import { type as T } from '@/theme/tokens';
 import { useSession } from '@/lib/session';
 import { errorWithWait } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
+import { useErrorBanner } from '@/components/notice';
 import {
   VERIFY_LOGIN_OTP,
   RESEND_LOGIN_OTP,
@@ -48,6 +49,7 @@ export default function Verify() {
 
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  useErrorBanner(error);
   // Both countdowns run to fixed times, so time spent in the email app is counted.
   const [now, setNow] = useState(() => Date.now());
   const [cooldownUntil, setCooldownUntil] = useState(() => Date.now() + RESEND_COOLDOWN * 1000);

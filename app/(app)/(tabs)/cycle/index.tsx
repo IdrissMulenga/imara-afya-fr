@@ -35,7 +35,7 @@ import {
   useCycleDays,
   useCycleSummary,
 } from '@/components/cycle';
-import { useLang, type Lang } from '@/theme/i18n';
+import { useLang, type Lang, keyedByLanguage } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { APP_COPY, type AppCopy } from '@/theme/copy-app';
@@ -71,7 +71,7 @@ function predictionLine(s: CycleSummary, today: string, lang: Lang, a: AppCopy):
   return a.periodLate.replace('{n}', String(-n));
 }
 
-export default function CycleScreen() {
+function CycleScreen() {
   const router = useRouter();
   const { lang } = useLang();
   const { c } = useTheme();
@@ -487,3 +487,5 @@ const styles = StyleSheet.create({
   dotBig: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderStyle: 'dashed' },
   note: { flexDirection: 'row', gap: 8, paddingHorizontal: 4 },
 });
+
+export default keyedByLanguage(CycleScreen);

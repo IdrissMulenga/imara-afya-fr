@@ -10,7 +10,7 @@ import { AppHeader } from '@/components/header';
 import { Section, Badge, FactRow, Divider } from '@/components/panel';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { FadeIn } from '@/components/motion';
-import { useNotice } from '@/components/notice';
+import { useNotice, useErrorBanner } from '@/components/notice';
 import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T } from '@/theme/tokens';
@@ -45,6 +45,7 @@ export default function ProfileSettings() {
   const [weightKg, setWeightKg] = useState(textOf(user?.weightKg));
 
   const [error, setError] = useState('');
+  useErrorBanner(error);
 
   const [updateProfile, { loading }] = useMutation<{ updateProfile: AuthUser }>(UPDATE_PROFILE);
 

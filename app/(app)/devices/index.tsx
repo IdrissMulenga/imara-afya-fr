@@ -10,7 +10,7 @@ import { AppHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
 import { Badge, Divider } from '@/components/panel';
 import { FadeIn } from '@/components/motion';
-import { useNotice } from '@/components/notice';
+import { useNotice, useErrorBanner } from '@/components/notice';
 import { useLang } from '@/theme/i18n';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
@@ -26,6 +26,7 @@ export default function Devices() {
   const notice = useNotice();
 
   const [error, setError] = useState('');
+  useErrorBanner(error);
 
   // Always fetched from the network. Apollo 4's useQuery returns the error (no onError).
   const { data, loading, error: queryError, refetch } = useQuery<{

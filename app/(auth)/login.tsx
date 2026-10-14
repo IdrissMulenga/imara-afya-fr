@@ -4,15 +4,16 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import { Screen, Spacer, Gap } from '@/components/screen';
-import { Heading, Field, PrimaryButton, BackButton, ErrorNote, Footnote, LinkText } from '@/components/ui';
+import { Heading, PrimaryButton, QuietButton, ErrorNote, Footnote, LinkText } from '@/components/ui';
+import { FormField, FormGroup, NavBack } from '@/components/native-form';
 import { Wordmark } from '@/components/wordmark';
-import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
 import { useLang } from '@/theme/i18n';
 import { useSession } from '@/lib/session';
 import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
 import { LOGIN, type LoginResult } from '@/graphql/auth';
+import { useErrorBanner } from '@/components/notice';
 
 export default function Login() {
   const router = useRouter();
@@ -24,13 +25,17 @@ export default function Login() {
 
   // One error at a time. field is null when it is about the whole form.
   const [error, setError] = useState('');
+  useErrorBanner(error);
   const [field, setField] = useState<FieldKey>(null);
+  // Wrong password or no account: offers sign-up next to the message.
+  const [noMatch, setNoMatch] = useState(false);
 
   const [login, { loading }] = useMutation<{ login: LoginResult }>(LOGIN);
 
   const submit = async () => {
     setError('');
     setField(null);
+    setNoMatch(false);
 
     // No client-side validation; the backend returns the errors.
     try {
@@ -55,7 +60,11 @@ export default function Login() {
       });
     } catch (e) {
       const failure = readError(e, lang);
-      setError(errorWithWait(e, lang));
+      // The server gives one answer for a wrong password and an unknown email, so the
+      // message covers both and offers sign-up.
+      const mismatch = failure.code === 'INVALID_CREDENTIALS';
+      setNoMatch(mismatch);
+      setError(mismatch ? t.loginNoMatch : errorWithWait(e, lang));
       setField(fieldOf(failure.code));
     }
   };
@@ -63,14 +72,14 @@ export default function Login() {
   return (
     <Screen>
       <FadeIn>
-        <BackButton onPress={() => router.replace('/(auth)/welcome')} label={t.back} />
+        <NavBack onPress={() => router.replace('/(auth)/welcome')} label={t.back} />
       </FadeIn>
 
-      <Gap h={24} />
+      <Gap h={12} />
       <FadeIn delay={60}>
-        <Wordmark />
+        <Wordmark hero tagline={t.tagline} />
       </FadeIn>
-      <Gap h={22} />
+      <Gap h={30} />
 
       <FadeIn delay={110}>
         <Heading title={t.loginTitle} sub={t.loginSub} />
@@ -79,35 +88,33 @@ export default function Login() {
       <Gap h={22} />
 
       <FadeIn delay={170}>
-        <Glass style={{ padding: 18 }}>
-          <View style={{ gap: 16 }}>
-            <Field
-              label={t.email}
-              value={email}
-              onChangeText={setEmail}
-              errorText={field === 'email' ? error : undefined}
-              placeholder={t.emailHint}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-              textContentType="emailAddress"
-              returnKeyType="next"
-            />
-            <Field
-              label={t.password}
-              value={password}
-              onChangeText={setPassword}
-              errorText={field === 'password' ? error : undefined}
-              secure
-              autoCapitalize="none"
-              autoComplete="current-password"
-              textContentType="password"
-              returnKeyType="go"
-              onSubmitEditing={submit}
-            />
-          </View>
-        </Glass>
+        <FormGroup>
+          <FormField
+            label={t.email}
+            value={email}
+            onChangeText={setEmail}
+            errorText={field === 'email' ? error : undefined}
+            placeholder={t.emailHint}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            returnKeyType="next"
+          />
+          <FormField
+            label={t.password}
+            value={password}
+            onChangeText={setPassword}
+            errorText={field === 'password' ? error : undefined}
+            secure
+            autoCapitalize="none"
+            autoComplete="current-password"
+            textContentType="password"
+            returnKeyType="go"
+            onSubmitEditing={submit}
+          />
+        </FormGroup>
       </FadeIn>
 
       <FadeIn delay={220} style={{ alignItems: 'flex-end', marginTop: 12 }}>
@@ -116,8 +123,16 @@ export default function Login() {
 
       {/* Form-level errors (not tied to one field). */}
       {error && !field ? (
-        <View style={{ marginTop: 16 }}>
+        <View style={{ marginTop: 16, gap: 10 }}>
           <ErrorNote message={error} />
+          {noMatch ? (
+            <QuietButton
+              label={t.createOne}
+              onPress={() =>
+                router.replace({ pathname: '/(auth)/signup', params: { email: email.trim() } })
+              }
+            />
+          ) : null}
         </View>
       ) : null}
 

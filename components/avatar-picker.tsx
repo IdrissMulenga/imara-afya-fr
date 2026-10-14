@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Avatar } from '@/components/panel';
 import { LinkText, ErrorNote } from '@/components/ui';
 import { useFade, usePressScale } from '@/components/motion';
-import { useNotice } from '@/components/notice';
+import { useNotice, useErrorBanner } from '@/components/notice';
 import { useTheme } from '@/theme/theme';
 import { type as T, font } from '@/theme/tokens';
 import { useLang } from '@/theme/i18n';
@@ -25,6 +25,7 @@ export function AvatarPicker() {
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  useErrorBanner(error);
   const [denied, setDenied] = useState(false);
 
   const press = usePressScale(0.94);
