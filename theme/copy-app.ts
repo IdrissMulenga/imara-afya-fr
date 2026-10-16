@@ -135,6 +135,10 @@ export type AppCopy = {
   emailMyDataSent: string;
   deleteWarning: string;
   deleteConfirmLabel: string;
+  /** Accounts made with Google or Apple confirm a deletion by signing in again. */
+  deleteProviderNote: string;
+  deleteConfirmGoogle: string;
+  deleteConfirmApple: string;
   deleteCta: string;
   deleteTypeLabel: string;
   deleteTypeWord: string;
@@ -738,6 +742,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     deleteWarning:
       'This erases your account and every piece of health data in it. It cannot be undone and we cannot get it back for you.',
     deleteConfirmLabel: 'YOUR PASSWORD',
+    deleteProviderNote: 'To confirm, sign in again with the account you use for Imara Afya.',
+    deleteConfirmGoogle: 'Confirm with Google and delete',
+    deleteConfirmApple: 'Confirm with Apple and delete',
     deleteCta: 'Delete everything',
     deleteTypeLabel: 'TYPE DELETE TO CONFIRM',
     deleteTypeWord: 'DELETE',
@@ -1346,6 +1353,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     deleteWarning:
       'Ceci efface votre compte et toutes vos données de santé. C’est irréversible et nous ne pourrons rien récupérer pour vous.',
     deleteConfirmLabel: 'VOTRE MOT DE PASSE',
+    deleteProviderNote: 'Pour confirmer, reconnectez-vous avec le compte que vous utilisez pour Imara Afya.',
+    deleteConfirmGoogle: 'Confirmer avec Google et supprimer',
+    deleteConfirmApple: 'Confirmer avec Apple et supprimer',
     deleteCta: 'Tout supprimer',
     deleteTypeLabel: 'TAPEZ SUPPRIMER POUR CONFIRMER',
     deleteTypeWord: 'SUPPRIMER',
@@ -1954,6 +1964,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     deleteWarning:
       'Hii inafuta akaunti yako na kila taarifa ya afya iliyo ndani yake. Haiwezi kurudishwa na hatuwezi kuirejesha kwako.',
     deleteConfirmLabel: 'NENOSIRI LAKO',
+    deleteProviderNote: 'Ili kuthibitisha, ingia tena kwa akaunti unayotumia kwa Imara Afya.',
+    deleteConfirmGoogle: 'Thibitisha kwa Google na ufute',
+    deleteConfirmApple: 'Thibitisha kwa Apple na ufute',
     deleteCta: 'Futa kila kitu',
     deleteTypeLabel: 'ANDIKA FUTA ILI KUTHIBITISHA',
     deleteTypeWord: 'FUTA',
@@ -2562,6 +2575,9 @@ export const APP_COPY: Record<Lang, AppCopy> = {
     deleteWarning:
       'Ibi bihanagura konte yawe n’amakuru yose y’amagara ari muri yo. Ntibishobora kugarukwa kandi ntidushobora kubigarukana.',
     deleteConfirmLabel: 'IJAMBO RYAWE RY’IBANGA',
+    deleteProviderNote: 'Kugira wemeze, subira winjire ukoresheje konte ukoresha kuri Imara Afya.',
+    deleteConfirmGoogle: 'Emeza na Google maze ufute',
+    deleteConfirmApple: 'Emeza na Apple maze ufute',
     deleteCta: 'Hanagura vyose',
     deleteTypeLabel: 'ANDIKA HANAGURA KWEMEZA',
     deleteTypeWord: 'HANAGURA',

@@ -49,6 +49,13 @@ type Copy = {
   loginCta: string;
   /** Sign-in failed: wrong password or no account (the server does not say which). */
   loginNoMatch: string;
+  continueGoogle: string;
+  /** Between the Google / Apple buttons and the email form. */
+  orDivider: string;
+  aboutTitle: string;
+  aboutSub: string;
+  aboutCta: string;
+  aboutSkip: string;
   noAccount: string;
   createOne: string;
 
@@ -136,6 +143,12 @@ export const COPY: Record<Lang, Copy> = {
     forgot: 'Forgot password?',
     loginCta: 'Log in',
     loginNoMatch: 'We couldn’t sign you in with that email and password. Check them, or create an account if you’re new.',
+    continueGoogle: 'Continue with Google',
+    orDivider: 'or',
+    aboutTitle: 'About you',
+    aboutSub: 'A few details so the app fits you. You can change them later.',
+    aboutCta: 'Continue',
+    aboutSkip: 'Skip for now',
     noAccount: 'New to Imara Afya?',
     createOne: 'Create an account',
 
@@ -216,6 +229,12 @@ export const COPY: Record<Lang, Copy> = {
     forgot: 'Mot de passe oublié ?',
     loginCta: 'Se connecter',
     loginNoMatch: 'Connexion impossible avec cet e-mail et ce mot de passe. Vérifiez-les, ou créez un compte si vous êtes nouveau.',
+    continueGoogle: 'Continuer avec Google',
+    orDivider: 'ou',
+    aboutTitle: 'À propos de vous',
+    aboutSub: 'Quelques détails pour adapter l’application. Modifiables plus tard.',
+    aboutCta: 'Continuer',
+    aboutSkip: 'Plus tard',
     noAccount: 'Nouveau sur Imara Afya ?',
     createOne: 'Créer un compte',
 
@@ -296,6 +315,12 @@ export const COPY: Record<Lang, Copy> = {
     forgot: 'Umesahau nywila?',
     loginCta: 'Ingia',
     loginNoMatch: 'Hatukuweza kukuingiza kwa barua pepe na nywila hii. Ziangalie, au fungua akaunti kama wewe ni mpya.',
+    continueGoogle: 'Endelea na Google',
+    orDivider: 'au',
+    aboutTitle: 'Kuhusu wewe',
+    aboutSub: 'Maelezo machache ili programu ikufae. Unaweza kuyabadilisha baadaye.',
+    aboutCta: 'Endelea',
+    aboutSkip: 'Ruka kwa sasa',
     noAccount: 'Mgeni kwenye Imara Afya?',
     createOne: 'Fungua akaunti',
 
@@ -376,6 +401,12 @@ export const COPY: Record<Lang, Copy> = {
     forgot: 'Wibagiye ijambo ryibanga?',
     loginCta: 'Injira',
     loginNoMatch: 'Ntitwashoboye kukwinjiza n’iyo imeyili n’iryo jambo ryibanga. Bisuzume, canke ufungure konti nimba uri mushasha.',
+    continueGoogle: 'Bandanya na Google',
+    orDivider: 'canke',
+    aboutTitle: 'Ivyerekeye',
+    aboutSub: 'Amakuru makeyi kugira porogaramu ikubereye. Uzoyahindura hanyuma.',
+    aboutCta: 'Bandanya',
+    aboutSkip: 'Simba ubu',
     noAccount: 'Uri mushasha kuri Imara Afya?',
     createOne: 'Iyandikishe',
 

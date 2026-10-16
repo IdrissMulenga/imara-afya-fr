@@ -14,6 +14,7 @@ import { readError, errorWithWait, fieldOf, type FieldKey } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
 import { LOGIN, type LoginResult } from '@/graphql/auth';
 import { useErrorBanner } from '@/components/notice';
+import { SocialButtons } from '@/components/social-buttons';
 
 export default function Login() {
   const router = useRouter();
@@ -86,6 +87,11 @@ export default function Login() {
       </FadeIn>
 
       <Gap h={22} />
+
+      <FadeIn delay={150}>
+        <SocialButtons />
+      </FadeIn>
+      <Gap h={12} />
 
       <FadeIn delay={170}>
         <FormGroup>

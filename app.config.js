@@ -20,5 +20,16 @@ module.exports = () => {
     ];
   });
 
+  // Google Sign-In on iOS needs the reversed iOS client id as a URL scheme; it is added once
+  // that client exists.
+  const iosClient = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+  if (iosClient) {
+    const scheme = `com.googleusercontent.apps.${iosClient.replace('.apps.googleusercontent.com', '')}`;
+    expo.plugins = [
+      ...expo.plugins,
+      ['@react-native-google-signin/google-signin', { iosUrlScheme: scheme }],
+    ];
+  }
+
   return { ...base, expo };
 };

@@ -25,6 +25,7 @@ import { getDeviceCredentials } from '@/lib/device';
 import { openLegal } from '@/lib/legal';
 import { detectedZone } from '@/lib/reminder-plan';
 import { useErrorBanner } from '@/components/notice';
+import { SocialButtons } from '@/components/social-buttons';
 import {
   SET_PREFERENCES,
   SIGNUP,
@@ -145,6 +146,11 @@ export default function Signup() {
       </FadeIn>
 
       <Gap h={22} />
+
+      <FadeIn delay={150}>
+        <SocialButtons />
+      </FadeIn>
+      <Gap h={12} />
 
       <FadeIn delay={170}>
         <FormGroup>

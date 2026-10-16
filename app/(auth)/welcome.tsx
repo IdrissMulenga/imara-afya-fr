@@ -11,6 +11,7 @@ import { welcome as W, font, radius, size } from '@/theme/tokens';
 import { Wordmark } from '@/components/wordmark';
 import { Glass } from '@/components/glass';
 import { IosSegmented } from '@/components/native-form';
+import { SocialButtons } from '@/components/social-buttons';
 
 const CYCLE_MS = 3800;
 const OUT_MS = 200;
@@ -187,6 +188,7 @@ export default function Welcome() {
 
       <Glass tone="dark" intensity={18} style={styles.panel} radius={22}>
         <View style={styles.panelInner}>
+          <SocialButtons onDark />
           <Pressable
             android_ripple={{ color: 'rgba(15,58,114,0.14)', foreground: true }}
             onPress={() => goTo('/(auth)/signup')}

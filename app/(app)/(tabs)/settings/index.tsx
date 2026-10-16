@@ -348,11 +348,14 @@ function Settings() {
       <FadeIn delay={340}>
         <SectionTitle text={a.sectionSecurity} />
         <Group>
-          <NavRow
-            label={a.changePassword}
-            hint={a.changePasswordNote}
-            onPress={() => router.push('/(app)/password')}
-          />
+          {/* Accounts made with Google or Apple have no password to change. */}
+          {user?.hasPassword !== false ? (
+            <NavRow
+              label={a.changePassword}
+              hint={a.changePasswordNote}
+              onPress={() => router.push('/(app)/password')}
+            />
+          ) : null}
           <NavRow
             label={a.trustedDevices}
             hint={a.trustedDevicesNote}

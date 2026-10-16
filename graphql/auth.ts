@@ -8,6 +8,8 @@ export const USER_FIELDS = gql`
     id
     email
     emailVerified
+    hasPassword
+    signInMethods
 
     name
     photoUrl
@@ -40,6 +42,33 @@ export const SIGNUP = gql`
   mutation Signup($input: SignUpInput!) {
     signup(input: $input) {
       token
+      user {
+        ...UserFields
+      }
+    }
+  }
+`;
+
+// Google and Apple sign-in; newAccount is true when the account was just created.
+export const SIGN_IN_WITH_GOOGLE = gql`
+  ${USER_FIELDS}
+  mutation SignInWithGoogle($input: GoogleSignInInput!) {
+    signInWithGoogle(input: $input) {
+      token
+      newAccount
+      user {
+        ...UserFields
+      }
+    }
+  }
+`;
+
+export const SIGN_IN_WITH_APPLE = gql`
+  ${USER_FIELDS}
+  mutation SignInWithApple($input: AppleSignInInput!) {
+    signInWithApple(input: $input) {
+      token
+      newAccount
       user {
         ...UserFields
       }
@@ -169,6 +198,9 @@ export type AuthUser = {
   id: string;
   email: string;
   emailVerified: boolean;
+  /** False for an account made with Google or Apple; missing in a profile cached before. */
+  hasPassword?: boolean;
+  signInMethods?: ('PASSWORD' | 'GOOGLE' | 'APPLE')[];
 
   name: string;
   photoUrl: string;
@@ -198,7 +230,7 @@ export type AuthUser = {
   createdAt: string;
 };
 
-export type AuthPayload = { token: string; user: AuthUser };
+export type AuthPayload = { token: string; user: AuthUser; newAccount?: boolean | null };
 
 export type OtpChallenge = {
   challenge: boolean;
@@ -278,7 +310,7 @@ export type TrustedDevice = {
   current: boolean;
 };
 
-// Requires the current password.
+// A password, or for an account without one a fresh Google or Apple sign-in.
 export const DELETE_ACCOUNT = gql`
   mutation DeleteAccount($input: DeleteAccountInput!) {
     deleteAccount(input: $input)

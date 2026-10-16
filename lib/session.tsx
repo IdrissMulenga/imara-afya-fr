@@ -238,3 +238,17 @@ async function revalidate(
 }
 
 export const useSession = () => useContext(SessionContext);
+
+let nextLanding: string | null = null;
+
+/** Where the next sign-in lands instead of the dashboard, e.g. "About you" for a new account. */
+export const setNextLanding = (path: string | null) => {
+  nextLanding = path;
+};
+
+/** Reads and clears the landing set by setNextLanding. */
+export const takeNextLanding = (): string | null => {
+  const path = nextLanding;
+  nextLanding = null;
+  return path;
+};

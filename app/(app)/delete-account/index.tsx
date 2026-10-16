@@ -1,11 +1,12 @@
-// Delete account: its own screen, typing DELETE (translated), and the account password.
+// Delete account: its own screen, typing DELETE (translated), and the account password. An account
+// made with Google or Apple confirms by signing in with them again instead.
 // The backend deletes the account, its trusted devices and codes.
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import { Screen, Spacer, Gap } from '@/components/screen';
-import { Field, PrimaryButton, ErrorNote } from '@/components/ui';
+import { Field, PrimaryButton, QuietButton, ErrorNote } from '@/components/ui';
 import { AppHeader } from '@/components/header';
 import { Glass } from '@/components/glass';
 import { FadeIn } from '@/components/motion';
@@ -18,6 +19,7 @@ import { errorMessage } from '@/lib/errors';
 import { clearQueue } from '@/lib/offline-queue';
 import { DELETE_ACCOUNT } from '@/graphql/auth';
 import { useErrorBanner } from '@/components/notice';
+import { appleAvailable, appleCredential, googleAvailable, googleIdToken } from '@/lib/social';
 
 export default function DeleteAccount() {
   const router = useRouter();
@@ -37,12 +39,28 @@ export default function DeleteAccount() {
   const wordMatches = typed.trim().toUpperCase() === a.deleteTypeWord.toUpperCase();
   const ready = wordMatches && password.length > 0;
 
-  const submit = async () => {
-    setError('');
-    if (!ready) return;
+  // Accounts made with Google or Apple have no password; they confirm with that provider.
+  const viaProvider = user?.hasPassword === false;
+  const methods = user?.signInMethods ?? [];
+  const linkedApple = methods.includes('APPLE');
+  const [apple, setApple] = useState(false);
+  useEffect(() => {
+    if (!linkedApple) return;
+    let alive = true;
+    appleAvailable().then((ok) => {
+      if (alive) setApple(ok);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [linkedApple]);
+  const google = methods.includes('GOOGLE') && googleAvailable();
 
+  type Proof = { password: string } | { googleIdToken: string } | { apple: { identityToken: string; nonce: string } };
+
+  const erase = async (proof: Proof) => {
     try {
-      const { data } = await remove({ variables: { input: { password } } });
+      const { data } = await remove({ variables: { input: proof } });
       if (!data?.deleteAccount) return;
 
       // Clear locally only; logout would fail because the account no longer exists. Entries saved
@@ -50,6 +68,30 @@ export default function DeleteAccount() {
       await clearQueue();
       await forgetSession();
       router.replace('/(auth)/welcome');
+    } catch (e) {
+      setError(errorMessage(e, lang));
+    }
+  };
+
+  const submit = async () => {
+    setError('');
+    if (!ready) return;
+    await erase({ password });
+  };
+
+  const confirmWith = async (provider: 'google' | 'apple') => {
+    setError('');
+    if (!wordMatches) return;
+    try {
+      if (provider === 'google') {
+        const idToken = await googleIdToken();
+        if (idToken) await erase({ googleIdToken: idToken });
+      } else {
+        const credential = await appleCredential();
+        if (credential) {
+          await erase({ apple: { identityToken: credential.identityToken, nonce: credential.nonce } });
+        }
+      }
     } catch (e) {
       setError(errorMessage(e, lang));
     }
@@ -98,17 +140,21 @@ export default function DeleteAccount() {
               autoCorrect={false}
             />
 
-            <Field
-              label={a.deleteConfirmLabel}
-              value={password}
-              onChangeText={setPassword}
-              secure
-              autoCapitalize="none"
-              autoComplete="current-password"
-              textContentType="password"
-              returnKeyType="go"
-              onSubmitEditing={ready ? submit : undefined}
-            />
+            {viaProvider ? (
+              <Text style={[T.body, { color: c.muted }]}>{a.deleteProviderNote}</Text>
+            ) : (
+              <Field
+                label={a.deleteConfirmLabel}
+                value={password}
+                onChangeText={setPassword}
+                secure
+                autoCapitalize="none"
+                autoComplete="current-password"
+                textContentType="password"
+                returnKeyType="go"
+                onSubmitEditing={ready ? submit : undefined}
+              />
+            )}
           </View>
         </Glass>
       </FadeIn>
@@ -120,7 +166,23 @@ export default function DeleteAccount() {
       ) : null}
 
       <Gap h={22} />
-      <PrimaryButton label={a.deleteCta} onPress={submit} busy={loading} disabled={!ready} />
+      {viaProvider ? (
+        <View style={{ gap: 12 }}>
+          {google ? (
+            <PrimaryButton
+              label={a.deleteConfirmGoogle}
+              onPress={() => confirmWith('google')}
+              busy={loading}
+              disabled={!wordMatches}
+            />
+          ) : null}
+          {apple ? (
+            <QuietButton label={a.deleteConfirmApple} onPress={() => confirmWith('apple')} />
+          ) : null}
+        </View>
+      ) : (
+        <PrimaryButton label={a.deleteCta} onPress={submit} busy={loading} disabled={!ready} />
+      )}
 
       <Spacer />
     </Screen>

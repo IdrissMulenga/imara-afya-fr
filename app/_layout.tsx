@@ -1,7 +1,7 @@
 // Root layout: providers, fonts, and routing between the auth and app groups.
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { Stack, useRouter, useSegments, type ErrorBoundaryProps } from 'expo-router';
+import { Stack, useRouter, useSegments, type ErrorBoundaryProps, type Href } from 'expo-router';
 import { ApolloProvider } from '@apollo/client/react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -16,7 +16,7 @@ import {
 
 import { client } from '@/lib/apollo';
 import { NoticeProvider } from '@/components/notice';
-import { SessionProvider, useSession } from '@/lib/session';
+import { SessionProvider, useSession, takeNextLanding } from '@/lib/session';
 import { StepsProvider } from '@/lib/steps-provider';
 import { WaterReminders } from '@/lib/water-reminders';
 import { CheckInReminders } from '@/lib/checkin-reminders';
@@ -111,7 +111,7 @@ function Gate() {
     if (!user && !inAuth) {
       router.replace('/(auth)/welcome');
     } else if (user && !inApp && !confirmingEmail) {
-      router.replace('/dashboard');
+      router.replace((takeNextLanding() ?? '/dashboard') as Href);
     }
   }, [booted, user, segments, router]);
 
