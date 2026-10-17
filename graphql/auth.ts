@@ -49,6 +49,21 @@ export const SIGNUP = gql`
   }
 `;
 
+// The Google client ids, read from the server before anyone signs in.
+export const SIGN_IN_OPTIONS = gql`
+  query SignInOptions {
+    signInOptions {
+      googleWebClientId
+      googleIosClientId
+    }
+  }
+`;
+
+export type SignInOptions = {
+  googleWebClientId: string | null;
+  googleIosClientId: string | null;
+};
+
 // Google and Apple sign-in; newAccount is true when the account was just created.
 export const SIGN_IN_WITH_GOOGLE = gql`
   ${USER_FIELDS}

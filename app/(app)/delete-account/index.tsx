@@ -19,7 +19,7 @@ import { errorMessage } from '@/lib/errors';
 import { clearQueue } from '@/lib/offline-queue';
 import { DELETE_ACCOUNT } from '@/graphql/auth';
 import { useErrorBanner } from '@/components/notice';
-import { appleAvailable, appleCredential, googleAvailable, googleIdToken } from '@/lib/social';
+import { appleAvailable, appleCredential, googleIdToken, useGoogleAvailable } from '@/lib/social';
 
 export default function DeleteAccount() {
   const router = useRouter();
@@ -54,7 +54,8 @@ export default function DeleteAccount() {
       alive = false;
     };
   }, [linkedApple]);
-  const google = methods.includes('GOOGLE') && googleAvailable();
+  const googleReady = useGoogleAvailable();
+  const google = methods.includes('GOOGLE') && googleReady;
 
   type Proof = { password: string } | { googleIdToken: string } | { apple: { identityToken: string; nonce: string } };
 

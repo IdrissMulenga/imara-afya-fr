@@ -14,7 +14,7 @@ import { font, radius, size } from '@/theme/tokens';
 import { setNextLanding, useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
-import { appleCredential, appleStatus, googleAvailable, googleIdToken } from '@/lib/social';
+import { appleCredential, appleStatus, googleIdToken, useGoogleAvailable } from '@/lib/social';
 import { SIGN_IN_WITH_APPLE, SIGN_IN_WITH_GOOGLE, type AuthPayload } from '@/graphql/auth';
 
 // Google's "G", in its brand colours.
@@ -48,7 +48,7 @@ export function SocialButtons({
   const apple = appleWhy === 'ok';
   // In development the Google button shows even where it cannot run yet (Expo Go, or no client
   // id), so the screens can be reviewed; release builds show it only when it works.
-  const googleReady = googleAvailable();
+  const googleReady = useGoogleAvailable();
   // App Store guideline 4.8: an iPhone app offering Google sign-in must also offer Sign in with
   // Apple, so on iOS Google shows only when Apple does.
   const allowedHere = Platform.OS !== 'ios' || apple;
@@ -95,7 +95,7 @@ export function SocialButtons({
         if (!googleReady || !allowedHere) {
           failure(
             'Google sign-in is not set up here yet',
-            'It needs the Google client id and the app’s own build (not Expo Go); on iPhone, Sign in with Apple too.'
+            'It needs GOOGLE_WEB_CLIENT_ID on the server and the app’s own build (not Expo Go); on iPhone, Sign in with Apple too.'
           );
           return;
         }

@@ -1,42 +1,67 @@
 // Google and Apple sign-in on the phone. Each returns null when the person cancels the sheet.
 // Google Sign-In is a native module that Expo Go does not include, so it loads only in the
-// app's own build; Apple works in Expo Go too.
+// app's own build; Apple works in Expo Go too. Google's client ids come from the API.
 import { Platform } from 'react-native';
+import { useQuery } from '@apollo/client/react';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { requireOptionalNativeModule } from 'expo';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
+import { SIGN_IN_OPTIONS, type SignInOptions } from '@/graphql/auth';
 
 type GoogleModule = typeof import('@react-native-google-signin/google-signin');
 
 const IN_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
-const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '';
-const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '';
-
+let webClientId = '';
+let iosClientId = '';
+let configuredFor = '';
 let google: GoogleModule | null | undefined;
 
-// Loads and configures Google Sign-In once; null where it cannot run.
-function googleModule(): GoogleModule | null {
+// Loads Google Sign-In once; null where it cannot run.
+function loadGoogle(): GoogleModule | null {
   if (google !== undefined) return google;
   try {
     google = IN_EXPO_GO
       ? null
       : // eslint-disable-next-line @typescript-eslint/no-require-imports
         (require('@react-native-google-signin/google-signin') as GoogleModule);
-    google?.GoogleSignin.configure({
-      webClientId: WEB_CLIENT_ID,
-      iosClientId: IOS_CLIENT_ID || undefined,
-    });
   } catch {
     google = null;
   }
   return google;
 }
 
-/** Whether the Google button can show: the app's own build with its client ids set. */
+// Google Sign-In configured with the client ids the API sent; null where it cannot run.
+function googleModule(): GoogleModule | null {
+  const module = loadGoogle();
+  const key = `${webClientId}|${iosClientId}`;
+  if (module && configuredFor !== key) {
+    module.GoogleSignin.configure({ webClientId, iosClientId: iosClientId || undefined });
+    configuredFor = key;
+  }
+  return module;
+}
+
+/** Stores the client ids from the API's signInOptions. */
+export function setGoogleClientIds(options: SignInOptions | undefined): void {
+  if (!options) return;
+  webClientId = options.googleWebClientId ?? '';
+  iosClientId = options.googleIosClientId ?? '';
+}
+
+/** Whether the Google button can show: the app's own build, with the API's client ids loaded. */
 export function googleAvailable(): boolean {
-  if (!WEB_CLIENT_ID || (Platform.OS === 'ios' && !IOS_CLIENT_ID)) return false;
+  if (!webClientId || (Platform.OS === 'ios' && !iosClientId)) return false;
   return googleModule() !== null;
+}
+
+/** Fetches the client ids from the API once per launch and says whether Google can show. */
+export function useGoogleAvailable(): boolean {
+  const { data } = useQuery<{ signInOptions: SignInOptions }>(SIGN_IN_OPTIONS, {
+    fetchPolicy: 'cache-first',
+  });
+  setGoogleClientIds(data?.signInOptions);
+  return googleAvailable();
 }
 
 /** A Google ID token for the account the person picks; null if they cancel. */
