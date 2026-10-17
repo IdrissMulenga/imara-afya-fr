@@ -188,7 +188,7 @@ export default function Welcome() {
 
       <Glass tone="dark" intensity={18} style={styles.panel} radius={22}>
         <View style={styles.panelInner}>
-          <SocialButtons onDark />
+          <SocialButtons onDark showGoogle={false} />
           <Pressable
             android_ripple={{ color: 'rgba(15,58,114,0.14)', foreground: true }}
             onPress={() => goTo('/(auth)/signup')}

@@ -1,7 +1,7 @@
 // Continue with Google and Sign in with Apple, above the email form. iOS shows Apple's own button
 // and Google's; Android shows Google's only. A new account goes on to "About you".
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@apollo/client/react';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -14,7 +14,7 @@ import { font, radius, size } from '@/theme/tokens';
 import { setNextLanding, useSession } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { getDeviceCredentials } from '@/lib/device';
-import { appleAvailable, appleCredential, googleAvailable, googleIdToken } from '@/lib/social';
+import { appleCredential, appleStatus, googleAvailable, googleIdToken } from '@/lib/social';
 import { SIGN_IN_WITH_APPLE, SIGN_IN_WITH_GOOGLE, type AuthPayload } from '@/graphql/auth';
 
 // Google's "G", in its brand colours.
@@ -30,18 +30,29 @@ function GoogleMark() {
 }
 
 /** The Google / Apple buttons, then an "or" line; nothing when neither can run here. */
-export function SocialButtons({ onDark = false }: { onDark?: boolean }) {
+export function SocialButtons({
+  onDark = false,
+  showGoogle = true,
+}: {
+  onDark?: boolean;
+  /** False leaves out the Google button (the welcome screen shows Apple only). */
+  showGoogle?: boolean;
+}) {
   const router = useRouter();
   const { t, lang } = useLang();
   const { isDark } = useTheme();
   const { signIn } = useSession();
   const { failure } = useNotice();
 
-  const [apple, setApple] = useState(false);
+  const [appleWhy, setAppleWhy] = useState('');
+  const apple = appleWhy === 'ok';
   // In development the Google button shows even where it cannot run yet (Expo Go, or no client
   // id), so the screens can be reviewed; release builds show it only when it works.
   const googleReady = googleAvailable();
-  const google = googleReady || __DEV__;
+  // App Store guideline 4.8: an iPhone app offering Google sign-in must also offer Sign in with
+  // Apple, so on iOS Google shows only when Apple does.
+  const allowedHere = Platform.OS !== 'ios' || apple;
+  const google = showGoogle && ((googleReady && allowedHere) || __DEV__);
   const [busy, setBusy] = useState<'google' | 'apple' | null>(null);
 
   const [withGoogle] = useMutation<{ signInWithGoogle: AuthPayload }>(SIGN_IN_WITH_GOOGLE);
@@ -49,15 +60,19 @@ export function SocialButtons({ onDark = false }: { onDark?: boolean }) {
 
   useEffect(() => {
     let alive = true;
-    appleAvailable().then((ok) => {
-      if (alive) setApple(ok);
+    appleStatus().then((status) => {
+      if (alive) setAppleWhy(status);
     });
     return () => {
       alive = false;
     };
   }, []);
 
-  if (!google && !apple) return null;
+  // In development on iPhone, says why the Apple button is missing.
+  const appleNote =
+    __DEV__ && Platform.OS === 'ios' && appleWhy && !apple ? `Apple: ${appleWhy}` : '';
+
+  if (!google && !apple && !appleNote) return null;
 
   // A new account lands on "About you"; the root gate opens it once the session is stored.
   const finish = async (payload: AuthPayload | undefined) => {
@@ -77,10 +92,10 @@ export function SocialButtons({ onDark = false }: { onDark?: boolean }) {
     try {
       const device = await getDeviceCredentials();
       if (which === 'google') {
-        if (!googleReady) {
+        if (!googleReady || !allowedHere) {
           failure(
             'Google sign-in is not set up here yet',
-            'It needs the Google client id and the app’s own build (not Expo Go).'
+            'It needs the Google client id and the app’s own build (not Expo Go); on iPhone, Sign in with Apple too.'
           );
           return;
         }
@@ -127,6 +142,8 @@ export function SocialButtons({ onDark = false }: { onDark?: boolean }) {
           />
         </View>
       ) : null}
+
+      {appleNote ? <Text style={[styles.devNote, { color: orColor }]}>{appleNote}</Text> : null}
 
       {google ? (
         <Pressable
@@ -179,4 +196,5 @@ const styles = StyleSheet.create({
   or: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 2 },
   line: { flex: 1, height: StyleSheet.hairlineWidth },
   orText: { fontFamily: font.bodyMedium, fontSize: 13 },
+  devNote: { fontFamily: font.body, fontSize: 12, textAlign: 'center' },
 });

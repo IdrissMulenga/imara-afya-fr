@@ -3,6 +3,7 @@
 // app's own build; Apple works in Expo Go too.
 import { Platform } from 'react-native';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
+import { requireOptionalNativeModule } from 'expo';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
 
@@ -63,8 +64,34 @@ export async function googleIdToken(): Promise<string | null> {
 
 /** Whether Sign in with Apple can show: iOS only. */
 export async function appleAvailable(): Promise<boolean> {
-  if (Platform.OS !== 'ios') return false;
-  return AppleAuthentication.isAvailableAsync().catch(() => false);
+  return (await appleStatus()) === 'ok';
+}
+
+let appleChecked: Promise<string> | null = null;
+
+/** Why Sign in with Apple can or cannot show here; shown in development to explain a missing button.
+ * Checked once per launch. */
+export function appleStatus(): Promise<string> {
+  appleChecked ??= checkApple();
+  return appleChecked;
+}
+
+async function checkApple(): Promise<string> {
+  if (Platform.OS !== 'ios') return 'not iOS';
+  if (!requireOptionalNativeModule('ExpoAppleAuthentication')) {
+    return 'this app build has no Apple sign-in module';
+  }
+  try {
+    return (await AppleAuthentication.isAvailableAsync())
+      ? 'ok'
+      : 'the phone says Sign in with Apple is not available';
+  } catch (error) {
+    return `check failed: ${String(error)}`;
+  }
+}
+
+if (__DEV__) {
+  void appleStatus().then((status) => console.log('[social] Apple sign-in:', status));
 }
 
 export type AppleCredential = {
